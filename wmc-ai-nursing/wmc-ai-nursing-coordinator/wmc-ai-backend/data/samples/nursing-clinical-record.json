@@ -1,0 +1,16 @@
+{
+  "patientId": "P001",
+  "patientName": "Test Patient",
+  "nurseName": "Nurse Mary",
+  "bloodPressure": "130/80",
+  "pulse": 78,
+  "temperature": 36.8,
+  "oxygen": 98,
+  "painScore": 3,
+  "appetite": "Good",
+  "mood": "Calm",
+  "mobility": "Needs assistance",
+  "sideTurning": "Left side completed",
+  "woundCondition": "No redness",
+  "notes": "Patient stable today"
+}

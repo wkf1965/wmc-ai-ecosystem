@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nursing Posture AI - Upload Assessment</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #eef2f7;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ── Header ── */
+    header {
+      width: 100%;
+      background: linear-gradient(135deg, #0f3460 0%, #16213e 100%);
+      color: #fff;
+      padding: 28px 40px;
+      text-align: center;
+    }
+    header .badge {
+      display: inline-block;
+      background: #e53e3e;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+    }
+    header h1 { font-size: 26px; font-weight: 700; letter-spacing: 0.5px; }
+    header p  { margin-top: 6px; font-size: 14px; color: #a0aec0; }
+
+    /* ── Main card ── */
+    main {
+      width: 100%;
+      max-width: 580px;
+      margin: 40px auto 60px;
+      padding: 0 16px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      overflow: hidden;
+    }
+    .card-header {
+      background: #f7fafc;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 20px 28px;
+    }
+    .card-header h2 { font-size: 17px; font-weight: 600; color: #2d3748; }
+    .card-header p  { font-size: 13px; color: #718096; margin-top: 4px; }
+    .card-body      { padding: 28px; }
+
+    /* ── Form ── */
+    .form-group { margin-bottom: 20px; }
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #4a5568;
+      margin-bottom: 7px;
+      letter-spacing: 0.3px;
+    }
+    label span { color: #e53e3e; margin-left: 2px; }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #2d3748;
+      transition: border-color .2s, box-shadow .2s;
+      outline: none;
+    }
+    input[type="text"]:focus {
+      border-color: #3182ce;
+      box-shadow: 0 0 0 3px rgba(49,130,206,0.15);
+    }
+    input[type="text"]::placeholder { color: #b2becf; }
+
+    /* ── Upload area ── */
+    .upload-area {
+      border: 2px dashed #cbd5e0;
+      border-radius: 10px;
+      padding: 36px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .2s, background .2s;
+      position: relative;
+    }
+    .upload-area:hover, .upload-area.dragover {
+      border-color: #3182ce;
+      background: #ebf8ff;
+    }
+    .upload-area input[type="file"] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+    }
+    .upload-icon { font-size: 40px; margin-bottom: 10px; }
+    .upload-area .primary-text {
+      font-size: 15px; font-weight: 600; color: #2d3748; margin-bottom: 4px;
+    }
+    .upload-area .secondary-text { font-size: 13px; color: #a0aec0; }
+    .upload-area .file-name {
+      margin-top: 12px; font-size: 13px; color: #3182ce;
+      font-weight: 600; display: none;
+    }
+
+    /* ── Preview ── */
+    #preview-wrap { margin-top: 14px; display: none; }
+    #preview-wrap img {
+      width: 100%; max-height: 240px; object-fit: contain;
+      border-radius: 8px; border: 1px solid #e2e8f0;
+    }
+
+    /* ── Submit button ── */
+    .btn-submit {
+      width: 100%;
+      padding: 13px;
+      background: linear-gradient(135deg, #2b6cb0, #3182ce);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 700;
+      border: none;
+      border-radius: 9px;
+      cursor: pointer;
+      letter-spacing: 0.4px;
+      transition: opacity .2s, transform .1s;
+      margin-top: 8px;
+    }
+    .btn-submit:hover   { opacity: 0.92; }
+    .btn-submit:active  { transform: scale(0.99); }
+    .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* ── Spinner overlay ── */
+    #spinner-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(15,52,96,0.72); z-index: 999;
+      flex-direction: column; align-items: center; justify-content: center;
+    }
+    #spinner-overlay.show { display: flex; }
+    .spinner {
+      width: 52px; height: 52px;
+      border: 5px solid rgba(255,255,255,0.25);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #spinner-overlay p { color: #fff; margin-top: 18px; font-size: 15px; font-weight: 600; }
+
+    /* ── Error ── */
+    .alert-error {
+      background: #fff5f5;
+      border: 1.5px solid #fc8181;
+      color: #c53030;
+      padding: 13px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* ── Disclaimer ── */
+    .disclaimer {
+      margin-top: 24px;
+      background: #fffbeb;
+      border: 1px solid #f6e05e;
+      border-radius: 8px;
+      padding: 13px 16px;
+      font-size: 12.5px;
+      color: #744210;
+      line-height: 1.6;
+    }
+    .disclaimer strong { color: #b7791f; }
+
+    /* ── Info bullets ── */
+    .info-list {
+      list-style: none;
+      margin: 16px 0 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .info-list li {
+      display: flex; align-items: flex-start; gap: 10px;
+      font-size: 13px; color: #4a5568;
+    }
+    .info-list li .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #3182ce; flex-shrink: 0; margin-top: 5px;
+    }
+
+    footer {
+      text-align: center; font-size: 12px;
+      color: #a0aec0; padding: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="badge">Nursing Training Tool</div>
+  <h1>&#129657; Nursing Posture AI</h1>
+  <p>Patient Turning Posture Assessment &mdash; Auto Scoring System</p>
+</header>
+
+<main>
+  <div class="card">
+    <div class="card-header">
+      <h2>Upload Posture Photo</h2>
+      <p>Upload a patient turning photo to receive an AI posture score and report.</p>
+    </div>
+    <div class="card-body">
+
+      {% if error %}
+      <div class="alert-error">
+        <span>&#9888;</span>
+        <span>{{ error }}</span>
+      </div>
+      {% endif %}
+
+      <form id="upload-form" method="POST" action="/upload" enctype="multipart/form-data">
+
+        <div class="form-group">
+          <label for="nurse_name">Nurse Name <span>*</span></label>
+          <input type="text" id="nurse_name" name="nurse_name"
+                 placeholder="e.g. Nurse Wang" required />
+        </div>
+
+        <div class="form-group">
+          <label for="patient_name">Patient Name / Bed ID <span>*</span></label>
+          <input type="text" id="patient_name" name="patient_name"
+                 placeholder="e.g. Bed-3 Patient" required />
+        </div>
+
+        <div class="form-group">
+          <label>Photo Upload <span>*</span></label>
+          <div class="upload-area" id="drop-zone">
+            <input type="file" name="image" id="image-input"
+                   accept=".jpg,.jpeg,.png,.bmp,.jfif" required />
+            <div class="upload-icon">&#128247;</div>
+            <div class="primary-text">Click to upload or drag &amp; drop</div>
+            <div class="secondary-text">JPG, PNG, BMP &mdash; max 16 MB</div>
+            <div class="file-name" id="file-name-display"></div>
+          </div>
+          <div id="preview-wrap">
+            <img id="preview-img" src="" alt="Preview" />
+          </div>
+        </div>
+
+        <button type="submit" class="btn-submit" id="submit-btn">
+          &#128269;&nbsp; Analyze Posture
+        </button>
+
+      </form>
+
+      <div class="disclaimer">
+        <strong>&#9888; Important Notice:</strong>
+        This tool is for nursing training and supervisor review only.
+        It does <strong>not</strong> provide medical diagnosis.
+        Final judgment must be made by a supervisor or registered nurse.
+      </div>
+
+      <ul class="info-list">
+        <li><span class="dot"></span><span>Photo is automatically renamed with timestamp on upload</span></li>
+        <li><span class="dot"></span><span>AI scores 6 posture criteria &mdash; max 100 points</span></li>
+        <li><span class="dot"></span><span>Report saved as <code>posture_report.json</code> and <code>posture_report.txt</code></span></li>
+        <li><span class="dot"></span><span>Annotated output image with pose landmarks is generated</span></li>
+        <li><span class="dot"></span><span>All reports marked <strong>review_required: true</strong></span></li>
+      </ul>
+
+    </div>
+  </div>
+</main>
+
+<footer>Nursing Posture AI &mdash; Training Tool v1.0 &mdash; Not for clinical diagnosis</footer>
+
+<!-- Spinner overlay -->
+<div id="spinner-overlay">
+  <div class="spinner"></div>
+  <p>Analyzing posture&hellip; please wait</p>
+</div>
+
+<script>
+  // File input: show name + preview
+  const input    = document.getElementById('image-input');
+  const nameDisp = document.getElementById('file-name-display');
+  const prevWrap = document.getElementById('preview-wrap');
+  const prevImg  = document.getElementById('preview-img');
+  const dropZone = document.getElementById('drop-zone');
+
+  input.addEventListener('change', () => {
+    const file = input.files[0];
+    if (!file) return;
+    nameDisp.textContent = file.name;
+    nameDisp.style.display = 'block';
+    const reader = new FileReader();
+    reader.onload = e => {
+      prevImg.src = e.target.result;
+      prevWrap.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  });
+
+  // Drag-and-drop
+  dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('dragover');
+    const dt = e.dataTransfer;
+    if (dt.files.length) {
+      input.files = dt.files;
+      input.dispatchEvent(new Event('change'));
+    }
+  });
+
+  // Show spinner on submit
+  document.getElementById('upload-form').addEventListener('submit', function() {
+    document.getElementById('submit-btn').disabled = true;
+    document.getElementById('spinner-overlay').classList.add('show');
+  });
+</script>
+
+</body>
+</html>

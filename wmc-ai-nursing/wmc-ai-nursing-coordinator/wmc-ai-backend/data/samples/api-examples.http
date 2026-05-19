@@ -1,0 +1,416 @@
+### Example HTTP calls (VS Code REST Client or copy to curl)
+
+@base = http://localhost:4000/api/v1
+@token = YOUR_JWT_HERE
+
+### Health
+GET http://localhost:4000/health
+
+### Login
+POST {{base}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "nurse@wmc.local",
+  "password": "password123"
+}
+
+### Me
+GET {{base}}/auth/me
+Authorization: Bearer {{token}}
+
+### List patients
+GET {{base}}/patients
+Authorization: Bearer {{token}}
+
+### Create patient (receptionist/admin/doctor/nurse)
+POST {{base}}/patients
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "fullName": "Test Patient",
+  "medicalSummary": "Demo"
+}
+
+### CRM leads
+GET {{base}}/crm/leads
+Authorization: Bearer {{token}}
+
+### Nursing vitals
+GET {{base}}/nursing/vitals
+Authorization: Bearer {{token}}
+
+### AI patient summary (stub)
+POST {{base}}/ai/patient-summary
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "patientId": "00000000-0000-4000-8000-000000000001"
+}
+
+### AI nursing summary (rule-based structured body; Bearer optional in NODE_ENV=development)
+POST {{base}}/ai/summary
+Content-Type: application/json
+
+{
+  "patientName": "Test Patient",
+  "bloodPressure": "130/80",
+  "pulse": 78,
+  "temperature": 36.8,
+  "oxygen": 98,
+  "painScore": 3,
+  "appetite": "Good",
+  "mood": "Calm",
+  "mobility": "Needs assistance",
+  "sideTurning": "Left side completed",
+  "woundCondition": "No redness",
+  "notes": "Patient stable today"
+}
+
+### Vitals analyze — rule-based alert level (Bearer optional in NODE_ENV=development)
+POST {{base}}/vitals/analyze
+Content-Type: application/json
+
+{
+  "patientName": "Ah Chong",
+  "bloodPressure": "170/100",
+  "pulse": 110,
+  "temperature": 38.5,
+  "oxygen": 92,
+  "painScore": 7,
+  "notes": "Patient looks weak and restless"
+}
+
+### Wound assessment — rule-based infection risk + in-memory store (Bearer optional in NODE_ENV=development)
+POST {{base}}/wound/assessment
+Content-Type: application/json
+
+{
+  "patientId": "P001",
+  "patientName": "Ah Chong",
+  "nurseName": "Nurse Mary",
+  "woundLocation": "Sacrum",
+  "redness": true,
+  "swelling": false,
+  "discharge": true,
+  "odor": false,
+  "painScore": 6,
+  "woundSize": "3cm x 2cm",
+  "dressingChanged": true,
+  "photoUploaded": false,
+  "notes": "Redness and mild discharge observed"
+}
+
+### List wound assessments
+GET {{base}}/wound/assessments
+
+### Family update — plain-language summary for relatives (Bearer optional in NODE_ENV=development)
+POST {{base}}/family/update
+Content-Type: application/json
+
+{
+  "patientName": "Ah Chong",
+  "condition": "Stroke Rehabilitation",
+  "mood": "Calm",
+  "appetite": "Good",
+  "mobility": "Needs assistance",
+  "vitalStatus": "Stable",
+  "rehabCompleted": true,
+  "sideTurningCompleted": true,
+  "notes": "Patient participated well in therapy today."
+}
+
+### Family communication queue — prioritized liaison list (Bearer optional in NODE_ENV=development)
+GET {{base}}/family/communication-queue
+
+### Doctor escalation check — rule-based review triage (Bearer optional in NODE_ENV=development)
+POST {{base}}/escalation/check
+Content-Type: application/json
+
+{
+  "patientName": "Ah Chong",
+  "bloodPressure": "180/110",
+  "pulse": 120,
+  "temperature": 39.2,
+  "oxygen": 89,
+  "painScore": 8,
+  "mood": "Agitated",
+  "mobility": "Bedbound",
+  "woundCondition": "Redness with discharge",
+  "notes": "Patient appears weak and confused"
+}
+
+### Emergency respond — acute composite detection (rule-based; Bearer optional in NODE_ENV=development)
+POST {{base}}/emergency/respond
+Content-Type: application/json
+
+{
+  "patientName": "Ah Chong",
+  "eventType": "Low Oxygen",
+  "bloodPressure": "85/50",
+  "pulse": 130,
+  "temperature": 39.5,
+  "oxygen": 82,
+  "consciousness": "Drowsy",
+  "breathingDifficulty": true,
+  "notes": "Patient appears weak and short of breath"
+}
+
+### Command center — facility status rollup (Bearer optional in NODE_ENV=development)
+GET {{base}}/command-center/status
+
+### Reports — facility daily management rollup (Bearer optional in NODE_ENV=development)
+GET {{base}}/reports/daily-facility
+
+### Dashboard summary — supervisor rollup (Bearer optional in NODE_ENV=development)
+GET {{base}}/dashboard/summary
+
+### Supervisor escalation queue — centralised urgent / high-risk items (Bearer optional in NODE_ENV=development)
+GET {{base}}/supervisor/escalation-queue
+
+### Night shift monitor — bedside / escalation rollup (Bearer optional in NODE_ENV=development)
+GET {{base}}/night-shift/monitor
+
+### Nurse task queue (Bearer optional in NODE_ENV=development)
+GET {{base}}/tasks/queue
+
+### Nurse reminder — create (Bearer optional in NODE_ENV=development)
+POST {{base}}/reminders/create
+Content-Type: application/json
+
+{
+  "patientName": "Ah Chong",
+  "reminderType": "Side Turning",
+  "task": "Turn patient to right side",
+  "dueTime": "12:00",
+  "assignedTo": "Nurse Mary",
+  "priority": "High",
+  "repeatEveryHours": 2,
+  "notes": "Photo required after turning"
+}
+
+### Nurse reminders — list (Bearer optional in NODE_ENV=development)
+GET {{base}}/reminders/list
+
+### Nursing announcements — create (Bearer optional in NODE_ENV=development)
+POST {{base}}/announcements/create
+Content-Type: application/json
+
+{
+  "title": "High Fever Monitoring",
+  "message": "Please monitor all fever patients every 2 hours tonight.",
+  "createdBy": "Supervisor Jane",
+  "priority": "High",
+  "targetShift": "Night Shift",
+  "requiresAcknowledgement": true
+}
+
+### Nursing announcements — list (Bearer optional in NODE_ENV=development)
+GET {{base}}/announcements/list
+
+### Nursing announcements — acknowledge (Bearer optional in NODE_ENV=development)
+POST {{base}}/announcements/acknowledge
+Content-Type: application/json
+
+{
+  "announcementId": "REPLACE_WITH_UUID_FROM_CREATE_RESPONSE",
+  "acknowledgedBy": "Nurse Mary"
+}
+
+### Nurse acknowledgements — confirm (Bearer optional in NODE_ENV=development)
+POST {{base}}/acknowledgements/confirm
+Content-Type: application/json
+
+{
+  "nurseName": "Nurse Mary",
+  "announcementId": "ANN-001",
+  "announcementTitle": "High Fever Monitoring",
+  "acknowledged": true,
+  "acknowledgedAt": "2026-05-19 21:15",
+  "notes": "Will monitor fever patients every 2 hours"
+}
+
+### Nurse acknowledgements — list (Bearer optional in NODE_ENV=development)
+GET {{base}}/acknowledgements/list
+
+### Incident report — POST (Bearer optional in NODE_ENV=development)
+POST {{base}}/incidents/report
+Content-Type: application/json
+
+{
+  "patientName": "Ah Chong",
+  "incidentType": "Fall",
+  "incidentTime": "2026-05-19 14:30",
+  "location": "Ward A",
+  "reportedBy": "Nurse Mary",
+  "injuryDetected": true,
+  "injuryDetails": "Minor bruise on left arm",
+  "vitalStatus": "Stable",
+  "doctorInformed": true,
+  "familyInformed": false,
+  "notes": "Patient attempted to walk without assistance"
+}
+
+### Incident reports — list (Bearer optional in NODE_ENV=development)
+GET {{base}}/incidents/reports
+
+### Shift handover (rule-based; Bearer optional in NODE_ENV=development)
+POST {{base}}/handover/generate
+Content-Type: application/json
+
+{
+  "shift": "Morning Shift",
+  "nurseInCharge": "Nurse Mary",
+  "records": [
+    {
+      "patientName": "Test Patient",
+      "bloodPressure": "130/80",
+      "pulse": 78,
+      "temperature": 36.8,
+      "oxygen": 98,
+      "painScore": 3,
+      "mood": "Calm",
+      "mobility": "Needs assistance",
+      "sideTurning": "Completed",
+      "woundCondition": "No redness",
+      "notes": "Stable today"
+    },
+    {
+      "patientName": "Ah Chong",
+      "bloodPressure": "170/100",
+      "pulse": 110,
+      "temperature": 38.5,
+      "oxygen": 92,
+      "painScore": 7,
+      "mood": "Agitated",
+      "mobility": "Bedbound",
+      "sideTurning": "Pending",
+      "woundCondition": "Redness noted",
+      "notes": "Monitor closely"
+    }
+  ]
+}
+
+### Auto shift handover — facility rollup from coordinators (Bearer optional in NODE_ENV=development)
+GET {{base}}/handover/auto-generate
+
+### Fall risk score (rule-based; Bearer optional in NODE_ENV=development)
+POST {{base}}/risk/fall-score
+Content-Type: application/json
+
+{
+  "patientName": "Ah Chong",
+  "mobility": "Bedbound",
+  "mood": "Agitated",
+  "painScore": 7,
+  "oxygen": 92,
+  "historyOfFalls": true,
+  "walkingAssist": true,
+  "confusion": true,
+  "age": 82
+}
+
+### Pressure ulcer risk (rule-based; Bearer optional in NODE_ENV=development)
+POST {{base}}/risk/pressure-ulcer
+Content-Type: application/json
+
+{
+  "patientName": "Ah Chong",
+  "bedbound": true,
+  "sideTurningCompleted": false,
+  "nutritionStatus": "Poor",
+  "skinCondition": "Redness",
+  "moisture": "High",
+  "mobility": "Immobile",
+  "age": 82,
+  "incontinence": true
+}
+
+### Wandering / elopement risk (rule-based; Bearer optional in NODE_ENV=development)
+POST {{base}}/risk/wandering
+Content-Type: application/json
+
+{
+  "patientName": "Ah Chong",
+  "age": 82,
+  "diagnosis": "Dementia",
+  "confusion": true,
+  "agitation": true,
+  "nightRestlessness": true,
+  "historyOfWandering": true,
+  "mobility": "Walks with assistance",
+  "sleepPattern": "Poor",
+  "notes": "Patient attempted to leave room twice last night"
+}
+
+### Bed exit alert — nurse triage (rule-based; Bearer optional in NODE_ENV=development)
+POST {{base}}/risk/bed-exit
+Content-Type: application/json
+
+{
+  "patientName": "Ah Chong",
+  "age": 82,
+  "mobility": "Walks with assistance",
+  "confusion": true,
+  "fallRiskLevel": "High",
+  "wanderingRiskLevel": "High",
+  "bedExitAttempt": true,
+  "timeOfAttempt": "02:30",
+  "nightShift": true,
+  "notes": "Patient tried to get out of bed without assistance"
+}
+
+### Side turning records (in-memory; Bearer optional in NODE_ENV=development)
+POST {{base}}/turning/records
+Content-Type: application/json
+
+{
+  "patientId": "P001",
+  "patientName": "Ah Chong",
+  "nurseName": "Nurse Mary",
+  "turningTime": "10:00",
+  "turningPosition": "Left side",
+  "skinCondition": "Mild redness",
+  "photoRequired": true,
+  "photoUploaded": false,
+  "notes": "Need recheck after 2 hours"
+}
+
+### Side turning — list records
+GET {{base}}/turning/records
+
+### Nurse shift OT (in-memory; Bearer optional in NODE_ENV=development)
+POST {{base}}/nurse-shift/calculate-ot
+Content-Type: application/json
+
+{
+  "nurseName": "Nurse Mary",
+  "shiftDate": "2026-05-19",
+  "shiftStart": "09:00",
+  "shiftEnd": "17:30",
+  "actualClockIn": "08:45",
+  "actualClockOut": "19:00",
+  "breakMinutes": 60,
+  "notes": "Stayed back for patient handover"
+}
+
+### Nurse shift — list OT records
+GET {{base}}/nurse-shift/records
+
+### Medication MAR alert check (rule-based; Bearer optional in NODE_ENV=development)
+POST {{base}}/medication/check-alert
+Content-Type: application/json
+
+{
+  "patientName": "Ah Chong",
+  "medicationName": "Amlodipine",
+  "scheduledTime": "08:00",
+  "givenTime": "10:30",
+  "doseGiven": true,
+  "missedDose": false,
+  "allergy": false,
+  "bloodPressure": "90/60",
+  "notes": "Patient looked dizzy after medication."
+}

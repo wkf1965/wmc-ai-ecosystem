@@ -1,0 +1,57 @@
+{
+  "disclaimer": "For nursing training and supervision only - not a medical diagnosis.",
+  "assessment_type": "Patient Turning Posture (Side-Lying Position)",
+  "timestamp": "2026-05-14T16:08:36",
+  "image": "test.jpg",
+  "total_score": 90,
+  "max_score": 100,
+  "percentage": 90,
+  "grade": "A",
+  "grade_label": "Excellent",
+  "criteria": {
+    "side_lying_position": {
+      "score": 30,
+      "max_score": 30,
+      "percentage": 100.0,
+      "detail": "Excellent - clearly side-lying"
+    },
+    "shoulder_hip_alignment": {
+      "score": 20,
+      "max_score": 20,
+      "percentage": 100.0,
+      "detail": "Excellent - shoulder and hip lines parallel"
+    },
+    "head_support": {
+      "score": 12,
+      "max_score": 15,
+      "percentage": 80.0,
+      "detail": "Good - slight head deviation"
+    },
+    "back_support": {
+      "score": 8,
+      "max_score": 15,
+      "percentage": 53.3,
+      "detail": "Moderate - lateral curvature present"
+    },
+    "leg_separation_support": {
+      "score": 10,
+      "max_score": 10,
+      "percentage": 100.0,
+      "detail": "Excellent - legs well separated"
+    },
+    "pressure_area_protection": {
+      "score": 10,
+      "max_score": 10,
+      "percentage": 100.0,
+      "detail": "Excellent - heels and ankles properly positioned"
+    }
+  },
+  "output_image": "output.jpg",
+  "clinical_notes": [
+    "Reposition patient every 2 hours to prevent pressure ulcers.",
+    "Ensure all bony prominences (sacrum, trochanters, heels, ankles, ears) are padded.",
+    "A 30° lateral tilt is preferred over 90° to reduce trochanteric pressure.",
+    "Document repositioning time, position, and skin condition after each turn.",
+    "This AI assessment supplements — but does not replace — direct clinical observation."
+  ]
+}

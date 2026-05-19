@@ -1,0 +1,61 @@
+{
+  "disclaimer": "For nursing training and supervision only. Do NOT use as medical diagnosis. Final review must be completed by a supervisor or registered nurse.",
+  "assessment_type": "Patient Turning Posture (Side-Lying Position)",
+  "review_required": true,
+  "supervisor_comment": "Pending",
+  "patient_name": "Test Patient",
+  "nurse_name": "Test Nurse",
+  "date_time": "2026-05-14 16:23:18",
+  "image_file": "test.jpg",
+  "score": 78,
+  "max_score": 100,
+  "grade": "B",
+  "grade_label": "Good",
+  "status": "Good - basic standards acceptable",
+  "scoring_items": {
+    "side_lying_position": {
+      "score": 24,
+      "max_score": 30,
+      "percentage": 80.0,
+      "detail": "Acceptable - lateral rotation present but not fully established"
+    },
+    "shoulder_hip_alignment": {
+      "score": 12,
+      "max_score": 20,
+      "percentage": 60.0,
+      "detail": "Needs improvement - angular misalignment detected between shoulder and hip lines"
+    },
+    "head_support": {
+      "score": 12,
+      "max_score": 15,
+      "percentage": 80.0,
+      "detail": "Not confirmed from image - head position partially visible only"
+    },
+    "back_support": {
+      "score": 12,
+      "max_score": 15,
+      "percentage": 80.0,
+      "detail": "Not confirmed from image - back support landmarks partially occluded"
+    },
+    "leg_separation_support": {
+      "score": 8,
+      "max_score": 10,
+      "percentage": 80.0,
+      "detail": "Needs review - leg separation appears partial; pillow support not confirmed"
+    },
+    "pressure_area_protection": {
+      "score": 10,
+      "max_score": 10,
+      "percentage": 100.0,
+      "detail": "Acceptable - no direct compression observed at visible bony prominences"
+    }
+  },
+  "ai_observation": "The patient appears to be in a partial side-lying position with some degree of lateral rotation, though full side-lying has not been clearly established from the image. Shoulder and hip alignment shows angular misalignment which may increase axial shear stress and pressure injury risk at the sacrum and trochanters. Head support status could not be confirmed due to limited visibility of cervical landmarks. Back support adequacy is inconclusive as key spinal reference points are partially occluded. Leg separation is present but appears insufficient; a pillow between the knees and ankles is recommended. Pressure area protection at visible bony prominences appears adequate.",
+  "improvement_suggestions": [
+    "Improve body alignment by ensuring the shoulder line and hip line are parallel to eliminate axial spinal twist.",
+    "Add pillow support behind the patient's back (wedge pillow) to maintain a stable 30-60 degree lateral position.",
+    "Insert a pillow between the knees and ankles to reduce bony pressure between medial condyles and malleoli.",
+    "Confirm pressure area protection by visually inspecting and padding the trochanter, shoulder, ear, and heel.",
+    "Retake assessment image with full body visible to confirm head, back, and leg support status."
+  ]
+}

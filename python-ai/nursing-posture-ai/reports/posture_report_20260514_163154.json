@@ -1,0 +1,57 @@
+{
+  "disclaimer": "For nursing training and supervisor review only. Do NOT use as medical diagnosis. Final judgment must be done by a supervisor or registered nurse.",
+  "assessment_type": "Patient Turning Posture (Side-Lying Position)",
+  "review_required": true,
+  "supervisor_comment": "",
+  "patient_name": "Test Patient",
+  "nurse_name": "Test Nurse",
+  "date_time": "2026-05-14 16:31:54",
+  "image_file": "test.jpg",
+  "score": 90,
+  "max_score": 100,
+  "grade": "A",
+  "grade_label": "Excellent",
+  "status": "Excellent - meets all clinical standards",
+  "scoring_items": {
+    "side_lying_position": {
+      "score": 30,
+      "max_score": 30,
+      "percentage": 100.0,
+      "detail": "Excellent - clearly side-lying"
+    },
+    "shoulder_hip_alignment": {
+      "score": 20,
+      "max_score": 20,
+      "percentage": 100.0,
+      "detail": "Excellent - shoulder and hip lines parallel"
+    },
+    "head_support": {
+      "score": 12,
+      "max_score": 15,
+      "percentage": 80.0,
+      "detail": "Good - slight head deviation"
+    },
+    "back_support": {
+      "score": 8,
+      "max_score": 15,
+      "percentage": 53.3,
+      "detail": "Moderate - lateral curvature present"
+    },
+    "leg_separation_support": {
+      "score": 10,
+      "max_score": 10,
+      "percentage": 100.0,
+      "detail": "Excellent - legs well separated"
+    },
+    "pressure_area_protection": {
+      "score": 10,
+      "max_score": 10,
+      "percentage": 100.0,
+      "detail": "Excellent - heels and ankles properly positioned"
+    }
+  },
+  "ai_observation": "The patient is clearly in a proper side-lying posture, meeting the clinical standard for lateral body rotation. Shoulder-hip alignment is excellent with no axial spinal twist detected. Head and neck positioning is adequate, indicating appropriate pillow height. Lateral spinal curvature detected. A wedge pillow behind the back is recommended. Leg separation is adequate, reducing contact pressure between medial knee condyles and malleoli. Heel and ankle positioning appears satisfactory with no evident direct surface compression.",
+  "improvement_suggestions": [
+    "Place a firm wedge or folded pillow along the patient's back to maintain spinal alignment and prevent rolling back to supine."
+  ]
+}

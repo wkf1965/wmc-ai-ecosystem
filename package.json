@@ -1,0 +1,22 @@
+{
+  "name": "wmc-ai-monorepo",
+  "private": true,
+  "version": "1.0.0",
+  "packageManager": "pnpm@9.1.2",
+  "workspaces": [
+    "wmc-ai-core/web",
+    "wmc-ai-frontdesk/web",
+    "wmc-ai-rehabilitation/web",
+    "wmc-ai-nursing/web",
+    "wmc-ai-crm/web",
+    "wmc-ai-marketing/web",
+    "shared-resources/ui"
+  ],
+  "scripts": {
+    "dev": "pnpm -r --parallel run dev",
+    "build": "pnpm -r run build",
+    "lint": "pnpm -r run lint",
+    "typecheck": "pnpm -r run typecheck",
+    "clean": "pnpm -r run clean"
+  }
+}

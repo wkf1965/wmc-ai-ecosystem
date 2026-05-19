@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="theme-color" content="#0f3460"/>
+  <title>WMC Nursing AI - OT Records</title>
+  <style>
+    :root{--navy:#0f3460;--blue:#1a6bb5;--sky:#3b9ede;--light:#eef4fb;
+          --white:#fff;--border:#d4e2f0;--text:#1e2d3d;--muted:#607d99;
+          --r:14px;--sh:0 4px 20px rgba(15,52,96,.10)}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--light);
+         color:var(--text);min-height:100vh;padding-bottom:48px}
+
+    .appbar{background:linear-gradient(135deg,var(--navy),#163a6a);color:#fff;
+            padding:0 16px;display:flex;align-items:center;height:60px;
+            position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.25)}
+    .appbar-logo{font-size:19px;font-weight:800;flex:1}
+    .appbar-logo span{color:#63b3ed}
+    .appbar-nav a{color:rgba(255,255,255,.75);text-decoration:none;font-size:12.5px;
+                  font-weight:600;padding:6px 10px;border-radius:8px;transition:background .15s}
+    .appbar-nav a:hover,.appbar-nav a.active{background:rgba(255,255,255,.15);color:#fff}
+
+    .warn-bar{background:#fffbeb;border-bottom:2px solid #f6e05e;padding:9px 16px;
+              font-size:12px;color:#7c4a00;display:flex;align-items:center;gap:8px}
+
+    .page{max-width:1100px;margin:0 auto;padding:22px 16px 0}
+    .page-top{display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+    .page-top h1{font-size:20px;font-weight:800;color:var(--navy);flex:1}
+
+    /* ── Filter bar ── */
+    .filter-form{background:var(--white);border-radius:var(--r);box-shadow:var(--sh);
+                 padding:14px 16px;margin-bottom:16px;
+                 display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+    .ff{display:flex;flex-direction:column;gap:5px;min-width:140px}
+    .ff label{font-size:11px;font-weight:700;color:var(--muted);
+              text-transform:uppercase;letter-spacing:.5px}
+    .ff input,.ff select{padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;
+                         font-size:13px;color:var(--text);background:#fff;outline:none;
+                         transition:border-color .2s;-webkit-appearance:none}
+    .ff input:focus,.ff select:focus{border-color:var(--sky)}
+    .btn-filter{padding:9px 16px;background:var(--blue);color:#fff;border:none;
+                border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;
+                transition:opacity .15s;align-self:flex-end}
+    .btn-filter:hover{opacity:.85}
+    .btn-clear{padding:9px 14px;background:#f1f5f9;color:var(--text);border:none;
+               border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;
+               text-decoration:none;align-self:flex-end}
+
+    /* ── Summary pills ── */
+    .sum-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+    .sum-pill{background:var(--white);border-radius:10px;box-shadow:var(--sh);
+              padding:10px 16px;font-size:13px;font-weight:700;color:var(--navy);
+              display:flex;align-items:center;gap:6px}
+
+    /* ── Table ── */
+    .tbl-card{background:var(--white);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden}
+    .tbl-head{background:#f0f6ff;border-bottom:1px solid var(--border);
+              padding:13px 18px;display:flex;align-items:center;gap:8px}
+    .tbl-head h2{font-size:14px;font-weight:700;color:var(--navy);flex:1}
+    .tbl-wrap{overflow-x:auto}
+    table{width:100%;border-collapse:collapse;min-width:820px}
+    thead th{background:#f7faff;font-size:11px;font-weight:700;text-transform:uppercase;
+             letter-spacing:.6px;color:var(--muted);padding:10px 12px;
+             text-align:left;border-bottom:2px solid var(--border)}
+    tbody tr:hover{background:#f4f8ff}
+    tbody td{padding:11px 12px;font-size:13px;border-bottom:1px solid #f0f4f8;
+             vertical-align:middle}
+    .t-name{font-weight:600}
+    .t-sub{font-size:11.5px;color:var(--muted);margin-top:2px}
+
+    /* Status badges */
+    .s-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;
+             border-radius:20px;font-size:11.5px;font-weight:700}
+    .s-pending {background:#fef3c7;color:#92400e;border:1px solid #fde68a}
+    .s-approved{background:#dcfce7;color:#166534;border:1px solid #86efac}
+    .s-rejected{background:#fee2e2;color:#991b1b;border:1px solid #fca5a5}
+    .s-active  {background:#dbeafe;color:#1d4ed8;border:1px solid #93c5fd}
+    .s-completed{background:#e0f2fe;color:#0369a1;border:1px solid #7dd3fc}
+
+    /* Risk badges */
+    .r-low     {background:#dcfce7;color:#166534}
+    .r-medium  {background:#fef3c7;color:#92400e}
+    .r-high    {background:#fee2e2;color:#991b1b}
+    .r-critical{background:#fecaca;color:#7f1d1d}
+    .risk-pill{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700}
+
+    /* OT type */
+    .ot-none     {color:#16a34a}
+    .ot-regular  {color:#2563eb}
+    .ot-weekend  {color:#7c3aed}
+    .ot-emergency{color:#dc2626;font-weight:700}
+
+    /* Bar */
+    .bar-mini{height:6px;background:#e2e8f0;border-radius:4px;overflow:hidden;width:70px;margin-top:3px}
+    .bar-fill{height:100%;border-radius:4px}
+
+    /* Checkout cell */
+    .co-form{display:flex;gap:5px;align-items:center}
+    .co-input{padding:5px 8px;border:1.5px solid var(--border);border-radius:7px;
+              font-size:12px;width:80px;outline:none}
+    .co-input:focus{border-color:var(--sky)}
+    .co-btn{padding:5px 10px;background:var(--blue);color:#fff;border:none;
+            border-radius:7px;font-size:12px;font-weight:700;cursor:pointer}
+
+    /* Action buttons */
+    .btn-approve{padding:5px 11px;background:#dcfce7;color:#166534;
+                 border:1.5px solid #86efac;border-radius:7px;font-size:12px;font-weight:700;
+                 cursor:pointer;transition:opacity .15s}
+    .btn-reject {padding:5px 11px;background:#fee2e2;color:#991b1b;
+                 border:1.5px solid #fca5a5;border-radius:7px;font-size:12px;font-weight:700;
+                 cursor:pointer;transition:opacity .15s;margin-left:4px}
+    .btn-approve:hover,.btn-reject:hover{opacity:.8}
+    .btn-done{padding:5px 11px;background:#f0fdf4;color:#16a34a;border:1.5px solid #86efac;
+              border-radius:7px;font-size:12px;font-weight:700;cursor:default}
+
+    .empty-state{text-align:center;padding:56px 24px;color:var(--muted);font-size:14px}
+    .empty-state .ei{font-size:44px;margin-bottom:12px}
+
+    /* ── Export row ── */
+    .export-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+    .btn-exp{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;
+             border-radius:8px;font-size:12.5px;font-weight:700;text-decoration:none;transition:opacity .15s}
+    .btn-exp:hover{opacity:.85}
+    .btn-csv {background:#f0fff4;color:#166534;border:1.5px solid #86efac}
+    .btn-json{background:#ebf8ff;color:#1a4a7a;border:1.5px solid #bee3f8}
+    .btn-pdf {background:#fdf4ff;color:#6b21a8;border:1.5px solid #d8b4fe}
+
+    /* ── Approval modal ── */
+    .modal-bd{display:none;position:fixed;inset:0;background:rgba(15,52,96,.65);
+              z-index:200;align-items:center;justify-content:center;padding:16px}
+    .modal-bd.open{display:flex}
+    .modal{background:#fff;border-radius:16px;max-width:440px;width:100%;
+           box-shadow:0 20px 60px rgba(0,0,0,.25);overflow:hidden;animation:mi .2s ease}
+    @keyframes mi{from{transform:scale(.95);opacity:0}}
+    .modal-hd{background:#f0f6ff;border-bottom:1px solid var(--border);
+              padding:15px 20px;display:flex;align-items:center;gap:10px}
+    .modal-hd h3{font-size:15px;font-weight:700;color:var(--navy);flex:1}
+    .modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted)}
+    .modal-body{padding:18px}
+    .modal-meta{font-size:13px;color:var(--text);line-height:2;margin-bottom:14px;
+                background:#f7faff;border-radius:8px;padding:10px 14px}
+    .mf{margin-bottom:12px}
+    .mf label{display:block;font-size:11.5px;font-weight:700;color:var(--muted);
+              text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+    .mf input,.mf textarea{width:100%;padding:9px 12px;border:1.5px solid var(--border);
+                            border-radius:8px;font-size:13.5px;color:var(--text);outline:none;
+                            transition:border-color .2s;font-family:inherit}
+    .mf input:focus,.mf textarea:focus{border-color:var(--sky)}
+    .mf textarea{resize:vertical;min-height:80px}
+    .modal-warn{font-size:11.5px;color:#dc2626;line-height:1.6;margin-bottom:4px}
+    .modal-ft{padding:0 20px 18px;display:flex;gap:8px;justify-content:flex-end}
+    .btn-cancel{padding:9px 18px;border-radius:8px;background:#f1f5f9;color:var(--text);
+                border:none;font-size:13.5px;font-weight:600;cursor:pointer}
+    .btn-ok-approve{padding:9px 18px;border-radius:8px;background:#16a34a;color:#fff;
+                    border:none;font-size:13.5px;font-weight:700;cursor:pointer;transition:opacity .15s}
+    .btn-ok-reject {padding:9px 18px;border-radius:8px;background:#dc2626;color:#fff;
+                    border:none;font-size:13.5px;font-weight:700;cursor:pointer;transition:opacity .15s}
+    .btn-ok-approve:hover,.btn-ok-reject:hover{opacity:.88}
+
+    #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);
+           background:#1a202c;color:#fff;padding:11px 22px;border-radius:30px;
+           font-size:14px;font-weight:600;transition:transform .3s;z-index:300;white-space:nowrap}
+    #toast.show{transform:translateX(-50%) translateY(0)}
+
+    footer{text-align:center;font-size:11.5px;color:var(--muted);padding:22px 16px 8px}
+
+    @media(max-width:600px){.filter-form{flex-direction:column}.ff{min-width:unset;width:100%}}
+  </style>
+</head>
+<body>
+
+<div class="appbar">
+  <div class="appbar-logo">WMC <span>Nursing AI</span></div>
+  <nav class="appbar-nav" style="display:flex;gap:2px">
+    <a href="/overtime">&#9200; OT Dashboard</a>
+    <a href="/overtime/checkin">&#9989; Check-In</a>
+    <a href="/overtime/records" class="active">&#128203; Records</a>
+  </nav>
+</div>
+
+<div class="warn-bar">
+  <span>&#9888;</span>
+  <span><strong>Operations Management Only</strong> &mdash; {{ disclaimer }}</span>
+</div>
+
+<div class="page">
+  <div class="page-top">
+    <h1>&#128203; Overtime Records</h1>
+    <a href="/overtime/checkin" style="background:var(--blue);color:#fff;text-decoration:none;
+       padding:9px 16px;border-radius:9px;font-size:13px;font-weight:700">+ Add Record</a>
+  </div>
+
+  <!-- ── Filters ── -->
+  <form class="filter-form" method="GET" action="/overtime/records">
+    <div class="ff">
+      <label>Nurse Name</label>
+      <input type="text" name="nurse" value="{{ filter_nurse }}" placeholder="Search nurse..."/>
+    </div>
+    <div class="ff">
+      <label>Date</label>
+      <input type="date" name="date" value="{{ filter_date }}"/>
+    </div>
+    <div class="ff">
+      <label>Month</label>
+      <input type="month" name="month" value="{{ filter_month }}"/>
+    </div>
+    <div class="ff">
+      <label>Status</label>
+      <select name="status">
+        <option value="">All</option>
+        <option value="active"    {% if filter_status=='active'    %}selected{% endif %}>Active</option>
+        <option value="pending"   {% if filter_status=='pending'   %}selected{% endif %}>Pending</option>
+        <option value="approved"  {% if filter_status=='approved'  %}selected{% endif %}>Approved</option>
+        <option value="rejected"  {% if filter_status=='rejected'  %}selected{% endif %}>Rejected</option>
+        <option value="completed" {% if filter_status=='completed' %}selected{% endif %}>Completed</option>
+      </select>
+    </div>
+    <button type="submit" class="btn-filter">&#128269; Filter</button>
+    <a href="/overtime/records" class="btn-clear">&#10005; Clear</a>
+  </form>
+
+  <!-- ── Summary ── -->
+  {% if records %}
+  {% set total_ot = records|sum(attribute='ot_hours') %}
+  <div class="sum-row">
+    <div class="sum-pill">&#128203; {{ total }} records</div>
+    <div class="sum-pill">&#9200; {{ "%.1f"|format(total_ot) }}h total OT</div>
+    <div class="sum-pill" style="color:#dc2626">
+      &#9201; {{ records|selectattr('status','eq','pending')|list|length }} pending
+    </div>
+    <div class="sum-pill" style="color:#16a34a">
+      &#10003; {{ records|selectattr('status','eq','approved')|list|length }} approved
+    </div>
+  </div>
+
+  <!-- Export buttons -->
+  <div class="export-row" style="margin-bottom:14px">
+    <a class="btn-exp btn-csv"
+       href="/overtime/export/csv{% if filter_month %}?month={{ filter_month }}{% endif %}">
+      &#128196; Export CSV
+    </a>
+    <a class="btn-exp btn-json"
+       href="/overtime/export/json{% if filter_month %}?month={{ filter_month }}{% endif %}">
+      &#128196; Export JSON
+    </a>
+    <a class="btn-exp btn-pdf"
+       href="/overtime/export/pdf{% if filter_month %}?month={{ filter_month }}{% endif %}">
+      &#128196; Export PDF
+    </a>
+  </div>
+  {% endif %}
+
+  <!-- ── Table ── -->
+  <div class="tbl-card">
+    <div class="tbl-head">
+      <h2>Attendance Records</h2>
+    </div>
+
+    {% if not records %}
+    <div class="empty-state">
+      <div class="ei">&#128197;</div>
+      <p>No records found. <a href="/overtime/checkin" style="color:var(--blue)">Add an attendance record</a>.</p>
+    </div>
+    {% else %}
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Nurse / Dept</th>
+            <th>Date</th>
+            <th>Shift</th>
+            <th>Check In/Out</th>
+            <th>Hours</th>
+            <th>OT</th>
+            <th>Risk</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for r in records %}
+        <tr id="row-{{ r.id }}">
+          <td>
+            <div class="t-name">{{ r.nurse_name }}</div>
+            <div class="t-sub">{{ r.department }}</div>
+          </td>
+          <td>
+            <div style="font-weight:600;font-size:13px">{{ r.date }}</div>
+            <div class="t-sub">{{ r.day_of_week }}</div>
+          </td>
+          <td>
+            {% set st = shift_types.get(r.shift_type, {}) %}
+            <div style="font-size:13px">{{ st.get('icon','') }} {{ st.get('label', r.shift_type) }}</div>
+          </td>
+          <td>
+            {% if r.check_out %}
+            <div style="font-size:13px">{{ r.check_in }} &rarr; {{ r.check_out }}</div>
+            {% elif r.check_in %}
+            <div style="font-size:13px">{{ r.check_in }} &rarr; ?</div>
+            <div class="co-form" style="margin-top:5px">
+              <input class="co-input" type="time" id="co-{{ r.id }}"
+                     placeholder="HH:MM"/>
+              <button class="co-btn"
+                      onclick="doCheckout('{{ r.id }}')">Out</button>
+            </div>
+            {% endif %}
+          </td>
+          <td>
+            {% if r.total_hours is not none %}
+            <div style="font-weight:700">{{ r.total_hours }}h</div>
+            <div class="bar-mini">
+              <div class="bar-fill"
+                   style="width:{{ [r.total_hours/16*100,100]|min }}%;
+                     background:{% if r.total_hours>=12 %}#dc2626{% elif r.total_hours>=10 %}#d97706{% else %}#3b9ede{% endif %}">
+              </div>
+            </div>
+            {% else %}&mdash;{% endif %}
+          </td>
+          <td>
+            {% if r.ot_hours is not none %}
+            <div class="ot-{{ r.ot_type or 'none' }}" style="font-weight:700;font-size:14px">
+              {{ r.ot_hours }}h
+            </div>
+            {% set oti = ot_info.get(r.ot_type or 'none', {}) %}
+            <div style="font-size:11px;color:var(--muted)">{{ oti.get('label','') }}</div>
+            {% else %}&mdash;{% endif %}
+          </td>
+          <td>
+            {% if r.risk_level %}
+            {% set ri = risk_info.get(r.risk_level, {}) %}
+            <span class="risk-pill r-{{ r.risk_level }}">{{ ri.get('label', r.risk_level) }}</span>
+            {% else %}&mdash;{% endif %}
+          </td>
+          <td>
+            <span class="s-badge s-{{ r.status or 'active' }}">
+              {% if r.status == 'approved'  %}&#10003; Approved
+              {% elif r.status == 'rejected' %}&#10005; Rejected
+              {% elif r.status == 'active'   %}&#9654; Active
+              {% elif r.status == 'completed'%}&#9679; Completed
+              {% else %}&#9201; Pending{% endif %}
+            </span>
+            {% if r.supervisor_name %}
+            <div class="t-sub">by {{ r.supervisor_name }}</div>
+            {% endif %}
+          </td>
+          <td>
+            {% if r.status == 'pending' and r.ot_hours and r.ot_hours > 0 %}
+            <button class="btn-approve"
+              onclick="openModal('{{ r.id }}','approve','{{ r.nurse_name }}',
+                       '{{ r.date }}','{{ r.ot_hours }}','{{ r.ot_type }}')">
+              &#10003; Approve
+            </button>
+            <button class="btn-reject"
+              onclick="openModal('{{ r.id }}','reject','{{ r.nurse_name }}',
+                       '{{ r.date }}','{{ r.ot_hours }}','{{ r.ot_type }}')">
+              &#10005; Reject
+            </button>
+            {% elif r.status in ['approved','rejected'] %}
+            <button class="btn-done" disabled>Done</button>
+            {% else %}
+            <span style="color:var(--muted);font-size:12px">&mdash;</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<footer>WMC Nursing AI &mdash; Operations Management &mdash; Not for Payroll Processing</footer>
+
+<!-- ── Approval/Rejection Modal ── -->
+<div class="modal-bd" id="approval-modal">
+  <div class="modal">
+    <div class="modal-hd">
+      <h3 id="modal-title">Supervisor Approval</h3>
+      <button class="modal-close" onclick="closeModal()">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-meta" id="modal-meta"></div>
+      <div class="mf">
+        <label>Supervisor Name</label>
+        <input type="text" id="sv-name" placeholder="Enter your name"/>
+      </div>
+      <div class="mf">
+        <label>Comment</label>
+        <textarea id="sv-comment"
+                  placeholder="Enter approval/rejection reason..."></textarea>
+      </div>
+      <p class="modal-warn">
+        &#9888; By approving, you confirm this OT record has been verified.
+        This is for operations tracking only — not a payroll system.
+      </p>
+    </div>
+    <div class="modal-ft">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button id="modal-action-btn" class="btn-ok-approve">&#10003; Approve</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+  let activeId   = null;
+  let activeAction = null;
+
+  function openModal(id, action, nurse, date, ot, otType) {
+    activeId     = id;
+    activeAction = action;
+    document.getElementById('modal-title').textContent =
+      action === 'approve' ? 'Approve Overtime' : 'Reject Overtime';
+    document.getElementById('modal-meta').innerHTML =
+      `<strong>Nurse:</strong> ${nurse}<br>` +
+      `<strong>Date:</strong> ${date}<br>` +
+      `<strong>OT Hours:</strong> ${ot}h (${otType})`;
+    document.getElementById('sv-name').value    = '';
+    document.getElementById('sv-comment').value = '';
+    const btn = document.getElementById('modal-action-btn');
+    if (action === 'approve') {
+      btn.textContent = '✓ Approve';
+      btn.className   = 'btn-ok-approve';
+    } else {
+      btn.textContent = '✗ Reject';
+      btn.className   = 'btn-ok-reject';
+    }
+    btn.onclick = submitAction;
+    document.getElementById('approval-modal').classList.add('open');
+  }
+
+  function closeModal() {
+    document.getElementById('approval-modal').classList.remove('open');
+    activeId = activeAction = null;
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  async function submitAction() {
+    const name    = document.getElementById('sv-name').value.trim();
+    const comment = document.getElementById('sv-comment').value.trim();
+    if (!name) { alert('Please enter supervisor name.'); return; }
+
+    const btn = document.getElementById('modal-action-btn');
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
+
+    const url = `/overtime/api/${activeAction}/${activeId}`;
+    try {
+      const res  = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ supervisor_name: name, comment }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        closeModal();
+        showToast(activeAction === 'approve' ? 'OT Record Approved' : 'OT Record Rejected');
+        setTimeout(() => location.reload(), 1200);
+      } else {
+        alert('Error: ' + (data.error || 'Unknown'));
+        btn.disabled    = false;
+        btn.textContent = activeAction === 'approve' ? '✓ Approve' : '✗ Reject';
+      }
+    } catch (e) {
+      alert('Network error.'); btn.disabled = false;
+    }
+  }
+
+  async function doCheckout(id) {
+    const t = document.getElementById('co-' + id).value;
+    if (!t) { alert('Please enter check-out time.'); return; }
+    const form = new FormData();
+    form.append('check_out', t);
+    const res  = await fetch(`/overtime/checkout/${id}`, { method: 'POST', body: form });
+    const data = await res.json();
+    if (data.ok) {
+      showToast(`Checked out. OT: ${data.ot_hours}h`);
+      setTimeout(() => location.reload(), 1000);
+    } else {
+      alert('Error: ' + (data.error || 'Failed'));
+    }
+  }
+
+  document.getElementById('approval-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+</script>
+</body>
+</html>

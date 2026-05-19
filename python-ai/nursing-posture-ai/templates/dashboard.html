@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="theme-color" content="#0f3460"/>
+  <title>WMC Nursing AI - Dashboard</title>
+  <style>
+    :root {
+      --navy:  #0f3460; --blue: #1a6bb5; --sky: #3b9ede;
+      --light: #eef4fb; --white: #ffffff; --border: #d4e2f0;
+      --text:  #1e2d3d; --muted: #607d99;
+      --radius:14px; --shadow: 0 4px 20px rgba(15,52,96,.10);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--light); color: var(--text);
+      min-height: 100vh; padding-bottom: 48px;
+    }
+
+    /* ── App bar ── */
+    .appbar {
+      background: linear-gradient(135deg, var(--navy), #163a6a);
+      color: #fff; padding: 0 16px;
+      display: flex; align-items: center; height: 60px;
+      position: sticky; top: 0; z-index: 100;
+      box-shadow: 0 2px 12px rgba(0,0,0,.25);
+    }
+    .appbar-logo { font-size: 20px; font-weight: 800; flex: 1; }
+    .appbar-logo span { color: #63b3ed; }
+    .appbar-nav a {
+      color: rgba(255,255,255,.75); text-decoration: none;
+      font-size: 13px; font-weight: 600;
+      padding: 6px 12px; border-radius: 8px;
+      transition: background .15s;
+    }
+    .appbar-nav a:hover, .appbar-nav a.active {
+      background: rgba(255,255,255,.15); color: #fff;
+    }
+
+    /* ── Warning bar ── */
+    .warn-bar {
+      background: #fffbeb; border-bottom: 2px solid #f6e05e;
+      padding: 9px 16px; font-size: 12px; color: #7c4a00;
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    /* ── Page ── */
+    .page { max-width: 900px; margin: 0 auto; padding: 24px 16px 0; }
+
+    h1.dash-title {
+      font-size: 20px; font-weight: 800; color: var(--navy);
+      margin-bottom: 18px;
+      display: flex; align-items: center; gap: 10px;
+    }
+
+    /* ── Stats row ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .stat-card {
+      background: var(--white); border-radius: var(--radius);
+      box-shadow: var(--shadow); padding: 18px 16px;
+      text-align: center;
+    }
+    .stat-card .s-val {
+      font-size: 32px; font-weight: 900; color: var(--navy); line-height: 1;
+    }
+    .stat-card .s-lbl {
+      font-size: 11.5px; font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: .6px; margin-top: 6px;
+    }
+    .stat-card.pending .s-val { color: #dc2626; }
+
+    /* ── Latest hero ── */
+    .latest-card {
+      background: var(--white); border-radius: var(--radius);
+      box-shadow: var(--shadow); margin-bottom: 20px; overflow: hidden;
+    }
+    .latest-head {
+      background: #f0f6ff; border-bottom: 1px solid var(--border);
+      padding: 14px 18px; display: flex; align-items: center; gap: 10px;
+    }
+    .latest-head h2 { font-size: 15px; font-weight: 700; color: var(--navy); }
+    .latest-body { padding: 18px; display: flex; gap: 20px; flex-wrap: wrap; }
+
+    .latest-img {
+      flex-shrink: 0; width: 140px; height: 140px;
+      object-fit: cover; border-radius: 10px;
+      border: 1px solid var(--border); background: #111;
+    }
+    .latest-img.placeholder {
+      display: flex; align-items: center; justify-content: center;
+      background: #e8f0f8; color: var(--muted); font-size: 13px;
+    }
+
+    .latest-info { flex: 1; min-width: 200px; }
+    .li-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+
+    .grade-badge {
+      display: inline-flex; align-items: center;
+      padding: 4px 14px; border-radius: 20px;
+      font-size: 16px; font-weight: 900;
+    }
+    .risk-pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 12px; border-radius: 20px;
+      font-size: 12px; font-weight: 700;
+    }
+    .review-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 10px; border-radius: 20px;
+      font-size: 11.5px; font-weight: 700;
+    }
+    .review-pending { background: #fff5f5; color: #dc2626; border: 1.5px solid #fca5a5; }
+    .review-done    { background: #f0fdf4; color: #16a34a; border: 1.5px solid #86efac; }
+
+    .li-meta { font-size: 13px; color: var(--muted); line-height: 1.8; }
+    .li-meta strong { color: var(--text); font-weight: 600; }
+
+    /* ── Assessment history ── */
+    .hist-card {
+      background: var(--white); border-radius: var(--radius);
+      box-shadow: var(--shadow); overflow: hidden;
+    }
+    .hist-head {
+      background: #f0f6ff; border-bottom: 1px solid var(--border);
+      padding: 14px 18px; display: flex; align-items: center; gap: 10px;
+    }
+    .hist-head h2 { font-size: 15px; font-weight: 700; color: var(--navy); flex: 1; }
+    .hist-head .btn-upload {
+      background: var(--blue); color: #fff;
+      text-decoration: none; border-radius: 8px;
+      padding: 6px 14px; font-size: 13px; font-weight: 700;
+      transition: opacity .15s;
+    }
+    .hist-head .btn-upload:hover { opacity: .85; }
+
+    .hist-empty {
+      text-align: center; padding: 48px 24px;
+      color: var(--muted); font-size: 14px;
+    }
+    .hist-empty .e-icon { font-size: 42px; margin-bottom: 12px; }
+
+    /* ── Table ── */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; min-width: 600px; }
+    thead th {
+      background: #f7faff;
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .6px; color: var(--muted);
+      padding: 10px 14px; text-align: left;
+      border-bottom: 2px solid var(--border);
+    }
+    tbody tr { transition: background .1s; }
+    tbody tr:hover { background: #f4f8ff; }
+    tbody td {
+      padding: 11px 14px; font-size: 13px;
+      color: var(--text); border-bottom: 1px solid #f0f4f8;
+      vertical-align: middle;
+    }
+    td .t-name   { font-weight: 600; }
+    td .t-sub    { font-size: 11.5px; color: var(--muted); margin-top: 2px; }
+    td .t-grade  {
+      font-size: 15px; font-weight: 900;
+      width: 34px; height: 34px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+    }
+    td .bar-mini { height: 6px; border-radius: 4px; background: #e2e8f0; width: 80px; margin-top: 4px; }
+    td .bar-fill { height: 100%; border-radius: 4px; }
+
+    /* ── Supervisor review button ── */
+    .btn-review {
+      padding: 6px 12px; border-radius: 7px;
+      font-size: 12px; font-weight: 700; border: none; cursor: pointer;
+      transition: opacity .15s;
+    }
+    .btn-review.pending { background: #fef3c7; color: #92400e; border: 1.5px solid #fde68a; }
+    .btn-review.done    { background: #f0fdf4; color: #166534; border: 1.5px solid #bbf7d0; cursor: default; }
+    .btn-review:hover:not(.done) { opacity: .8; }
+
+    /* ── Review modal ── */
+    .modal-backdrop {
+      display: none; position: fixed; inset: 0;
+      background: rgba(15,52,96,.65); z-index: 200;
+      align-items: center; justify-content: center;
+      padding: 16px;
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal {
+      background: #fff; border-radius: 16px;
+      max-width: 460px; width: 100%;
+      box-shadow: 0 20px 60px rgba(0,0,0,.25);
+      overflow: hidden;
+      animation: modalIn .2s ease;
+    }
+    @keyframes modalIn { from { transform: scale(.95); opacity: 0; } }
+    .modal-header {
+      background: #f0f6ff; border-bottom: 1px solid var(--border);
+      padding: 16px 20px; display: flex; align-items: center; gap: 10px;
+    }
+    .modal-header h3 { font-size: 16px; font-weight: 700; color: var(--navy); flex: 1; }
+    .modal-close {
+      background: none; border: none; font-size: 20px;
+      cursor: pointer; color: var(--muted); line-height: 1;
+      padding: 4px;
+    }
+    .modal-body { padding: 20px; }
+    .modal-meta { font-size: 13.5px; color: var(--text); line-height: 2; margin-bottom: 16px; }
+    .modal-meta strong { font-weight: 700; }
+    .modal-field { margin-bottom: 14px; }
+    .modal-field label {
+      display: block; font-size: 12px; font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: .5px; margin-bottom: 7px;
+    }
+    .modal-field input, .modal-field textarea {
+      width: 100%; padding: 10px 13px;
+      border: 1.5px solid var(--border); border-radius: 9px;
+      font-size: 14px; color: var(--text);
+      outline: none; transition: border-color .2s;
+      font-family: inherit;
+    }
+    .modal-field input:focus, .modal-field textarea:focus {
+      border-color: var(--sky);
+      box-shadow: 0 0 0 3px rgba(59,158,222,.12);
+    }
+    .modal-field textarea { resize: vertical; min-height: 90px; }
+    .modal-footer {
+      padding: 0 20px 20px;
+      display: flex; gap: 10px; justify-content: flex-end;
+    }
+    .btn-cancel {
+      padding: 10px 20px; border-radius: 8px;
+      background: #f1f5f9; color: var(--text);
+      border: none; font-size: 14px; font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-confirm {
+      padding: 10px 20px; border-radius: 8px;
+      background: var(--blue); color: #fff;
+      border: none; font-size: 14px; font-weight: 700;
+      cursor: pointer; transition: opacity .15s;
+    }
+    .btn-confirm:hover { opacity: .88; }
+
+    /* ── Toast ── */
+    #toast {
+      position: fixed; bottom: 24px; left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #1a202c; color: #fff;
+      padding: 12px 22px; border-radius: 30px;
+      font-size: 14px; font-weight: 600;
+      transition: transform .3s; z-index: 300;
+      white-space: nowrap;
+    }
+    #toast.show { transform: translateX(-50%) translateY(0); }
+
+    footer {
+      text-align: center; font-size: 11.5px;
+      color: var(--muted); padding: 24px 16px 8px;
+    }
+
+    @media (max-width: 480px) {
+      .stats-row { grid-template-columns: 1fr 1fr; }
+      .stats-row .stat-card:last-child { grid-column: 1 / -1; }
+      .latest-body { flex-direction: column; }
+      .latest-img { width: 100%; height: 200px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- App bar -->
+<div class="appbar">
+  <div class="appbar-logo">WMC <span>Nursing AI</span></div>
+  <nav class="appbar-nav">
+    <a href="/">&#128247; Upload</a>
+    <a href="/dashboard" class="active">&#128202; Dashboard</a>
+  </nav>
+</div>
+
+<!-- Warning bar -->
+<div class="warn-bar">
+  <span>&#9888;</span>
+  <span><strong>Training &amp; Supervision Tool Only</strong> &mdash; Not a medical diagnosis system. Supervisor review required for all assessments.</span>
+</div>
+
+<div class="page">
+
+  <h1 class="dash-title">&#128202; Assessment Dashboard</h1>
+
+  <!-- ── Stats ── -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="s-val">{{ total_count }}</div>
+      <div class="s-lbl">Total Assessments</div>
+    </div>
+    <div class="stat-card {% if pending_review > 0 %}pending{% endif %}">
+      <div class="s-val">{{ pending_review }}</div>
+      <div class="s-lbl">Pending Review</div>
+    </div>
+    <div class="stat-card">
+      <div class="s-val">
+        {% if assessments %}{{ assessments[0].score }}{% else %}--{% endif %}
+      </div>
+      <div class="s-lbl">Latest Score</div>
+    </div>
+  </div>
+
+  <!-- ── Latest assessment hero ── -->
+  <div class="latest-card">
+    <div class="latest-head">
+      <span>&#127942;</span>
+      <h2>Latest Assessment</h2>
+    </div>
+    <div class="latest-body">
+      {% if assessments %}
+      {% set la = assessments[0] %}
+      {% set risk = risk_levels.get(la.grade, {'color':'#888','bg':'#eee'}) %}
+
+      <img class="latest-img"
+           src="{{ url_for('static', filename='output_images/' ~ la.output_image) }}"
+           alt="Latest output"
+           onerror="this.style.display='none'" />
+
+      <div class="latest-info">
+        <div class="li-row">
+          <span class="grade-badge"
+            style="background:{{ risk.bg }}; color:{{ risk.color }};">
+            Grade {{ la.grade }}
+          </span>
+          <span class="risk-pill"
+            style="background:{{ risk.bg }}; color:{{ risk.color }};">
+            &#9679; {{ la.risk_label }}
+          </span>
+          {% if la.supervisor_reviewed %}
+          <span class="review-badge review-done">&#10003; Reviewed</span>
+          {% else %}
+          <span class="review-badge review-pending">&#9888; Review Required</span>
+          {% endif %}
+        </div>
+
+        <div class="li-meta">
+          <strong>Patient:</strong> {{ la.patient_name }}<br/>
+          <strong>Nurse:</strong> {{ la.nurse_name }}<br/>
+          <strong>Posture:</strong> {{ la.posture_label }}<br/>
+          <strong>Score:</strong> {{ la.score }} / 100 &mdash; {{ la.grade_label }}<br/>
+          <strong>Time:</strong> {{ la.timestamp }}
+        </div>
+
+        {% if not la.supervisor_reviewed %}
+        <button class="btn-review pending"
+                onclick="openReview('{{ la.id }}','{{ la.patient_name }}','{{ la.nurse_name }}','{{ la.score }}','{{ la.grade }}','{{ la.posture_label }}')"
+                style="margin-top:10px;">
+          &#9998; Supervisor Review
+        </button>
+        {% else %}
+        <div style="margin-top:10px; font-size:12.5px; color:#16a34a; font-weight:600;">
+          &#10003; Reviewed by {{ la.supervisor_name }} &mdash; {{ la.reviewed_at }}
+        </div>
+        {% endif %}
+      </div>
+      {% else %}
+      <div style="width:100%; text-align:center; color:var(--muted); padding:24px;">
+        No assessments yet. <a href="/" style="color:var(--blue);">Upload your first photo</a>.
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- ── Assessment history ── -->
+  <div class="hist-card">
+    <div class="hist-head">
+      <span>&#128196;</span>
+      <h2>Assessment History</h2>
+      <a href="/" class="btn-upload">+ New Upload</a>
+    </div>
+
+    {% if not assessments %}
+    <div class="hist-empty">
+      <div class="e-icon">&#128247;</div>
+      <p>No assessments recorded yet.</p>
+    </div>
+    {% else %}
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Patient / Nurse</th>
+            <th>Posture Type</th>
+            <th>Score</th>
+            <th>Risk</th>
+            <th>Time</th>
+            <th>Review</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for a in assessments %}
+        {% set risk = risk_levels.get(a.grade, {'color':'#888','bg':'#eee','label':'Unknown'}) %}
+        <tr>
+          <td>
+            <div class="t-name">{{ a.patient_name }}</div>
+            <div class="t-sub">{{ a.nurse_name }}</div>
+          </td>
+          <td style="font-size:12.5px; color:var(--muted);">{{ a.posture_label }}</td>
+          <td>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span class="t-grade"
+                style="background:{{ risk.bg }}; color:{{ risk.color }};">
+                {{ a.grade }}
+              </span>
+              <div>
+                <div style="font-weight:700; font-size:14px;">{{ a.score }}/100</div>
+                <div class="bar-mini">
+                  <div class="bar-fill"
+                    style="width:{{ a.score }}%;
+                      background:{% if a.score>=85 %}#16a34a{% elif a.score>=70 %}#2563eb{% elif a.score>=50 %}#d97706{% else %}#dc2626{% endif %};">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <span class="risk-pill"
+              style="background:{{ risk.bg }}; color:{{ risk.color }}; white-space:nowrap;">
+              {{ risk.label }}
+            </span>
+          </td>
+          <td style="font-size:12px; color:var(--muted); white-space:nowrap;">
+            {{ a.timestamp }}
+          </td>
+          <td>
+            {% if a.supervisor_reviewed %}
+            <button class="btn-review done" disabled>&#10003; Done</button>
+            {% else %}
+            <button class="btn-review pending"
+                    onclick="openReview('{{ a.id }}','{{ a.patient_name }}','{{ a.nurse_name }}','{{ a.score }}','{{ a.grade }}','{{ a.posture_label }}')">
+              &#9998; Review
+            </button>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+  </div>
+
+</div><!-- /page -->
+
+<footer>
+  WMC Nursing AI &mdash; Training &amp; Supervision Tool &mdash; Not for Clinical Diagnosis
+</footer>
+
+<!-- ── Supervisor Review Modal ── -->
+<div class="modal-backdrop" id="review-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>&#9998; Supervisor Review</h3>
+      <button class="modal-close" onclick="closeModal()">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-meta" id="modal-meta"></div>
+      <div class="modal-field">
+        <label>Supervisor Name</label>
+        <input type="text" id="sv-name" placeholder="Enter your name" />
+      </div>
+      <div class="modal-field">
+        <label>Supervisor Comment</label>
+        <textarea id="sv-comment"
+                  placeholder="Enter your clinical observations and sign-off comment..."></textarea>
+      </div>
+      <div style="font-size:12px; color:#dc2626; line-height:1.6;">
+        &#9888; By submitting this review you confirm that you have assessed the
+        AI report and taken clinical responsibility for any follow-up actions.
+        This is a training tool — not a substitute for direct patient assessment.
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-confirm" id="confirm-btn" onclick="submitReview()">
+        &#10003; Mark as Reviewed
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast notification -->
+<div id="toast"></div>
+
+<script>
+  let activeId = null;
+
+  function openReview(id, patient, nurse, score, grade, posture) {
+    activeId = id;
+    document.getElementById('modal-meta').innerHTML =
+      `<strong>Patient:</strong> ${patient}<br>` +
+      `<strong>Nurse:</strong> ${nurse}<br>` +
+      `<strong>Posture:</strong> ${posture}<br>` +
+      `<strong>Score / Grade:</strong> ${score}/100 &mdash; Grade ${grade}`;
+    document.getElementById('sv-name').value    = '';
+    document.getElementById('sv-comment').value = '';
+    document.getElementById('review-modal').classList.add('open');
+  }
+
+  function closeModal() {
+    document.getElementById('review-modal').classList.remove('open');
+    activeId = null;
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  async function submitReview() {
+    const name    = document.getElementById('sv-name').value.trim();
+    const comment = document.getElementById('sv-comment').value.trim();
+    if (!name) { alert('Please enter supervisor name.'); return; }
+
+    const btn = document.getElementById('confirm-btn');
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
+
+    try {
+      const res = await fetch(`/api/supervisor-review/${activeId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ supervisor_name: name, comment }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        closeModal();
+        showToast('Review saved successfully');
+        setTimeout(() => location.reload(), 1200);
+      } else {
+        alert('Error: ' + (data.error || 'Unknown error'));
+        btn.disabled = false;
+        btn.textContent = '✓ Mark as Reviewed';
+      }
+    } catch (e) {
+      alert('Network error. Please try again.');
+      btn.disabled = false;
+      btn.textContent = '✓ Mark as Reviewed';
+    }
+  }
+
+  // Close modal on backdrop click
+  document.getElementById('review-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+node_modules
+.pnpm-store
+.next
+dist
+build
+coverage
+logs
+.env
+.env.local
+.DS_Store
+.vscode
+*.log

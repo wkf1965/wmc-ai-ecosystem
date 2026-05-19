@@ -1,0 +1,1 @@
+# Safety runbook template for escalation events.

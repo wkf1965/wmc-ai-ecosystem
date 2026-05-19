@@ -1,0 +1,303 @@
+{
+  "description": "Example JSON bodies for POST /api/v1/* (use Bearer token from POST /auth/login)",
+  "auth_login": {
+    "email": "nurse@wmc.local",
+    "password": "password123"
+  },
+  "patient_create": {
+    "mrn": "WMC-10003",
+    "fullName": "Lee Ka Yan",
+    "dateOfBirth": "1985-06-20",
+    "gender": "F",
+    "phone": "+85291112222",
+    "medicalSummary": "ACL reconstruction follow-up."
+  },
+  "crm_lead_create": {
+    "source": "google_form",
+    "contactName": "Mary Ho",
+    "phone": "+85293334444",
+    "email": "mary@example.com",
+    "notes": "Interested in outpatient rehab.",
+    "pipelineStage": "consultation_booked"
+  },
+  "nursing_daily_report": {
+    "patientId": "REPLACE_WITH_UUID_FROM_GET_patients",
+    "shiftDate": "2026-05-19",
+    "narrative": "Stable overnight; encouraged fluids."
+  },
+  "vital_signs": {
+    "patientId": "REPLACE_WITH_UUID",
+    "temperature": 36.7,
+    "bloodPressureSys": 128,
+    "bloodPressureDia": 78,
+    "heartRate": 72,
+    "spo2": 98,
+    "notes": "Pre-meal"
+  },
+  "medication": {
+    "patientId": "REPLACE_WITH_UUID",
+    "medicationName": "Metformin",
+    "dose": "500mg",
+    "route": "PO",
+    "scheduledAt": "2026-05-19T08:00:00.000Z"
+  },
+  "nursing_alert": {
+    "patientId": "REPLACE_WITH_UUID",
+    "severity": "high",
+    "category": "Fall risk",
+    "description": "Patient unsteady transferring from bed; rails up.",
+    "photoUrlPlaceholder": "https://example.com/placeholder-photo-id"
+  },
+  "doctor_review": {
+    "patientId": "REPLACE_WITH_UUID",
+    "priority": "urgent",
+    "summary": "Multiple nursing alerts today — review mobility plan."
+  },
+  "rehab_session": {
+    "patientId": "REPLACE_WITH_UUID",
+    "sessionAt": "2026-05-19T10:00:00.000Z",
+    "painScore": 4,
+    "mobilityNotes": "Ambulated 20m with rolling walker.",
+    "therapistNotes": "Tolerance improving session-over-session."
+  },
+  "ai_patient_summary": {
+    "patientId": "REPLACE_WITH_UUID"
+  },
+  "ai_summary_nursing_structured": {
+    "patientName": "Test Patient",
+    "bloodPressure": "130/80",
+    "pulse": 78,
+    "temperature": 36.8,
+    "oxygen": 98,
+    "painScore": 3,
+    "appetite": "Good",
+    "mood": "Calm",
+    "mobility": "Needs assistance",
+    "sideTurning": "Left side completed",
+    "woundCondition": "No redness",
+    "notes": "Patient stable today"
+  },
+  "ai_summary_legacy_notes_stub": {
+    "patientName": "Test Patient",
+    "notes": "Follow-up labs pending; tolerated breakfast well."
+  },
+  "handover_generate": {
+    "shift": "Morning Shift",
+    "nurseInCharge": "Nurse Mary",
+    "records": [
+      {
+        "patientName": "Test Patient",
+        "bloodPressure": "130/80",
+        "pulse": 78,
+        "temperature": 36.8,
+        "oxygen": 98,
+        "painScore": 3,
+        "mood": "Calm",
+        "mobility": "Needs assistance",
+        "sideTurning": "Completed",
+        "woundCondition": "No redness",
+        "notes": "Stable today"
+      },
+      {
+        "patientName": "Ah Chong",
+        "bloodPressure": "170/100",
+        "pulse": 110,
+        "temperature": 38.5,
+        "oxygen": 92,
+        "painScore": 7,
+        "mood": "Agitated",
+        "mobility": "Bedbound",
+        "sideTurning": "Pending",
+        "woundCondition": "Redness noted",
+        "notes": "Monitor closely"
+      }
+    ]
+  },
+  "risk_fall_score": {
+    "patientName": "Ah Chong",
+    "mobility": "Bedbound",
+    "mood": "Agitated",
+    "painScore": 7,
+    "oxygen": 92,
+    "historyOfFalls": true,
+    "walkingAssist": true,
+    "confusion": true,
+    "age": 82
+  },
+  "risk_pressure_ulcer": {
+    "patientName": "Ah Chong",
+    "bedbound": true,
+    "sideTurningCompleted": false,
+    "nutritionStatus": "Poor",
+    "skinCondition": "Redness",
+    "moisture": "High",
+    "mobility": "Immobile",
+    "age": 82,
+    "incontinence": true
+  },
+  "turning_side_record": {
+    "patientId": "P001",
+    "patientName": "Ah Chong",
+    "nurseName": "Nurse Mary",
+    "turningTime": "10:00",
+    "turningPosition": "Left side",
+    "skinCondition": "Mild redness",
+    "photoRequired": true,
+    "photoUploaded": false,
+    "notes": "Need recheck after 2 hours"
+  },
+  "vitals_analyze": {
+    "patientName": "Ah Chong",
+    "bloodPressure": "170/100",
+    "pulse": 110,
+    "temperature": 38.5,
+    "oxygen": 92,
+    "painScore": 7,
+    "notes": "Patient looks weak and restless"
+  },
+  "wound_assessment": {
+    "patientId": "P001",
+    "patientName": "Ah Chong",
+    "nurseName": "Nurse Mary",
+    "woundLocation": "Sacrum",
+    "redness": true,
+    "swelling": false,
+    "discharge": true,
+    "odor": false,
+    "painScore": 6,
+    "woundSize": "3cm x 2cm",
+    "dressingChanged": true,
+    "photoUploaded": false,
+    "notes": "Redness and mild discharge observed"
+  },
+  "family_update": {
+    "patientName": "Ah Chong",
+    "condition": "Stroke Rehabilitation",
+    "mood": "Calm",
+    "appetite": "Good",
+    "mobility": "Needs assistance",
+    "vitalStatus": "Stable",
+    "rehabCompleted": true,
+    "sideTurningCompleted": true,
+    "notes": "Patient participated well in therapy today."
+  },
+  "escalation_check": {
+    "patientName": "Ah Chong",
+    "bloodPressure": "180/110",
+    "pulse": 120,
+    "temperature": 39.2,
+    "oxygen": 89,
+    "painScore": 8,
+    "mood": "Agitated",
+    "mobility": "Bedbound",
+    "woundCondition": "Redness with discharge",
+    "notes": "Patient appears weak and confused"
+  },
+  "emergency_respond": {
+    "patientName": "Ah Chong",
+    "eventType": "Low Oxygen",
+    "bloodPressure": "85/50",
+    "pulse": 130,
+    "temperature": 39.5,
+    "oxygen": 82,
+    "consciousness": "Drowsy",
+    "breathingDifficulty": true,
+    "notes": "Patient appears weak and short of breath"
+  },
+  "incident_report": {
+    "patientName": "Ah Chong",
+    "incidentType": "Fall",
+    "incidentTime": "2026-05-19 14:30",
+    "location": "Ward A",
+    "reportedBy": "Nurse Mary",
+    "injuryDetected": true,
+    "injuryDetails": "Minor bruise on left arm",
+    "vitalStatus": "Stable",
+    "doctorInformed": true,
+    "familyInformed": false,
+    "notes": "Patient attempted to walk without assistance"
+  },
+  "nurse_reminder_create": {
+    "patientName": "Ah Chong",
+    "reminderType": "Side Turning",
+    "task": "Turn patient to right side",
+    "dueTime": "12:00",
+    "assignedTo": "Nurse Mary",
+    "priority": "High",
+    "repeatEveryHours": 2,
+    "notes": "Photo required after turning"
+  },
+  "nurse_announcement_create": {
+    "title": "High Fever Monitoring",
+    "message": "Please monitor all fever patients every 2 hours tonight.",
+    "createdBy": "Supervisor Jane",
+    "priority": "High",
+    "targetShift": "Night Shift",
+    "requiresAcknowledgement": true
+  },
+  "nurse_acknowledgement_confirm": {
+    "nurseName": "Nurse Mary",
+    "announcementId": "ANN-001",
+    "announcementTitle": "High Fever Monitoring",
+    "acknowledged": true,
+    "acknowledgedAt": "2026-05-19 21:15",
+    "notes": "Will monitor fever patients every 2 hours"
+  },
+  "wandering_risk": {
+    "patientName": "Ah Chong",
+    "age": 82,
+    "diagnosis": "Dementia",
+    "confusion": true,
+    "agitation": true,
+    "nightRestlessness": true,
+    "historyOfWandering": true,
+    "mobility": "Walks with assistance",
+    "sleepPattern": "Poor",
+    "notes": "Patient attempted to leave room twice last night"
+  },
+  "bed_exit_alert": {
+    "patientName": "Ah Chong",
+    "age": 82,
+    "mobility": "Walks with assistance",
+    "confusion": true,
+    "fallRiskLevel": "High",
+    "wanderingRiskLevel": "High",
+    "bedExitAttempt": true,
+    "timeOfAttempt": "02:30",
+    "nightShift": true,
+    "notes": "Patient tried to get out of bed without assistance"
+  },
+  "nurse_shift_ot_calculate": {
+    "nurseName": "Nurse Mary",
+    "shiftDate": "2026-05-19",
+    "shiftStart": "09:00",
+    "shiftEnd": "17:30",
+    "actualClockIn": "08:45",
+    "actualClockOut": "19:00",
+    "breakMinutes": 60,
+    "notes": "Stayed back for patient handover"
+  },
+  "medication_check_alert": {
+    "patientName": "Ah Chong",
+    "medicationName": "Amlodipine",
+    "scheduledTime": "08:00",
+    "givenTime": "10:30",
+    "doseGiven": true,
+    "missedDose": false,
+    "allergy": false,
+    "bloodPressure": "90/60",
+    "notes": "Patient looked dizzy after medication."
+  },
+  "ai_classify_lead": {
+    "notes": "Lead asked about stroke rehab pricing via WhatsApp."
+  },
+  "ai_follow_up": {
+    "context": "Lead qualified — send booking link for Tuesday slot."
+  },
+  "ai_nursing_alert_summary": {
+    "description": "SpO2 dipped to 91% after exertion; recovered with rest."
+  },
+  "ai_rehab_report": {
+    "sessionIds": ["REPLACE_SESSION_UUID"]
+  }
+}

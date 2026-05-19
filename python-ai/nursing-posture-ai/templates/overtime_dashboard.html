@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="theme-color" content="#0f3460"/>
+  <title>WMC Nursing AI - Overtime Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --navy:#0f3460; --blue:#1a6bb5; --sky:#3b9ede;
+      --light:#eef4fb; --white:#fff; --border:#d4e2f0;
+      --text:#1e2d3d; --muted:#607d99;
+      --r:14px; --sh:0 4px 20px rgba(15,52,96,.10);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--light);
+         color:var(--text);min-height:100vh;padding-bottom:48px}
+
+    /* ── App bar ── */
+    .appbar{background:linear-gradient(135deg,var(--navy),#163a6a);color:#fff;
+            padding:0 16px;display:flex;align-items:center;height:60px;
+            position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.25)}
+    .appbar-logo{font-size:19px;font-weight:800;flex:1}
+    .appbar-logo span{color:#63b3ed}
+    .appbar-nav{display:flex;gap:2px;flex-wrap:wrap}
+    .appbar-nav a{color:rgba(255,255,255,.75);text-decoration:none;font-size:12.5px;
+                  font-weight:600;padding:6px 10px;border-radius:8px;transition:background .15s;
+                  white-space:nowrap}
+    .appbar-nav a:hover,.appbar-nav a.active{background:rgba(255,255,255,.15);color:#fff}
+
+    .warn-bar{background:#fffbeb;border-bottom:2px solid #f6e05e;padding:8px 16px;
+              font-size:12px;color:#7c4a00;display:flex;align-items:center;gap:8px}
+
+    .page{max-width:1100px;margin:0 auto;padding:22px 16px 0}
+    .page-title{font-size:20px;font-weight:800;color:var(--navy);margin-bottom:18px;
+                display:flex;align-items:center;gap:10px}
+
+    /* ── Stats grid ── */
+    .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+    .stat-card{background:var(--white);border-radius:var(--r);box-shadow:var(--sh);
+               padding:16px 14px;text-align:center}
+    .stat-card .sv{font-size:30px;font-weight:900;color:var(--navy);line-height:1}
+    .stat-card .sl{font-size:11px;font-weight:700;color:var(--muted);
+                   text-transform:uppercase;letter-spacing:.6px;margin-top:5px}
+    .stat-card.warn .sv{color:#d97706}
+    .stat-card.danger .sv{color:#dc2626}
+
+    /* ── Two-column layout ── */
+    .cols{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px}
+    .cols-equal{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+
+    /* ── Card ── */
+    .card{background:var(--white);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden}
+    .card-head{background:#f0f6ff;border-bottom:1px solid var(--border);
+               padding:13px 18px;display:flex;align-items:center;gap:8px}
+    .card-head h2{font-size:14px;font-weight:700;color:var(--navy);flex:1}
+    .card-head .badge{background:var(--navy);color:#fff;font-size:11px;font-weight:700;
+                      padding:2px 9px;border-radius:20px}
+    .card-body{padding:16px}
+    .chart-wrap{position:relative;height:200px}
+
+    /* ── Risk alerts ── */
+    .alert-list{display:flex;flex-direction:column;gap:8px}
+    .alert-item{border-radius:10px;padding:11px 13px;display:flex;align-items:flex-start;gap:10px}
+    .alert-item.critical{background:#fef2f2;border:1px solid #fca5a5}
+    .alert-item.high    {background:#fff5f5;border:1px solid #fca5a5}
+    .alert-item.medium  {background:#fffbeb;border:1px solid #fde68a}
+    .alert-item.low     {background:#f0fdf4;border:1px solid #86efac}
+    .alert-icon{font-size:18px;flex-shrink:0;margin-top:1px}
+    .alert-msg{font-size:13px;font-weight:600;color:var(--text);line-height:1.4}
+    .alert-action{font-size:11.5px;color:var(--muted);margin-top:3px}
+    .sev-badge{font-size:10px;font-weight:800;padding:2px 8px;border-radius:10px;
+               text-transform:uppercase;letter-spacing:.5px;flex-shrink:0}
+    .sev-critical{background:#fecaca;color:#991b1b}
+    .sev-high    {background:#fee2e2;color:#dc2626}
+    .sev-medium  {background:#fef3c7;color:#92400e}
+    .sev-low     {background:#dcfce7;color:#166534}
+
+    /* ── AI insights ── */
+    .insight-list{display:flex;flex-direction:column;gap:9px}
+    .insight-item{background:#f7faff;border-left:4px solid var(--sky);
+                  border-radius:0 9px 9px 0;padding:11px 14px;
+                  font-size:13px;color:var(--text);line-height:1.6;
+                  display:flex;align-items:flex-start;gap:10px}
+    .insight-item.high   {border-left-color:#dc2626;background:#fff5f5}
+    .insight-item.medium {border-left-color:#d97706;background:#fffbeb}
+    .i-icon{font-size:18px;flex-shrink:0;margin-top:1px}
+
+    /* ── Monthly summary pills ── */
+    .mo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    .mo-cell{text-align:center;background:#f7faff;border-radius:10px;padding:12px 8px}
+    .mo-cell .mv{font-size:22px;font-weight:900;color:var(--navy)}
+    .mo-cell .ml{font-size:11px;color:var(--muted);font-weight:700;
+                 text-transform:uppercase;margin-top:4px}
+
+    /* ── Quick action buttons ── */
+    .action-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+    .btn-action{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;
+                border-radius:10px;font-size:13.5px;font-weight:700;text-decoration:none;
+                transition:opacity .15s}
+    .btn-primary  {background:linear-gradient(135deg,var(--navy),var(--blue));color:#fff}
+    .btn-secondary{background:var(--white);color:var(--blue);border:2px solid var(--blue)}
+    .btn-success  {background:#dcfce7;color:#166534;border:1.5px solid #86efac}
+    .btn-action:hover{opacity:.85}
+
+    /* ── Export row ── */
+    .export-row{display:flex;gap:8px;flex-wrap:wrap}
+    .btn-exp{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;
+             border-radius:8px;font-size:12.5px;font-weight:700;text-decoration:none;transition:opacity .15s}
+    .btn-exp:hover{opacity:.85}
+    .btn-csv {background:#f0fff4;color:#166534;border:1.5px solid #86efac}
+    .btn-json{background:#ebf8ff;color:#1a4a7a;border:1.5px solid #bee3f8}
+    .btn-pdf {background:#fdf4ff;color:#6b21a8;border:1.5px solid #d8b4fe}
+
+    .disclaimer{background:#fffbeb;border:1px solid #f6e05e;border-radius:9px;
+                padding:12px 16px;font-size:12px;color:#7c4a00;line-height:1.6;margin-top:4px}
+
+    footer{text-align:center;font-size:11.5px;color:var(--muted);padding:22px 16px 8px}
+
+    @media(max-width:700px){
+      .stats-grid{grid-template-columns:repeat(2,1fr)}
+      .cols{grid-template-columns:1fr}
+      .cols-equal{grid-template-columns:1fr}
+      .mo-grid{grid-template-columns:repeat(2,1fr)}
+    }
+  </style>
+</head>
+<body>
+
+<div class="appbar">
+  <div class="appbar-logo">WMC <span>Nursing AI</span></div>
+  <nav class="appbar-nav">
+    <a href="/">&#128247; Posture</a>
+    <a href="/dashboard">&#128202; Posture DB</a>
+    <a href="/overtime" class="active">&#9200; Overtime</a>
+    <a href="/overtime/checkin">&#9989; Check-In</a>
+    <a href="/overtime/records">&#128203; Records</a>
+  </nav>
+</div>
+
+<div class="warn-bar">
+  <span>&#9888;</span>
+  <span><strong>Operations Management Only</strong> &mdash; {{ disclaimer }}</span>
+</div>
+
+<div class="page">
+  <div class="page-title">&#9200; Nursing Overtime Dashboard</div>
+
+  <!-- ── Quick actions ── -->
+  <div class="action-row">
+    <a class="btn-action btn-primary" href="/overtime/checkin">&#9989; Add Attendance</a>
+    <a class="btn-action btn-secondary" href="/overtime/records">&#128203; All Records</a>
+    {% if pending_total > 0 %}
+    <a class="btn-action btn-success" href="/overtime/records?status=pending">
+      &#9201; {{ pending_total }} Pending Approval
+    </a>
+    {% endif %}
+  </div>
+
+  <!-- ── Today stats ── -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="sv">{{ day_sum.total_nurses }}</div>
+      <div class="sl">&#128100; Nurses Today</div>
+    </div>
+    <div class="stat-card">
+      <div class="sv">{{ day_sum.total_shifts }}</div>
+      <div class="sl">&#128197; Shifts Today</div>
+    </div>
+    <div class="stat-card {% if day_sum.total_ot_h > 8 %}warn{% endif %}">
+      <div class="sv">{{ day_sum.total_ot_h }}h</div>
+      <div class="sl">&#9200; Today OT Hours</div>
+    </div>
+    <div class="stat-card {% if pending_total > 0 %}danger{% endif %}">
+      <div class="sv">{{ pending_total }}</div>
+      <div class="sl">&#9201; Pending Review</div>
+    </div>
+  </div>
+
+  <!-- ── Charts row ── -->
+  <div class="cols">
+    <div class="card">
+      <div class="card-head"><h2>&#128200; Last 7 Days OT Hours</h2></div>
+      <div class="card-body">
+        <div class="chart-wrap"><canvas id="chart7day"></canvas></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h2>&#129294; OT Type Distribution</h2></div>
+      <div class="card-body">
+        <div class="chart-wrap"><canvas id="chartTypes"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Top nurses chart + monthly summary ── -->
+  <div class="cols">
+    <div class="card">
+      <div class="card-head"><h2>&#129351; Top OT Nurses This Month</h2></div>
+      <div class="card-body">
+        <div class="chart-wrap"><canvas id="chartTop"></canvas></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <h2>&#128197; {{ mo_sum.month_label }} Summary</h2>
+      </div>
+      <div class="card-body">
+        <div class="mo-grid">
+          <div class="mo-cell">
+            <div class="mv">{{ mo_sum.total_records }}</div>
+            <div class="ml">Shifts Recorded</div>
+          </div>
+          <div class="mo-cell">
+            <div class="mv" style="color:{% if mo_sum.total_ot_h>40 %}#dc2626{% else %}#0f3460{% endif %}">
+              {{ mo_sum.total_ot_h }}h
+            </div>
+            <div class="ml">Total OT</div>
+          </div>
+          <div class="mo-cell">
+            <div class="mv">{{ mo_sum.total_reg_h }}h</div>
+            <div class="ml">Regular Hours</div>
+          </div>
+          <div class="mo-cell">
+            <div class="mv" style="color:#16a34a">{{ mo_sum.approved }}</div>
+            <div class="ml">Approved</div>
+          </div>
+          <div class="mo-cell">
+            <div class="mv" style="color:{% if mo_sum.pending>0 %}#dc2626{% else %}#16a34a{% endif %}">
+              {{ mo_sum.pending }}
+            </div>
+            <div class="ml">Pending</div>
+          </div>
+          <div class="mo-cell">
+            <div class="mv">{{ mo_sum.nurses_with_ot|length }}</div>
+            <div class="ml">Nurses w/ OT</div>
+          </div>
+        </div>
+        <!-- Workload bar per nurse -->
+        {% if mo_sum.nurses_with_ot %}
+        <div style="margin-top:14px">
+          {% for nurse, ot_h in mo_sum.nurses_with_ot.items() %}
+          <div style="margin-bottom:8px">
+            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px">
+              <span style="font-weight:600;color:var(--text)">{{ nurse }}</span>
+              <span style="color:var(--muted)">{{ ot_h }}h OT</span>
+            </div>
+            <div style="height:7px;background:#e2e8f0;border-radius:4px;overflow:hidden">
+              <div style="height:100%;border-radius:4px;width:{{ [ot_h/40*100,100]|min }}%;
+                background:{% if ot_h>=20 %}#dc2626{% elif ot_h>=12 %}#d97706{% else %}#2563eb{% endif %}">
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Risk alerts + AI insights ── -->
+  <div class="cols-equal">
+    <div class="card">
+      <div class="card-head">
+        <h2>&#9888; Risk Detection Alerts</h2>
+        {% if risks %}
+        <span class="badge">{{ risks|length }}</span>
+        {% endif %}
+      </div>
+      <div class="card-body">
+        {% if risks %}
+        <div class="alert-list">
+          {% for alert in risks %}
+          <div class="alert-item {{ alert.severity }}">
+            <span class="alert-icon">
+              {% if alert.severity == 'critical' %}&#128680;
+              {% elif alert.severity == 'high'   %}&#9888;
+              {% else %}&#8505;{% endif %}
+            </span>
+            <div style="flex:1">
+              <div class="alert-msg">{{ alert.message }}</div>
+              <div class="alert-action">{{ alert.action }}</div>
+            </div>
+            <span class="sev-badge sev-{{ alert.severity }}">{{ alert.severity }}</span>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div style="text-align:center;padding:24px;color:var(--muted);font-size:13px">
+          <div style="font-size:32px;margin-bottom:8px">&#10003;</div>
+          No risk alerts detected.
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h2>&#129504; AI Insights</h2></div>
+      <div class="card-body">
+        <div class="insight-list">
+          {% for ins in insights %}
+          <div class="insight-item {{ ins.severity }}">
+            <span class="i-icon">
+              {% if ins.icon == 'trend'    %}&#128200;
+              {% elif ins.icon == 'balance'%}&#9878;
+              {% elif ins.icon == 'moon'  %}&#127769;
+              {% elif ins.icon == 'alert' %}&#128680;
+              {% elif ins.icon == 'calendar'%}&#128197;
+              {% elif ins.icon == 'clock' %}&#9201;
+              {% elif ins.icon == 'check' %}&#10003;
+              {% else %}&#8505;{% endif %}
+            </span>
+            <span>{{ ins.text }}</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Export ── -->
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-head"><h2>&#128190; Export Reports</h2></div>
+    <div class="card-body">
+      <div class="export-row">
+        <a class="btn-exp btn-csv"
+           href="/overtime/export/csv?month={{ now.strftime('%Y-%m') }}">
+          &#128196; CSV (This Month)
+        </a>
+        <a class="btn-exp btn-json"
+           href="/overtime/export/json?month={{ now.strftime('%Y-%m') }}">
+          &#128196; JSON (This Month)
+        </a>
+        <a class="btn-exp btn-pdf"
+           href="/overtime/export/pdf?month={{ now.strftime('%Y-%m') }}">
+          &#128196; PDF (This Month)
+        </a>
+        <a class="btn-exp btn-csv" href="/overtime/export/csv">
+          &#128196; CSV (All Records)
+        </a>
+        <a class="btn-exp btn-pdf" href="/overtime/export/pdf">
+          &#128196; PDF (All Records)
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="disclaimer">
+    <strong>&#9888; Notice:</strong> {{ disclaimer }}
+  </div>
+</div>
+
+<footer>WMC Nursing AI &mdash; Operations Management &mdash; Not for Payroll Processing</footer>
+
+<script>
+const c7Labels = {{ c7day_labels|safe }};
+const c7Values = {{ c7day_values|safe }};
+const ctLabels = {{ ctypes_labels|safe }};
+const ctValues = {{ ctypes_values|safe }};
+const ctColors = {{ ctypes_colors|safe }};
+const topLabels= {{ ctop_labels|safe }};
+const topValues= {{ ctop_values|safe }};
+
+Chart.defaults.font.family = "'Segoe UI', system-ui, sans-serif";
+
+// 7-day bar
+new Chart(document.getElementById('chart7day'), {
+  type: 'bar',
+  data: {
+    labels: c7Labels,
+    datasets: [{
+      label: 'OT Hours',
+      data: c7Values,
+      backgroundColor: c7Values.map(v =>
+        v >= 8 ? '#dc2626' : v >= 4 ? '#d97706' : '#3b9ede'),
+      borderRadius: 6,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: { y: { beginAtZero: true, title: { display: true, text: 'Hours' } } }
+  }
+});
+
+// Types doughnut
+if (ctLabels.length > 0) {
+  new Chart(document.getElementById('chartTypes'), {
+    type: 'doughnut',
+    data: { labels: ctLabels, datasets: [{ data: ctValues, backgroundColor: ctColors, borderWidth: 2 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } }
+    }
+  });
+}
+
+// Top nurses horizontal bar
+if (topLabels.length > 0) {
+  new Chart(document.getElementById('chartTop'), {
+    type: 'bar',
+    data: {
+      labels: topLabels,
+      datasets: [{
+        label: 'OT Hours',
+        data: topValues,
+        backgroundColor: topValues.map(v =>
+          v >= 20 ? '#dc2626' : v >= 12 ? '#d97706' : '#1a6bb5'),
+        borderRadius: 5,
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { x: { beginAtZero: true, title: { display: true, text: 'OT Hours' } } }
+    }
+  });
+}
+</script>
+</body>
+</html>

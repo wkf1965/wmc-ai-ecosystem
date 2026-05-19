@@ -1,0 +1,79 @@
+=================================================================
+  NURSING POSTURE ASSESSMENT REPORT
+  Patient Turning Posture (Side-Lying Position)
+=================================================================
+  Patient Name : Test Patient
+  Nurse Name   : Test Nurse
+  Date / Time  : 2026-05-14 16:23:18
+  Image File   : test.jpg
+-----------------------------------------------------------------
+  SCORE  :  78 / 100
+  GRADE  :  B  (Good)
+  STATUS :  Good - basic standards acceptable
+-----------------------------------------------------------------
+  SCORING ITEMS
+-----------------------------------------------------------------
+  1. Side Lying Position               24 / 30   Acceptable - lateral rotation present
+                                                  but not fully established
+  2. Shoulder Hip Alignment            12 / 20   Needs improvement - angular misalignment
+                                                  detected between shoulder and hip lines
+  3. Head Support                      12 / 15   Not confirmed from image - head position
+                                                  partially visible only
+  4. Back Support                      12 / 15   Not confirmed from image - back support
+                                                  landmarks partially occluded
+  5. Leg Separation Support             8 / 10   Needs review - leg separation appears
+                                                  partial; pillow support not confirmed
+  6. Pressure Area Protection          10 / 10   Acceptable - no direct compression
+                                                  observed at visible bony prominences
+-----------------------------------------------------------------
+  AI OBSERVATION
+-----------------------------------------------------------------
+  The patient appears to be in a partial side-lying position
+  with some degree of lateral rotation, though full side-lying
+  has not been clearly established from the image.
+
+  Shoulder and hip alignment shows angular misalignment which
+  may increase axial shear stress and pressure injury risk at
+  the sacrum and trochanters.
+
+  Head support status could not be confirmed due to limited
+  visibility of cervical landmarks. Back support adequacy is
+  inconclusive as key spinal reference points are partially
+  occluded.
+
+  Leg separation is present but appears insufficient; a pillow
+  between the knees and ankles is recommended. Pressure area
+  protection at visible bony prominences appears adequate.
+-----------------------------------------------------------------
+  IMPROVEMENT SUGGESTIONS
+-----------------------------------------------------------------
+  1. Improve body alignment by ensuring the shoulder line and
+     hip line are parallel to eliminate axial spinal twist.
+
+  2. Add pillow support behind the patient's back (wedge
+     pillow) to maintain a stable 30-60 degree lateral
+     position.
+
+  3. Insert a pillow between the knees and ankles to reduce
+     bony pressure between medial condyles and malleoli.
+
+  4. Confirm pressure area protection by visually inspecting
+     and padding the trochanter, shoulder, ear, and heel.
+
+  5. Retake assessment image with full body visible to confirm
+     head, back, and leg support status.
+-----------------------------------------------------------------
+  REVIEW REQUIRED  :  YES
+  SUPERVISOR REVIEW:  Pending
+  SUPERVISOR COMMENT:
+  _______________________________________________________________
+  _______________________________________________________________
+  _______________________________________________________________
+=================================================================
+  DISCLAIMER
+-----------------------------------------------------------------
+  For nursing training and supervision only.
+  Do NOT use as medical diagnosis.
+  Final review must be completed by a supervisor or
+  registered nurse.
+=================================================================

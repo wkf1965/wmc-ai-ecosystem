@@ -1,0 +1,31 @@
+{
+  "disclaimer": "This system is for nursing operations management only. Not a payroll replacement system. All records must be verified by a supervisor before any administrative action.",
+  "generated_at": "2026-05-14T16:59:27",
+  "total_records": 1,
+  "total_ot_h": 4.5,
+  "records": [
+    {
+      "id": "OT_20260514_165858",
+      "nurse_name": "Nurse Wang",
+      "department": "Ward A",
+      "date": "2026-05-14",
+      "day_of_week": "Thursday",
+      "shift_type": "morning",
+      "shift_label": "Morning Shift",
+      "check_in": "07:00",
+      "check_out": "19:30",
+      "total_hours": 12.5,
+      "regular_hours": 8.0,
+      "ot_hours": 4.5,
+      "ot_type": "regular",
+      "is_weekend": false,
+      "risk_level": "high",
+      "notes": "Test record",
+      "status": "approved",
+      "supervisor_name": "Supervisor",
+      "supervisor_comment": "",
+      "approved_at": "2026-05-14 16:59:26",
+      "created_at": "2026-05-14 16:58:58"
+    }
+  ]
+}

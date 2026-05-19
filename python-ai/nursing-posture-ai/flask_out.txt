@@ -1,0 +1,9 @@
+============================================================
+  WMC Nursing Posture AI - Web Upload Server
+  http://localhost:5000
+  Dashboard: http://localhost:5000/dashboard
+  Overtime:  http://localhost:5000/overtime
+  For nursing training and supervisor review only.
+============================================================
+ * Serving Flask app 'app'
+ * Debug mode: off

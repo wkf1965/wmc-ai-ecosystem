@@ -1,0 +1,24 @@
+[
+  {
+    "id": "20260514_164608",
+    "timestamp": "2026-05-14 16:46:09",
+    "patient_name": "Bed-3 Patient",
+    "nurse_name": "Test Nurse",
+    "posture_type": "left_turning",
+    "posture_label": "Patient Turning - Left Side-Lying",
+    "score": 90,
+    "grade": "A",
+    "grade_label": "Excellent",
+    "status": "Excellent - meets all clinical standards",
+    "risk_label": "Low Risk",
+    "upload_file": "upload_left_turning_20260514_164608.jpg",
+    "output_image": "output_left_turning_20260514_164608.jpg",
+    "json_report": "posture_report_20260514_164608.json",
+    "txt_report": "posture_report_20260514_164608.txt",
+    "review_required": true,
+    "supervisor_reviewed": false,
+    "supervisor_name": "",
+    "supervisor_comment": "",
+    "reviewed_at": ""
+  }
+]

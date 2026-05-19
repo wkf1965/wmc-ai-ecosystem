@@ -1,0 +1,24 @@
+{
+  "users": [],
+  "patients": [
+    {
+      "id": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+      "mrn": "WMC-10001",
+      "fullName": "Chan Tai Man",
+      "dateOfBirth": "1958-03-12",
+      "gender": "M",
+      "phone": "+85290000001",
+      "medicalSummary": "Hypertension; post-stroke rehab.",
+      "createdAt": "2026-05-19T00:00:00.000Z",
+      "updatedAt": "2026-05-19T00:00:00.000Z"
+    }
+  ],
+  "crm_leads": [],
+  "nursing_daily_reports": [],
+  "vital_signs": [],
+  "medications": [],
+  "nursing_alerts": [],
+  "doctor_review_queue": [],
+  "rehab_sessions": [],
+  "ai_results": []
+}

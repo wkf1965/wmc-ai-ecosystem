@@ -1,0 +1,6 @@
+version: "3.9"
+services:
+  nursing-dashboard:
+    image: node:20
+    environment:
+      - NODE_ENV=production

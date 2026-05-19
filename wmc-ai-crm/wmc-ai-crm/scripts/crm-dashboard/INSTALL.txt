@@ -1,0 +1,37 @@
+WMC AI CRM — Google Sheet Dashboard (Apps Script)
+
+WHAT THIS DOES
+- Adds a new tab "Dashboard" with KPIs, three charts, and a live Hot Leads table.
+- Applies conditional formatting on Sheet1 column F (Hot=red tint, Warm=yellow, Cold=grey).
+- Does NOT change your Node webhook. Data must keep landing on Sheet1 columns A–I as today.
+
+INSTALL (5 minutes)
+1. Open the same Google Sheet your service account writes to.
+2. Extensions → Apps Script.
+3. Remove any default myFunction code. Paste the entire contents of:
+   scripts/crm-dashboard/CrmDashboard.gs
+4. Save the project (disk icon).
+5. Select function "setupCrmDashboard" in the toolbar dropdown → Run → Authorize.
+6. Switch back to the spreadsheet tab and open "Dashboard".
+
+IF YOUR DATA TAB IS NOT NAMED "Sheet1"
+- In Apps Script, change the first line:
+  var DATA_SHEET_NAME = "YourActualTabName";
+- Match GOOGLE_SHEET_TAB in your server .env if you use a custom tab.
+
+AUTO-UPDATE
+- KPIs use COUNTIF/COUNTIFS on Sheet1!A2:A and Sheet1!F2:F (open-ended rows) — new webhook rows update counts automatically.
+- FILTER hot-lead table updates automatically.
+- Charts read the formula blocks on Dashboard; when counts/dates change, charts refresh.
+- Conditional formatting covers column F from row 2 to the bottom of the sheet so new rows stay colored.
+
+RE-RUN
+- CRM Dashboard menu → "Run full setup / rebuild Dashboard" if you want to reset layout/charts.
+- "Apply lead-type colors" only refreshes Sheet1 formatting.
+
+TROUBLESHOOTING
+- If QUERY charts show errors, check that column A holds ISO-like dates (yyyy-mm-dd at start).
+- Lead type text must match exactly: Hot Lead | Warm Lead | Cold Lead (same as your webhook).
+
+FILES IN REPO
+- scripts/crm-dashboard/CrmDashboard.gs  (source of truth — copy into Apps Script)

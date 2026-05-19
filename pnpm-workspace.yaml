@@ -1,0 +1,8 @@
+packages:
+  - "wmc-ai-core/web"
+  - "wmc-ai-frontdesk/web"
+  - "wmc-ai-rehabilitation/web"
+  - "wmc-ai-nursing/web"
+  - "wmc-ai-crm/web"
+  - "wmc-ai-marketing/web"
+  - "shared-resources/ui"

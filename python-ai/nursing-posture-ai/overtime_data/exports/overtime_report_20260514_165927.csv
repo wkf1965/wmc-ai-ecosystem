@@ -1,0 +1,2 @@
+﻿id,nurse_name,department,date,day_of_week,shift_type,check_in,check_out,total_hours,regular_hours,ot_hours,ot_type,is_weekend,risk_level,status,supervisor_name,supervisor_comment,approved_at,created_at
+OT_20260514_165858,Nurse Wang,Ward A,2026-05-14,Thursday,morning,07:00,19:30,12.5,8.0,4.5,regular,False,high,approved,Supervisor,,2026-05-14 16:59:26,2026-05-14 16:58:58

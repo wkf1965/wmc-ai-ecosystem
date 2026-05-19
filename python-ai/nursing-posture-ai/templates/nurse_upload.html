@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+  <meta name="theme-color" content="#0f3460"/>
+  <title>WMC Nursing AI - Posture Upload</title>
+  <style>
+    :root {
+      --navy:   #0f3460;
+      --blue:   #1a6bb5;
+      --sky:    #3b9ede;
+      --light:  #eef4fb;
+      --white:  #ffffff;
+      --border: #d4e2f0;
+      --text:   #1e2d3d;
+      --muted:  #607d99;
+      --danger: #dc2626;
+      --warn-bg:#fffbeb;
+      --warn-bd:#f6e05e;
+      --warn-tx:#7c4a00;
+      --radius: 14px;
+      --shadow: 0 4px 20px rgba(15,52,96,.10);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--light);
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: 40px;
+    }
+
+    /* ── Top app bar ── */
+    .appbar {
+      background: linear-gradient(135deg, var(--navy) 0%, #163a6a 100%);
+      color: #fff;
+      padding: 0 16px;
+      display: flex; align-items: center;
+      height: 60px;
+      position: sticky; top: 0; z-index: 100;
+      box-shadow: 0 2px 12px rgba(0,0,0,.25);
+    }
+    .appbar-logo { font-size: 20px; font-weight: 800; letter-spacing: .5px; flex: 1; }
+    .appbar-logo span { color: #63b3ed; }
+    .appbar-nav { display: flex; gap: 4px; }
+    .appbar-nav a {
+      color: rgba(255,255,255,.75);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 8px;
+      transition: background .15s, color .15s;
+    }
+    .appbar-nav a:hover { background: rgba(255,255,255,.12); color: #fff; }
+
+    /* ── Warning banner ── */
+    .warning-banner {
+      background: var(--warn-bg);
+      border-bottom: 2px solid var(--warn-bd);
+      padding: 10px 16px;
+      display: flex; align-items: flex-start; gap: 10px;
+      font-size: 12.5px;
+      color: var(--warn-tx);
+      line-height: 1.55;
+    }
+    .warning-banner .wi { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+    .warning-banner strong { font-weight: 700; }
+
+    /* ── Page wrapper ── */
+    .page { max-width: 560px; margin: 0 auto; padding: 20px 16px 0; }
+
+    /* ── Page title ── */
+    .page-title {
+      text-align: center;
+      margin-bottom: 22px;
+    }
+    .page-title h1 {
+      font-size: 21px; font-weight: 800; color: var(--navy);
+      margin-bottom: 5px;
+    }
+    .page-title p { font-size: 13.5px; color: var(--muted); }
+
+    /* ── Card ── */
+    .card {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+    .card-head {
+      background: #f0f6ff;
+      border-bottom: 1px solid var(--border);
+      padding: 14px 18px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .card-head .icon { font-size: 18px; }
+    .card-head h2 {
+      font-size: 15px; font-weight: 700; color: var(--navy);
+    }
+    .card-body { padding: 18px; }
+
+    /* ── Form fields ── */
+    .field { margin-bottom: 18px; }
+    .field:last-child { margin-bottom: 0; }
+    label.lbl {
+      display: block;
+      font-size: 12.5px; font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase; letter-spacing: .6px;
+      margin-bottom: 7px;
+    }
+    label.lbl .req { color: var(--danger); margin-left: 2px; }
+    .inp {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-size: 15px;
+      color: var(--text);
+      background: #fff;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+      -webkit-appearance: none;
+    }
+    .inp:focus {
+      border-color: var(--sky);
+      box-shadow: 0 0 0 3px rgba(59,158,222,.15);
+    }
+    .inp::placeholder { color: #bbc8d4; }
+
+    /* ── Posture type grid ── */
+    .posture-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .posture-option { display: none; }
+    .posture-label {
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .18s, background .18s, transform .1s;
+      background: #fafcff;
+      display: flex; flex-direction: column;
+      align-items: center; gap: 8px;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    .posture-label:active { transform: scale(.97); }
+    .posture-label .p-icon { font-size: 26px; line-height: 1; }
+    .posture-label .p-name {
+      font-size: 12px; font-weight: 700; color: var(--navy);
+      line-height: 1.3;
+    }
+    .posture-option:checked + .posture-label {
+      border-color: var(--blue);
+      background: #e8f1fb;
+      box-shadow: 0 0 0 3px rgba(26,107,181,.15);
+    }
+    /* Full-width 5th option */
+    .posture-grid .posture-wrap:last-child {
+      grid-column: 1 / -1;
+    }
+    .posture-grid .posture-wrap:last-child .posture-label {
+      flex-direction: row;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    /* ── Upload zone ── */
+    .upload-zone {
+      border: 2.5px dashed var(--border);
+      border-radius: 12px;
+      padding: 28px 16px;
+      text-align: center;
+      cursor: pointer;
+      position: relative;
+      transition: border-color .2s, background .2s;
+      background: #fafcff;
+    }
+    .upload-zone:hover, .upload-zone.dragover {
+      border-color: var(--sky);
+      background: #e8f4fd;
+    }
+    .upload-zone input[type="file"] {
+      position: absolute; inset: 0;
+      opacity: 0; width: 100%; height: 100%; cursor: pointer;
+    }
+    .upload-zone .uz-icon { font-size: 42px; margin-bottom: 8px; }
+    .upload-zone .uz-primary {
+      font-size: 15px; font-weight: 700; color: var(--navy); margin-bottom: 4px;
+    }
+    .upload-zone .uz-secondary { font-size: 12.5px; color: var(--muted); }
+    .upload-zone .uz-hint {
+      margin-top: 8px; font-size: 12px; color: var(--sky); font-weight: 600; display: none;
+    }
+    #preview-wrap {
+      margin-top: 14px; display: none;
+    }
+    #preview-img {
+      width: 100%; max-height: 260px;
+      object-fit: contain; border-radius: 10px;
+      border: 1px solid var(--border); background: #111;
+    }
+    .preview-name {
+      font-size: 12px; color: var(--muted); margin-top: 6px; text-align: center;
+    }
+
+    /* ── Camera hint ── */
+    .camera-hint {
+      display: flex; align-items: center; justify-content: center;
+      gap: 8px; font-size: 12.5px; color: var(--sky);
+      font-weight: 600; margin-top: 10px;
+    }
+
+    /* ── Submit button ── */
+    .btn-submit {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, var(--navy), var(--blue));
+      color: #fff;
+      font-size: 16px; font-weight: 800;
+      border: none; border-radius: 12px;
+      cursor: pointer;
+      letter-spacing: .4px;
+      transition: opacity .2s, transform .1s;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-submit:hover   { opacity: .9; }
+    .btn-submit:active  { transform: scale(.99); }
+    .btn-submit:disabled { opacity: .5; cursor: not-allowed; }
+
+    /* ── Error ── */
+    .alert-error {
+      background: #fff5f5; border: 1.5px solid #fca5a5;
+      color: #991b1b; border-radius: 10px;
+      padding: 13px 16px; font-size: 14px;
+      display: flex; align-items: flex-start; gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    /* ── Info chips ── */
+    .info-chips {
+      display: flex; flex-wrap: wrap; gap: 8px;
+      margin-top: 4px;
+    }
+    .chip {
+      display: flex; align-items: center; gap: 6px;
+      background: #e8f1fb; border-radius: 20px;
+      padding: 6px 12px; font-size: 12px;
+      color: #1a4a7a; font-weight: 600;
+    }
+
+    /* ── Spinner overlay ── */
+    #spinner {
+      display: none; position: fixed; inset: 0;
+      background: rgba(15,52,96,.80); z-index: 999;
+      flex-direction: column; align-items: center; justify-content: center;
+      gap: 18px;
+    }
+    #spinner.show { display: flex; }
+    .spin-ring {
+      width: 56px; height: 56px;
+      border: 5px solid rgba(255,255,255,.25);
+      border-top-color: #63b3ed;
+      border-radius: 50%;
+      animation: spin .75s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #spinner p { color: #fff; font-size: 15px; font-weight: 700; }
+    #spinner small { color: rgba(255,255,255,.65); font-size: 12.5px; }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center; font-size: 11.5px;
+      color: var(--muted); padding: 24px 16px 8px;
+    }
+
+    @media (max-width: 360px) {
+      .posture-grid { grid-template-columns: 1fr; }
+      .posture-grid .posture-wrap:last-child { grid-column: unset; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- App bar -->
+<div class="appbar">
+  <div class="appbar-logo">WMC <span>Nursing AI</span></div>
+  <nav class="appbar-nav">
+    <a href="/">&#128247; Upload</a>
+    <a href="/dashboard">&#128202; Dashboard</a>
+  </nav>
+</div>
+
+<!-- Warning banner -->
+<div class="warning-banner">
+  <span class="wi">&#9888;</span>
+  <span>
+    <strong>Training &amp; Supervision Tool Only.</strong>
+    This AI system is for nursing supervision and training only.
+    It is <strong>not a medical diagnosis system.</strong>
+    Final clinical judgment must be made by a supervisor or registered nurse.
+  </span>
+</div>
+
+<div class="page">
+
+  <div class="page-title">
+    <h1>&#129657; Mobile Nurse Input</h1>
+    <p>Upload a patient posture photo for AI assessment</p>
+  </div>
+
+  {% if error %}
+  <div class="alert-error">
+    <span>&#10060;</span>
+    <span>{{ error }}</span>
+  </div>
+  {% endif %}
+
+  <form id="upload-form" method="POST" action="/upload" enctype="multipart/form-data" novalidate>
+
+    <!-- ── Nurse & Patient info ── -->
+    <div class="card">
+      <div class="card-head">
+        <span class="icon">&#128100;</span>
+        <h2>Assessment Information</h2>
+      </div>
+      <div class="card-body">
+        <div class="field">
+          <label class="lbl" for="nurse_name">Nurse Name <span class="req">*</span></label>
+          <input class="inp" type="text" id="nurse_name" name="nurse_name"
+                 placeholder="e.g. Nurse Wang" autocomplete="name" required />
+        </div>
+        <div class="field">
+          <label class="lbl" for="patient_name">Patient Name / Bed ID <span class="req">*</span></label>
+          <input class="inp" type="text" id="patient_name" name="patient_name"
+                 placeholder="e.g. Bed-3 Patient" required />
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Posture type ── -->
+    <div class="card">
+      <div class="card-head">
+        <span class="icon">&#129462;</span>
+        <h2>Select Posture Type</h2>
+      </div>
+      <div class="card-body">
+        <div class="posture-grid">
+          {% for key, pt in posture_types.items() %}
+          <div class="posture-wrap">
+            <input class="posture-option" type="radio" name="posture_type"
+                   id="pt_{{ key }}" value="{{ key }}"
+                   {% if loop.first %}checked{% endif %} />
+            <label class="posture-label" for="pt_{{ key }}">
+              <span class="p-icon">{{ pt.icon }}</span>
+              <span class="p-name">{{ pt.label }}</span>
+            </label>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Photo upload ── -->
+    <div class="card">
+      <div class="card-head">
+        <span class="icon">&#128247;</span>
+        <h2>Upload Photo</h2>
+      </div>
+      <div class="card-body">
+        <div class="upload-zone" id="drop-zone">
+          <input type="file" name="image" id="image-input"
+                 accept="image/*" required />
+          <div class="uz-icon">&#128444;</div>
+          <div class="uz-primary">Tap to upload or take photo</div>
+          <div class="uz-secondary">JPG, PNG &mdash; max 16 MB</div>
+          <div class="uz-hint" id="file-hint"></div>
+        </div>
+
+        <div class="camera-hint">
+          <span>&#128247;</span>
+          <span>On mobile: tap above to open camera directly</span>
+        </div>
+
+        <div id="preview-wrap">
+          <img id="preview-img" src="" alt="Preview"/>
+          <p class="preview-name" id="preview-name"></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Submit ── -->
+    <button type="submit" class="btn-submit" id="submit-btn">
+      <span>&#128269;</span>
+      <span>Analyze Posture</span>
+    </button>
+
+    <div class="info-chips" style="margin-top:14px;">
+      <span class="chip">&#10003; Auto-timestamped upload</span>
+      <span class="chip">&#10003; Score + Grade A/B/C/D</span>
+      <span class="chip">&#10003; JSON &amp; TXT report saved</span>
+      <span class="chip">&#10003; Supervisor review required</span>
+    </div>
+
+  </form>
+</div>
+
+<footer>
+  WMC Nursing AI &mdash; Training &amp; Supervision Tool &mdash; Not for Clinical Diagnosis
+</footer>
+
+<!-- Spinner -->
+<div id="spinner">
+  <div class="spin-ring"></div>
+  <p>Analyzing posture&hellip;</p>
+  <small>AI pose detection in progress</small>
+</div>
+
+<script>
+  const input    = document.getElementById('image-input');
+  const dropZone = document.getElementById('drop-zone');
+  const hint     = document.getElementById('file-hint');
+  const prevWrap = document.getElementById('preview-wrap');
+  const prevImg  = document.getElementById('preview-img');
+  const prevName = document.getElementById('preview-name');
+
+  function handleFile(file) {
+    if (!file) return;
+    hint.textContent = file.name;
+    hint.style.display = 'block';
+    prevName.textContent = file.name;
+    const reader = new FileReader();
+    reader.onload = e => {
+      prevImg.src = e.target.result;
+      prevWrap.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  input.addEventListener('change', () => handleFile(input.files[0]));
+
+  dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('dragover');
+    if (e.dataTransfer.files.length) {
+      input.files = e.dataTransfer.files;
+      handleFile(input.files[0]);
+    }
+  });
+
+  document.getElementById('upload-form').addEventListener('submit', function(e) {
+    const nurse   = document.getElementById('nurse_name').value.trim();
+    const patient = document.getElementById('patient_name').value.trim();
+    const file    = input.files[0];
+    if (!nurse || !patient || !file) {
+      e.preventDefault();
+      alert('Please fill in all fields and select a photo.');
+      return;
+    }
+    document.getElementById('submit-btn').disabled = true;
+    document.getElementById('spinner').classList.add('show');
+  });
+</script>
+</body>
+</html>

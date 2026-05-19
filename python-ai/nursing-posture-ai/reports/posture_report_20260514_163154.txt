@@ -1,0 +1,53 @@
+=================================================================
+  NURSING POSTURE ASSESSMENT REPORT
+  Patient Turning Posture (Side-Lying Position)
+=================================================================
+  Patient Name : Test Patient
+  Nurse Name   : Test Nurse
+  Date / Time  : 2026-05-14 16:31:54
+  Image File   : test.jpg
+-----------------------------------------------------------------
+  SCORE  :  90 / 100
+  GRADE  :  A  (Excellent)
+  STATUS :  Excellent - meets all clinical standards
+-----------------------------------------------------------------
+  SCORING ITEMS
+-----------------------------------------------------------------
+  1. Side Lying Position               30 / 30   Excellent - clearly side-lying
+  2. Shoulder Hip Alignment            20 / 20   Excellent - shoulder and hip lines parallel
+  3. Head Support                      12 / 15   Good - slight head deviation
+  4. Back Support                       8 / 15   Moderate - lateral curvature present
+  5. Leg Separation Support            10 / 10   Excellent - legs well separated
+  6. Pressure Area Protection          10 / 10   Excellent - heels and ankles properly positioned
+-----------------------------------------------------------------
+  AI OBSERVATION
+-----------------------------------------------------------------
+  The patient is clearly in a proper side-lying posture, 
+  meeting the clinical standard for lateral body rotation. 
+  Shoulder-hip alignment is excellent with no axial spinal 
+  twist detected. Head and neck positioning is adequate, 
+  indicating appropriate pillow height. Lateral spinal 
+  curvature detected. A wedge pillow behind the back is 
+  recommended. Leg separation is adequate, reducing contact 
+  pressure between medial knee condyles and malleoli. Heel and 
+  ankle positioning appears satisfactory with no evident 
+  direct surface compression. 
+-----------------------------------------------------------------
+  IMPROVEMENT SUGGESTIONS
+-----------------------------------------------------------------
+  1. Place a firm wedge or folded pillow along the patient's 
+  1. back to maintain spinal alignment and prevent rolling 
+  1. back to supine. 
+-----------------------------------------------------------------
+  REVIEW REQUIRED  :  YES
+  SUPERVISOR COMMENT:
+  _____________________________________________________________
+  _____________________________________________________________
+  _____________________________________________________________
+=================================================================
+  DISCLAIMER
+-----------------------------------------------------------------
+  For nursing training and supervisor review only. Do NOT use 
+  as medical diagnosis. Final judgment must be done by a 
+  supervisor or registered nurse. 
+=================================================================

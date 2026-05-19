@@ -1,0 +1,5 @@
+name: patient-safety-check
+on: [schedule]
+schedule: "*/5 * * * *"
+steps:
+  - name: run-risk-scan

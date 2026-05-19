@@ -1,0 +1,92 @@
+{
+  "version": "1.0",
+  "disclaimer": "For nursing training and supervision only — not a medical diagnosis.",
+  "assessment_type": "Patient Turning Posture (Side-Lying Position)",
+
+  "grades": {
+    "A": { "min": 85, "max": 100, "label": "Excellent" },
+    "B": { "min": 70, "max": 84,  "label": "Good" },
+    "C": { "min": 50, "max": 69,  "label": "Needs Improvement" },
+    "D": { "min": 0,  "max": 49,  "label": "Poor — Immediate Correction Required" }
+  },
+
+  "criteria": {
+    "side_lying_position": {
+      "max_score": 30,
+      "weight": "highest",
+      "description": "Body is rotated laterally to a true side-lying position (30–60° from supine). Assessed via shoulder/hip depth asymmetry and vertical tilt.",
+      "thresholds": {
+        "excellent": 30,
+        "good":      23,
+        "fair":      15,
+        "minimal":    8,
+        "poor":       3
+      }
+    },
+    "shoulder_hip_alignment": {
+      "max_score": 20,
+      "weight": "high",
+      "description": "Shoulder line and hip line are parallel — no spinal axial twist that could cause pressure injury or discomfort.",
+      "thresholds": {
+        "excellent": 20,
+        "good":      16,
+        "fair":      10,
+        "poor":       4
+      }
+    },
+    "head_support": {
+      "max_score": 15,
+      "weight": "medium",
+      "description": "Head is in a neutral cervical position. Ear aligned with shoulder — no hyperflexion or hyperextension of the neck.",
+      "thresholds": {
+        "excellent": 15,
+        "good":      12,
+        "fair":       8,
+        "poor":       4
+      }
+    },
+    "back_support": {
+      "max_score": 15,
+      "weight": "medium",
+      "description": "Spine is relatively straight — shoulder midpoint, hip midpoint, and knee midpoint are collinear. Prevents scoliotic positioning.",
+      "thresholds": {
+        "excellent": 15,
+        "good":      12,
+        "fair":       8,
+        "poor":       4
+      }
+    },
+    "leg_separation_support": {
+      "max_score": 10,
+      "weight": "low",
+      "description": "Knees and ankles are separated, reducing pressure between bony prominences. A pillow between legs is the clinical standard.",
+      "thresholds": {
+        "excellent": 10,
+        "good":       8,
+        "fair":       5,
+        "poor":       2
+      }
+    },
+    "pressure_area_protection": {
+      "max_score": 10,
+      "weight": "low",
+      "description": "Heels, ankles, and dependent bony prominences are not compressed. Assessed via heel/ankle depth positioning and landmark visibility.",
+      "thresholds": {
+        "excellent": 10,
+        "good":       8,
+        "fair":       5,
+        "poor":       2
+      }
+    }
+  },
+
+  "total_max_score": 100,
+
+  "clinical_notes": [
+    "Reposition patient every 2 hours to prevent pressure ulcers.",
+    "Ensure all bony prominences (sacrum, trochanters, heels, ankles, ears) are padded.",
+    "A 30° lateral tilt is preferred over 90° to reduce trochanteric pressure.",
+    "Document repositioning time, position, and skin condition after each turn.",
+    "This AI assessment supplements — but does not replace — direct clinical observation."
+  ]
+}
