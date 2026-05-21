@@ -9,6 +9,7 @@ import {
   rosterPatientDisplayName,
 } from './patientRosterResolve.js'
 import { isProductionNursingMode } from './nursingMode.js'
+import { runNursingRiskScoring } from './nursingRiskScoring.js'
 
 export const TELEGRAM_ENV = {
   mode: typeof import.meta !== 'undefined' ? import.meta.env?.VITE_TELEGRAM_MODE || 'simulation' : 'simulation',
@@ -192,6 +193,12 @@ export function processTelegramNurseMessageForIntegration(parsed, rosterCtx) {
 
   const analysis = analyzePatientNotes(hypotheticalNotes, patient)
 
+  const riskScoringResult = runNursingRiskScoring(
+    parsed.originalText || parsed.nursingNoteText || '',
+    resolvedRoom,
+    patientNameSnapshot,
+  )
+
   return {
     parsed,
     patientId,
@@ -200,6 +207,7 @@ export function processTelegramNurseMessageForIntegration(parsed, rosterCtx) {
     patientResolution: null,
     nursingPayload,
     analysis,
+    riskScoringResult,
     recommendedAction: recommendedActionFromAnalysis(analysis, parsed),
     aiNursingNoteDraft: nursingPayload.nurseRemarks,
   }

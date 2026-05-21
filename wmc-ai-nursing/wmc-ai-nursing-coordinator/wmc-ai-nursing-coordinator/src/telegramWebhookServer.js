@@ -25,6 +25,8 @@ import { logTelegramChatIdFromWebhook } from '../telegramWebhookProcessor.mjs'
 import { processMobileNurseSubmit } from '../mobileNurseSubmitApi.mjs'
 import { workflowCategoryDisplay } from './lib/telegramNurseParser.js'
 import { mapOverallScoreToWorkflowRiskLabel } from './lib/telegramWorkflowReply.js'
+import { readCommandRecords } from './lib/commands/commandRecordStore.js'
+import { COMMAND_REGISTRY, buildCommandHelpReply } from './lib/commands/commandRegistry.js'
 
 /** Default 3001; optional TELEGRAM_SERVER_PORT override. */
 const PORT = Number(process.env.TELEGRAM_SERVER_PORT) || 3001
@@ -349,6 +351,60 @@ app.get(WEBHOOK_PATH, (req, res) => {
     path: WEBHOOK_PATH,
     message: `POST Telegram updates here. Uses executeTelegramInboundPipeline (same as Vite dev). Optional: GET /api/integrations/telegram/backend`,
   })
+})
+
+// ── Command Workflow API endpoints ───────────────────────────────────────────
+
+/** GET /api/commands/registry — list all registered commands and their schemas */
+app.get('/api/commands/registry', (_req, res) => {
+  const commands = Object.values(COMMAND_REGISTRY).map((def) => ({
+    name: def.name,
+    description: def.description,
+    sheetTab: def.sheetTab,
+    dbTable: def.dbTable,
+    fields: def.fields.map((f) => ({
+      key: f.key,
+      label: f.label,
+      required: f.required,
+      aliases: f.aliases ?? [],
+    })),
+    helpText: def.helpText,
+  }))
+  res.json({ ok: true, commands, count: commands.length })
+})
+
+/** GET /api/commands/help — text listing of all commands */
+app.get('/api/commands/help', (_req, res) => {
+  res.json({ ok: true, text: buildCommandHelpReply() })
+})
+
+/** GET /api/commands/records — all command records (paginated) */
+app.get('/api/commands/records', async (req, res) => {
+  try {
+    const limitRaw = parseInt(String(req.query.limit ?? '50'), 10)
+    const limit = Number.isFinite(limitRaw) ? Math.min(500, Math.max(1, limitRaw)) : 50
+    const commandName = req.query.command ? String(req.query.command) : undefined
+    const records = await readCommandRecords({ commandName, limit })
+    res.json({ ok: true, records, count: records.length })
+  } catch (e) {
+    res.status(500).json({ ok: false, error: String(e?.message || e) })
+  }
+})
+
+/** GET /api/commands/records/:command — records for a specific command type */
+app.get('/api/commands/records/:command', async (req, res) => {
+  try {
+    const commandName = `/${req.params.command.replace(/^\//, '')}`
+    const limitRaw = parseInt(String(req.query.limit ?? '50'), 10)
+    const limit = Number.isFinite(limitRaw) ? Math.min(500, Math.max(1, limitRaw)) : 50
+    if (!COMMAND_REGISTRY[commandName]) {
+      return res.status(404).json({ ok: false, error: `Unknown command: ${commandName}` })
+    }
+    const records = await readCommandRecords({ commandName, limit })
+    res.json({ ok: true, commandName, records, count: records.length })
+  } catch (e) {
+    res.status(500).json({ ok: false, error: String(e?.message || e) })
+  }
 })
 
 app.use((err, req, res, next) => {

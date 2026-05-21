@@ -3,6 +3,7 @@
  */
 
 import { scoreToLevel } from './aiRiskDetection.js'
+import { buildTelegramRiskAlertFromText } from './nursingRiskScoring.js'
 
 /** Maps underlying AI score bands to dashboard Telegram tiers */
 const WORKFLOW_RISK_FROM_AI_LABEL = {
@@ -36,10 +37,11 @@ export function mapOverallScoreToWorkflowRiskLabel(overallScore) {
 
 /**
  * Acknowledgement for Telegram — roster-verified success (multi-line confirmation).
+ * Uses the advanced nursing risk scoring engine to generate a rich risk alert.
  * @param {object} integration — result of processTelegramNurseMessageForIntegration
  */
 export function buildTelegramWorkflowReply(integration) {
-  const { parsed, patientResolution, patientNameResolved, resolvedRoom } = integration
+  const { parsed, patientResolution, patientNameResolved, resolvedRoom, riskScoringResult } = integration
 
   if (patientResolution === 'processing_error') {
     return TELEGRAM_PROCESSING_ERROR_REPLY
@@ -65,5 +67,35 @@ export function buildTelegramWorkflowReply(integration) {
         : '—'
 
   const finalPatientName = String(patientNameResolved ?? '').trim() || 'Unknown'
+
+  // Use pre-computed risk scoring if available; otherwise compute on the fly from parsed text.
+  if (riskScoringResult) {
+    const r = riskScoringResult
+    const lines = []
+    lines.push(`${r.emoji} ${r.levelLabel}`)
+    lines.push(`Room ${roomAck}`)
+    lines.push(`Patient: ${finalPatientName}`)
+    lines.push(`Risk Score: ${r.score}`)
+    if (r.detectedFactors.length > 0) {
+      lines.push('Detected:')
+      for (const f of r.detectedFactors) {
+        lines.push(`- ${f.label}`)
+      }
+    } else {
+      lines.push('Detected: No specific risk factors matched.')
+    }
+    lines.push('')
+    lines.push('Suggested Action:')
+    lines.push(r.suggestedAction)
+    return lines.join('\n')
+  }
+
+  // Fallback: run scoring inline from parsed note text.
+  const noteText = parsed?.originalText || parsed?.nursingNoteText || ''
+  if (noteText.trim()) {
+    const { message } = buildTelegramRiskAlertFromText(noteText, roomAck, finalPatientName)
+    return message
+  }
+
   return `Received Room ${roomAck}.\nPatient: ${finalPatientName}\nSaved to Nursing Dashboard.`
 }

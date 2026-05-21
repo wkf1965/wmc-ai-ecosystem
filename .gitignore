@@ -10,3 +10,8 @@ logs
 .DS_Store
 .vscode
 *.log
+
+# Google service account key files — never commit these
+*service-account*.json
+*-credentials.json
+omega-rhino-461101-f5-e361bce1d1e0.json

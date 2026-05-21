@@ -1,0 +1,100 @@
+{
+  "records": [
+    {
+      "id": "6d220245-be4c-429f-8772-b9a905da9eb9",
+      "timestamp": "2026-05-21T03:24:38.571Z",
+      "command_name": "/vitals",
+      "chat_id": "",
+      "nurse_name": "Nurse Aida",
+      "room": "12A",
+      "patient_name": "Siti binti Rahmat",
+      "payload": {
+        "patientName": "Siti binti Rahmat",
+        "room": "12A",
+        "bp": "130/85",
+        "pulse": "88",
+        "temperature": "37.8",
+        "spo2": "95",
+        "bloodSugar": "8.4",
+        "remark": "Patient complained of mild headache"
+      },
+      "db_row": {
+        "timestamp": "2026-05-21T03:24:38.570Z",
+        "command_name": "/vitals",
+        "chat_id": "",
+        "nurse_name": "Nurse Aida",
+        "patient_name": "Siti binti Rahmat",
+        "room": "12A",
+        "bp": "130/85",
+        "pulse": 88,
+        "temperature": 37.8,
+        "spo2": 95,
+        "blood_sugar": "8.4",
+        "remark": "Patient complained of mild headache",
+        "source": "telegram_command"
+      },
+      "source": "telegram_command"
+    },
+    {
+      "id": "6b305d58-a796-4aa0-907b-bf1be376e4ee",
+      "timestamp": "2026-05-21T03:22:35.502Z",
+      "command_name": "/vitals",
+      "chat_id": "",
+      "nurse_name": "Nurse Aida",
+      "room": "5",
+      "patient_name": "Ahmad bin Ali",
+      "payload": {
+        "patientName": "Ahmad bin Ali",
+        "room": "5"
+      },
+      "db_row": {
+        "timestamp": "2026-05-21T03:22:35.502Z",
+        "command_name": "/vitals",
+        "chat_id": "",
+        "nurse_name": "Nurse Aida",
+        "patient_name": "Ahmad bin Ali",
+        "room": "5",
+        "bp": "",
+        "pulse": null,
+        "temperature": null,
+        "spo2": null,
+        "blood_sugar": "",
+        "remark": "",
+        "source": "telegram_command"
+      },
+      "source": "telegram_command"
+    },
+    {
+      "id": "c72a21ed-d625-46b4-9600-f090d189c8b2",
+      "timestamp": "2026-05-21T03:13:51.689Z",
+      "command_name": "/vitals",
+      "chat_id": "",
+      "nurse_name": "SN_Aida",
+      "room": "5",
+      "patient_name": "",
+      "payload": {
+        "room": "5",
+        "bp": "120/80",
+        "pulse": "72",
+        "temp": "37.2",
+        "spo2": "98",
+        "nurseInitials": "SN_Aida"
+      },
+      "db_row": {
+        "timestamp": "2026-05-21T03:13:51.688Z",
+        "command_name": "/vitals",
+        "chat_id": "",
+        "nurse_name": "SN_Aida",
+        "room": "5",
+        "patient_name": "",
+        "bp": "120/80",
+        "pulse": 72,
+        "temperature": 37.2,
+        "spo2": 98,
+        "respiratory_rate": null,
+        "source": "telegram_command"
+      },
+      "source": "telegram_command"
+    }
+  ]
+}

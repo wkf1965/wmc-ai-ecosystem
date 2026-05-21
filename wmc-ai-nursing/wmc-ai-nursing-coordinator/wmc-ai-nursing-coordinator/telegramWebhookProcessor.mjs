@@ -19,6 +19,15 @@ import {
   buildTelegramWorkflowReply,
   mapOverallScoreToWorkflowRiskLabel,
 } from './src/lib/telegramWorkflowReply.js'
+import {
+  isTelegramHandoverCommand,
+  handleHandoverCommand,
+} from './src/lib/telegramHandoverHandler.js'
+import {
+  isTelegramTimelineCommand,
+  handleTimelineCommand,
+} from './src/lib/telegramTimelineHandler.js'
+import { dispatchCommandOrFormStep } from './src/lib/commands/commandDispatcher.js'
 
 function telegramSenderDisplay(from) {
   if (!from || typeof from !== 'object') return null
@@ -350,6 +359,144 @@ export async function processTelegramInboundUpdate(bodyJson) {
     text_preview: String(text).slice(0, 120),
   })
 
+  // ── Structured command workflow dispatcher ────────────────────────────────
+  // Handles /admit /vitals /fall /turning /rehab /med /alert /cancel /help
+  // and multi-step form replies. Falls through for free-text nursing notes.
+  try {
+    const cmdResult = await dispatchCommandOrFormStep(String(text), chatId, {
+      nurseName: nurseDisplayName,
+      username,
+    })
+    if (cmdResult.handled) {
+      console.log('[telegram] command workflow handled:', String(text).split(' ')[0])
+      const emptyParsed = {
+        originalText: String(text),
+        patientRoom: null,
+        patientNameGuess: null,
+        nursingNoteText: String(text),
+        riskKeywords: [],
+        suggestedLoopCategory: 'command_workflow',
+        loopScores: {},
+        loopCategoryLabel: 'Command Workflow',
+      }
+      const cmdIntegration = buildTelegramProcessingErrorIntegration(emptyParsed)
+      return {
+        extracted,
+        rawUpdate,
+        nursingRecord: {
+          room: null,
+          patient: null,
+          patientId: null,
+          note: String(text),
+          category: 'Command Workflow',
+          loopKey: 'command_workflow',
+          riskKeywords: [],
+          nurseName: nurseDisplayName,
+          symptoms: '',
+          dashboardCategories: ['Command Workflow'],
+          dashboardCategoryDisplay: 'Command Workflow',
+          riskLevel: 'N/A',
+          workflowRiskLabel: 'N/A',
+          recommendedAction: '',
+          nursingRiskScore: null,
+          nursingRiskLevel: null,
+          nursingRiskDetected: [],
+        },
+        brainSignals: buildBrainSignals(cmdIntegration.analysis, emptyParsed),
+        replyText: cmdResult.reply,
+        integration: cmdIntegration,
+      }
+    }
+  } catch (cmdErr) {
+    console.error('[telegram] command dispatcher error:', cmdErr?.message || cmdErr)
+    // Fall through to nursing note pipeline on dispatcher error
+  }
+  // ── end command workflow dispatcher ──────────────────────────────────────
+
+  // ── /handover command intercept ──────────────────────────────────────────
+  if (isTelegramHandoverCommand(String(text))) {
+    console.log('[telegram] /handover command detected — generating shift handover report')
+    let handoverReply
+    try {
+      handoverReply = await handleHandoverCommand(String(text))
+    } catch (err) {
+      console.error('[telegram] /handover generation failed:', err)
+      handoverReply = 'Could not generate handover report. Please try again in a moment.'
+    }
+    const handoverIntegration = buildTelegramProcessingErrorIntegration(
+      parseTelegramNurseMessage(String(text)),
+    )
+    return {
+      extracted,
+      rawUpdate,
+      nursingRecord: {
+        room: null,
+        patient: null,
+        patientId: null,
+        note: String(text),
+        category: 'Shift Handover',
+        loopKey: 'shift_handover',
+        riskKeywords: [],
+        nurseName: nurseDisplayName,
+        symptoms: '',
+        dashboardCategories: ['Shift Handover'],
+        dashboardCategoryDisplay: 'Shift Handover',
+        riskLevel: 'N/A',
+        workflowRiskLabel: 'N/A',
+        recommendedAction: '',
+        nursingRiskScore: null,
+        nursingRiskLevel: null,
+        nursingRiskDetected: [],
+      },
+      brainSignals: buildBrainSignals(handoverIntegration.analysis, { riskKeywords: [], suggestedLoopCategory: 'shift_handover' }),
+      replyText: handoverReply,
+      integration: handoverIntegration,
+    }
+  }
+  // ── end /handover intercept ───────────────────────────────────────────────
+
+  // ── /timeline command intercept ──────────────────────────────────────────
+  if (isTelegramTimelineCommand(String(text))) {
+    console.log('[telegram] /timeline command detected — generating patient timeline report')
+    let timelineReply
+    try {
+      timelineReply = await handleTimelineCommand(String(text))
+    } catch (err) {
+      console.error('[telegram] /timeline generation failed:', err)
+      timelineReply = 'Could not generate timeline report. Please try again in a moment.'
+    }
+    const timelineIntegration = buildTelegramProcessingErrorIntegration(
+      parseTelegramNurseMessage(String(text)),
+    )
+    return {
+      extracted,
+      rawUpdate,
+      nursingRecord: {
+        room: null,
+        patient: null,
+        patientId: null,
+        note: String(text),
+        category: 'Patient Timeline',
+        loopKey: 'patient_timeline',
+        riskKeywords: [],
+        nurseName: nurseDisplayName,
+        symptoms: '',
+        dashboardCategories: ['Patient Timeline'],
+        dashboardCategoryDisplay: 'Patient Timeline',
+        riskLevel: 'N/A',
+        workflowRiskLabel: 'N/A',
+        recommendedAction: '',
+        nursingRiskScore: null,
+        nursingRiskLevel: null,
+        nursingRiskDetected: [],
+      },
+      brainSignals: buildBrainSignals(timelineIntegration.analysis, { riskKeywords: [], suggestedLoopCategory: 'patient_timeline' }),
+      replyText: timelineReply,
+      integration: timelineIntegration,
+    }
+  }
+  // ── end /timeline intercept ───────────────────────────────────────────────
+
   let parsed
   try {
     parsed = parseTelegramNurseMessage(extracted.text)
@@ -390,7 +537,7 @@ export async function processTelegramInboundUpdate(bodyJson) {
       nursingNotes: rosterCtx.nursingNotes,
       resolution: rosterCtx.resolution,
     })
-    const { patientId, patientNameResolved, analysis, recommendedAction } = integration
+    const { patientId, patientNameResolved, analysis, recommendedAction, riskScoringResult } = integration
 
     const dashCat = classifyDashboardCategories(parsed, integration)
     const dashRisk = dashboardRiskLevel(integration)
@@ -420,6 +567,9 @@ export async function processTelegramInboundUpdate(bodyJson) {
           ? mapOverallScoreToWorkflowRiskLabel(analysis.overallScore)
           : 'N/A',
       recommendedAction,
+      nursingRiskScore: riskScoringResult?.score ?? null,
+      nursingRiskLevel: riskScoringResult?.level ?? null,
+      nursingRiskDetected: riskScoringResult?.detectedFactors?.map((f) => f.label) ?? [],
     }
 
     const brainSignals = buildBrainSignals(analysis, parsed, { production: isProductionNursingMode() })

@@ -1,0 +1,164 @@
+{
+  "records": [
+    {
+      "id": "875baa82-fcaf-49e0-aae6-b30ca2e41e7a",
+      "timestamp": "2026-05-21T08:03:40.754Z",
+      "workflow": "vitals",
+      "data": {
+        "patientName": "Ali",
+        "room": "2",
+        "bp": "132/78",
+        "pulse": "67",
+        "temperature": "35",
+        "spo2": "89",
+        "bloodSugar": "7",
+        "remark": "-"
+      },
+      "savedBy": "-4853741756"
+    },
+    {
+      "id": "a10521dc-8e73-4231-9669-40593752dc9a",
+      "timestamp": "2026-05-21T07:12:08.351Z",
+      "workflow": "vitals",
+      "data": {
+        "patientName": "Ali",
+        "room": "2",
+        "bp": "130/89",
+        "pulse": "-",
+        "temperature": "-",
+        "spo2": "-",
+        "bloodSugar": "-",
+        "remark": "-"
+      },
+      "savedBy": "-4853741756"
+    },
+    {
+      "id": "0ac89cbf-cebd-49aa-8073-c787be6f7cff",
+      "timestamp": "2026-05-21T06:53:34.650Z",
+      "workflow": "vitals",
+      "data": {
+        "patientName": "Ali",
+        "room": "2",
+        "bp": "150/89",
+        "pulse": "78",
+        "temperature": "38",
+        "spo2": "-",
+        "bloodSugar": "-",
+        "remark": "-"
+      },
+      "savedBy": "-4853741756"
+    },
+    {
+      "id": "17d9f26e-a09f-483c-8457-eaf93e372e9d",
+      "timestamp": "2026-05-21T06:38:05.394Z",
+      "workflow": "vitals",
+      "data": {
+        "patientName": "Ali",
+        "room": "2",
+        "bp": "178/98",
+        "pulse": "90",
+        "temperature": "40",
+        "spo2": "98",
+        "bloodSugar": "12",
+        "remark": "Monitor"
+      },
+      "savedBy": "-4853741756"
+    },
+    {
+      "id": "2e26d77a-2f74-40c1-b6ef-8b2148092fe2",
+      "timestamp": "2026-05-21T06:31:53.530Z",
+      "workflow": "vitals",
+      "data": {
+        "patientName": "Ali",
+        "room": "2",
+        "bp": "180/90",
+        "pulse": "90",
+        "temperature": "39",
+        "spo2": "89",
+        "bloodSugar": "8",
+        "remark": "See doctor"
+      },
+      "savedBy": "-4853741756"
+    },
+    {
+      "id": "bfea1fe2-b364-4551-8565-becee8a8221f",
+      "timestamp": "2026-05-21T06:19:32.494Z",
+      "workflow": "vitals",
+      "data": {
+        "patientName": "Ali",
+        "room": "2",
+        "bp": "225/100",
+        "pulse": "90",
+        "temperature": "40",
+        "spo2": "56",
+        "bloodSugar": "22",
+        "remark": "Send hospital"
+      },
+      "savedBy": "-4853741756"
+    },
+    {
+      "id": "a4b2e6ea-7196-4119-8921-48657c5878d9",
+      "timestamp": "2026-05-21T04:26:55.679Z",
+      "workflow": "alert",
+      "data": {
+        "patientName": "Ali",
+        "room": "2",
+        "time": "Now",
+        "alertType": "Unresponsive",
+        "observation": "Spo2 56,weak ,coma",
+        "actionTaken": "Send hospital",
+        "doctorInformed": "Not yet",
+        "remark": "Call family member"
+      },
+      "savedBy": ""
+    },
+    {
+      "id": "9be13765-5805-4a02-ab5e-b02cd480a9e7",
+      "timestamp": "2026-05-21T04:23:30.098Z",
+      "workflow": "med",
+      "data": {
+        "patientName": "Ali",
+        "room": "2",
+        "time": "6 am",
+        "medication": "Simvastatin",
+        "dose": "5 mg",
+        "indication": "Hypertension",
+        "response": "Fatigue",
+        "remark": "Need to admit hospital"
+      },
+      "savedBy": ""
+    },
+    {
+      "id": "08fc452f-2796-4f34-821d-9dd317b9d720",
+      "timestamp": "2026-05-21T04:19:50.780Z",
+      "workflow": "rehab",
+      "data": {
+        "patientName": "Ali",
+        "room": "2",
+        "date": "Today",
+        "therapist": "Ms izati",
+        "sessionType": "Strengthening",
+        "progress": "Weak mobility",
+        "nextGoal": "Mobility improve to 2/10",
+        "remark": "Need to meet family members"
+      },
+      "savedBy": ""
+    },
+    {
+      "id": "e7d942b6-1be6-4031-9ac9-7c2f3f071c2d",
+      "timestamp": "2026-05-21T03:51:25.021Z",
+      "workflow": "vitals",
+      "data": {
+        "patientName": "Ali",
+        "room": "2",
+        "bp": "145/67",
+        "pulse": "78",
+        "temperature": "40",
+        "spo2": "94",
+        "bloodSugar": "\"-\"",
+        "remark": "\"-\""
+      },
+      "savedBy": ""
+    }
+  ]
+}

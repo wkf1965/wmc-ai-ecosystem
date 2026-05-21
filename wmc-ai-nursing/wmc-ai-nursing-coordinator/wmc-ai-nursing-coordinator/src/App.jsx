@@ -51,6 +51,7 @@ import TelegramTestPage from './pages/TelegramTestPage'
 import TelegramNursingDashboardPage from './pages/TelegramNursingDashboardPage'
 import RoomModulePage from './pages/RoomModulePage'
 import BackendApiTesterPage from './pages/BackendApiTesterPage'
+import NursingSupervisorDashboardPage from './pages/NursingSupervisorDashboardPage'
 
 export default function App() {
   return (
@@ -81,6 +82,7 @@ export default function App() {
           <Route path="reports" element={<ReportsPage />} />
           <Route path="shift-handover" element={<ShiftHandoverPage />} />
           <Route path="supervisor" element={<SupervisorCommandCenterPage />} />
+          <Route path="nursing-supervisor" element={<NursingSupervisorDashboardPage />} />
           <Route path="doctor-review" element={<DoctorReviewQueuePage />} />
           <Route path="doctor-review-loop" element={<DoctorReviewLoopPage />} />
           <Route path="medications" element={<MedicationTrackingPage />} />
