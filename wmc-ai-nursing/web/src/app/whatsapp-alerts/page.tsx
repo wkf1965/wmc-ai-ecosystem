@@ -123,13 +123,6 @@ function safeToLocaleCompare(a: string | null | undefined, b: string | null | un
   return right.localeCompare(left)
 }
 
-function patientRoom(patientId: string) {
-  const value = patientId.replace(/\D/g, "")
-  const suffix = value.padStart(3, "0")
-  const wing = Number.parseInt(suffix, 10) % 4
-  return `${["A", "B", "C", "D"][wing]}-2${suffix.slice(-2)}`
-}
-
 function latestNoteForPatient(patientId: string) {
   return notesForPatient(patientId).sort((left, right) => safeToLocaleCompare(left?.recordedAt, right?.recordedAt))[0]
 }
@@ -205,7 +198,7 @@ function buildAlertRows() {
   return listPatients().flatMap((patient) => {
     const risk = analyzePatientRisk(patient)
     const latest = latestNoteForPatient(patient.id)
-    const room = patientRoom(patient.id)
+    const room = patient.roomNumber || "—"
     if (!latest) return []
 
     const fullText = collectText(latest)

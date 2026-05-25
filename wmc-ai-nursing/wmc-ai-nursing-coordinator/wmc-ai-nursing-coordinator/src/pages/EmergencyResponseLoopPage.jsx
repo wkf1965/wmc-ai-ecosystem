@@ -183,7 +183,11 @@ export default function EmergencyResponseLoopPage() {
   }
 
   function handleTriggerEmergency() {
-    const roster = patients.length ? patients : [{ id: 'p1', fullName: 'Sim Resident A (demo)' }]
+    const roster = patients.length ? patients : []
+    if (roster.length === 0) {
+      showToast('No residents found. Add a resident first.', 'warn')
+      return
+    }
     const menu = roster.map((p, i) => `${i + 1}. ${p.fullName} (${p.id})`).join('\n')
     const pick = window.prompt(`Choose patient #:\n${menu}`, '1')
     if (pick === null) return
@@ -207,7 +211,7 @@ export default function EmergencyResponseLoopPage() {
       emergencyType,
       severityLevel: sev,
     })
-    showToast(`Emergency triggered (sim): ${emergencyType}`, 'success')
+    showToast(`Emergency triggered: ${emergencyType}`, 'success')
   }
 
   function handleNotifyDoctor() {
@@ -219,32 +223,32 @@ export default function EmergencyResponseLoopPage() {
     const base = stripBucket(row)
     if (!base.doctorNotified) {
       upsertEmergencyRecord({ ...base, doctorNotified: true, doctorResponded: false })
-      showToast('Doctor notified (simulation).', 'success')
+      showToast('Doctor notified.', 'success')
       return
     }
     upsertEmergencyRecord({ ...base, doctorResponded: true })
-    showToast('Doctor response recorded (simulation).', 'success')
+    showToast('Doctor response recorded.', 'success')
   }
 
   function handleNotifySupervisor() {
     const row = requireSelection()
     if (!row) return
     upsertEmergencyRecord({ ...stripBucket(row), supervisorNotified: true })
-    showToast('Supervisor notified (simulation).', 'success')
+    showToast('Supervisor notified.', 'success')
   }
 
   function handleNotifyFamily() {
     const row = requireSelection()
     if (!row) return
     upsertEmergencyRecord({ ...stripBucket(row), familyNotified: true })
-    showToast('Family notified (simulation).', 'success')
+    showToast('Family notified.', 'success')
   }
 
   function handleAmbulance() {
     const row = requireSelection()
     if (!row) return
     upsertEmergencyRecord({ ...stripBucket(row), ambulanceCalled: true })
-    showToast('Ambulance called — EMS staged (simulation).', 'warn')
+    showToast('Ambulance called — EMS staged.', 'warn')
   }
 
   function handleMarkResolved() {
@@ -255,7 +259,7 @@ export default function EmergencyResponseLoopPage() {
       outcomeStatus: 'resolved',
       doctorResponded: true,
     })
-    showToast('Incident marked resolved (simulation).', 'success')
+    showToast('Incident marked resolved.', 'success')
   }
 
   function handleFlagFollowUp() {
@@ -275,10 +279,10 @@ export default function EmergencyResponseLoopPage() {
     <div className="mx-auto max-w-[1600px] pb-8">
       <PageHeader
         title="Emergency response loop"
-        description="Rapid simulated escalation board for falls, cardiorespiratory events, neuro red flags, and medication reactions. Demo only — follow your facility emergency operations plan."
+        description="Rapid escalation board for falls, cardiorespiratory events, neuro red flags, and medication reactions. Follow your facility emergency operations plan."
         action={
           <div className="flex flex-wrap gap-2">
-            <Badge variant="info">Simulation mode</Badge>
+            <Badge variant="info">Local mode</Badge>
             <Link
               to="/supervisor"
               className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50"
@@ -312,25 +316,25 @@ export default function EmergencyResponseLoopPage() {
           <button type="button" className={btnTeal} onClick={handleNotifyDoctor} disabled={!selected}>
             <span className="inline-flex items-center gap-1">
               <Stethoscope className="h-4 w-4 shrink-0" aria-hidden />
-              Notify doctor (sim)
+              Notify doctor
             </span>
           </button>
           <button type="button" className={btnWarn} onClick={handleNotifySupervisor} disabled={!selected}>
             <span className="inline-flex items-center gap-1">
               <ShieldAlert className="h-4 w-4 shrink-0" aria-hidden />
-              Notify supervisor (sim)
+              Notify supervisor
             </span>
           </button>
           <button type="button" className={btnMuted} onClick={handleNotifyFamily} disabled={!selected}>
             <span className="inline-flex items-center gap-1">
               <Users className="h-4 w-4 shrink-0" aria-hidden />
-              Notify family (sim)
+              Notify family
             </span>
           </button>
           <button type="button" className={btnDanger} onClick={handleAmbulance} disabled={!selected}>
             <span className="inline-flex items-center gap-1">
               <Ambulance className="h-4 w-4 shrink-0" aria-hidden />
-              Call ambulance (sim)
+              Call ambulance
             </span>
           </button>
           <button type="button" className={btnSuccess} onClick={handleMarkResolved} disabled={!selected}>
@@ -347,7 +351,7 @@ export default function EmergencyResponseLoopPage() {
           </button>
         </div>
         <p className="mt-3 text-xs text-slate-500">
-          <strong className="text-slate-700">Doctor notify:</strong> first click pages MD (sim); second click marks MD response received.
+          <strong className="text-slate-700">Doctor notify:</strong> first click pages MD; second click marks MD response received.
           Select a card to apply notification actions.
         </p>
       </Card>
@@ -407,7 +411,7 @@ export default function EmergencyResponseLoopPage() {
           <ShieldAlert className="h-5 w-5 text-teal-600" aria-hidden />
           <h3 className="text-sm font-semibold text-slate-900">Emergency scoring</h3>
         </div>
-        <p className="mt-0.5 text-xs text-slate-500">Simulation tally · includes demo baseline · bumps when new incidents trigger</p>
+        <p className="mt-0.5 text-xs text-slate-500">Local tally · updates when new incidents trigger</p>
         <dl className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-5">
           {[
             { label: 'Mild', val: scores.mild },

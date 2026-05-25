@@ -2,7 +2,13 @@
  * Vitals Workflow — Stage 2
  */
 
-const D = '━━━━━━━━━━━━━━━━━━━━━━━━━'
+import {
+  DIVIDER,
+  htmlConfirmHeader,
+  htmlConfirmFooter,
+  htmlField,
+  htmlWarning,
+} from '../utils/workflowFormat.js'
 
 export const VITALS_WORKFLOW = {
   name: 'vitals',
@@ -26,34 +32,32 @@ export const VITALS_WORKFLOW = {
 
   buildSummary(data) {
     const lines = [
-      '📋 *Please confirm this vitals record:*',
-      D, '',
-      `👤 Patient Name: ${data.patientName}`,
-      `🏥 Room: ${data.room}`,
-      `🩺 BP: ${data.bp}`,
-      `💓 Pulse: ${data.pulse}`,
-      `🌡️ Temperature: ${data.temperature}`,
-      `💨 SpO2: ${data.spo2}`,
-      `🩸 Blood Sugar: ${data.bloodSugar}`,
-      `📝 Remark: ${data.remark}`,
-      '', D,
-      'Reply *yes* to save  |  *no* to cancel',
+      htmlConfirmHeader('Please confirm this vitals record:'),
+      DIVIDER, '',
+      htmlField('👤 Patient Name:', data.patientName),
+      htmlField('🏥 Room:', data.room),
+      htmlField('🩺 BP:', data.bp),
+      htmlField('💓 Pulse:', data.pulse),
+      htmlField('🌡️ Temperature:', data.temperature),
+      htmlField('💨 SpO2:', data.spo2),
+      htmlField('🩸 Blood Sugar:', data.bloodSugar),
+      htmlField('📝 Remark:', data.remark),
     ]
 
-    // Flag abnormal values
     const flags = []
-    if (data.spo2 && parseFloat(data.spo2) < 94) flags.push('⚠️ Low SpO2 — monitor closely')
-    if (data.temperature && parseFloat(data.temperature) >= 38.0) flags.push('⚠️ Fever detected')
-    if (data.pulse && parseFloat(data.pulse) > 100) flags.push('⚠️ Tachycardia')
+    if (data.spo2 && parseFloat(data.spo2) < 94) flags.push('Low SpO2 — monitor closely')
+    if (data.temperature && parseFloat(data.temperature) >= 38.0) flags.push('Fever detected')
+    if (data.pulse && parseFloat(data.pulse) > 100) flags.push('Tachycardia')
     if (data.bp) {
-      const sys = parseInt(data.bp)
-      if (sys >= 140) flags.push('⚠️ High blood pressure')
-      if (sys < 90) flags.push('🚨 Low blood pressure')
+      const sys = parseInt(data.bp, 10)
+      if (sys >= 140) flags.push('High blood pressure')
+      if (sys < 90) flags.push('Low blood pressure')
     }
     if (flags.length) {
-      lines.splice(lines.length - 2, 0, '', ...flags)
+      lines.push('', ...flags.map((flag) => htmlWarning(flag)))
     }
 
+    lines.push('', DIVIDER, htmlConfirmFooter())
     return lines.join('\n')
   },
 }

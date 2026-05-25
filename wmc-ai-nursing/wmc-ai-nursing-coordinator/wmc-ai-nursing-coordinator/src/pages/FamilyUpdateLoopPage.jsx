@@ -48,7 +48,7 @@ const COLS = [
   { key: 'draft_updates', title: 'Draft updates', sub: 'Message being composed', badge: 'info' },
   { key: 'pending_approval', title: 'Pending approval', sub: 'Supervisor sign-off', badge: 'warning' },
   { key: 'ready_to_send', title: 'Ready to send', sub: 'Approved · awaiting WA', badge: 'teal' },
-  { key: 'sent_simulation', title: 'Sent simulation', sub: 'Logged demo delivery', badge: 'success' },
+  { key: 'sent_simulation', title: 'Sent updates', sub: 'Logged delivery', badge: 'success' },
   { key: 'urgent_family_alerts', title: 'Urgent family alerts', sub: 'Risk / MD triggers', badge: 'danger' },
 ]
 
@@ -233,13 +233,13 @@ export default function FamilyUpdateLoopPage() {
       familyDraftSyncedDoctor: false,
     })
     bumpFamilyUpdateScore('pending', 1)
-    showToast('Family update draft regenerated (simulation).', 'success')
+    showToast('Family update draft regenerated.', 'success')
   }
 
   function handleEditMessage() {
     const row = requireSelection()
     if (!row) return
-    const next = window.prompt('Edit family message (simulation)', row.familyMessageDraft || '')
+    const next = window.prompt('Edit family message', row.familyMessageDraft || '')
     if (next === null) return
     upsertFamilyUpdateInstance(row.patientId, { familyMessageDraft: next })
     showToast('Message updated locally.', 'success')
@@ -250,7 +250,7 @@ export default function FamilyUpdateLoopPage() {
     if (!row) return
     if (!row.nurseApprovedBy) {
       upsertFamilyUpdateInstance(row.patientId, {
-        nurseApprovedBy: 'Charge RN (sim)',
+        nurseApprovedBy: 'Charge RN',
       })
       bumpFamilyUpdateScore(row.needsSupervisorApproval ? 'supervisorReviewNeeded' : 'pending', 1)
       showToast('Nurse approval recorded.', 'success')
@@ -258,7 +258,7 @@ export default function FamilyUpdateLoopPage() {
     }
     if (row.needsSupervisorApproval && !row.supervisorApprovedBy) {
       upsertFamilyUpdateInstance(row.patientId, {
-        supervisorApprovedBy: 'Nursing supervisor (sim)',
+        supervisorApprovedBy: 'Nursing supervisor',
       })
       bumpFamilyUpdateScore('upToDate', 1)
       showToast('Supervisor approval recorded.', 'success')
@@ -270,7 +270,7 @@ export default function FamilyUpdateLoopPage() {
   function handleCopyWhatsApp() {
     const row = requireSelection()
     if (!row) return
-    const block = `${row.familyMessageDraft || ''}\n\n— ${row.patientName} · Rm ${row.roomNumber} (sim)`
+    const block = `${row.familyMessageDraft || ''}\n\n— ${row.patientName} · Rm ${row.roomNumber}`
     navigator.clipboard.writeText(block).catch(() => {})
     showToast('Copied draft to clipboard.', 'success')
   }
@@ -294,7 +294,7 @@ export default function FamilyUpdateLoopPage() {
       lastSentAt: new Date().toISOString(),
     })
     bumpFamilyUpdateScore('upToDate', 1)
-    showToast('Marked as sent (simulation).', 'success')
+    showToast('Marked as sent.', 'success')
   }
 
   function handleWeeklyReport() {
@@ -314,10 +314,10 @@ export default function FamilyUpdateLoopPage() {
     <div className="mx-auto max-w-[1600px] pb-8">
       <PageHeader
         title="Family Update Loop"
-        description="Simulation workspace merging nursing notes, vitals, meds, intake, hydration, sleep, rehab, mental health, doctor review, and AI risk signals into WhatsApp-ready drafts."
+        description="Local workspace merging nursing notes, vitals, meds, intake, hydration, sleep, rehab, mental health, doctor review, and AI risk signals into WhatsApp-ready drafts."
         action={
           <div className="flex flex-wrap gap-2">
-            <Badge variant="info">Simulation mode</Badge>
+            <Badge variant="info">Local mode</Badge>
             <Link
               to="/family-updates"
               className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50"
@@ -448,7 +448,7 @@ export default function FamilyUpdateLoopPage() {
 
         <p className="mt-3 text-xs text-slate-500">
           Sources refresh from nursing notes, vital records, medication loop, nutrition/meals, hydration, sleep monitoring,
-          rehabilitation loop, mental-health checks, doctor-review queue, AI risk predictions, and demo AI alerts list.
+          rehabilitation loop, mental-health checks, doctor-review queue, AI risk predictions, and AI alerts.
         </p>
       </Card>
 

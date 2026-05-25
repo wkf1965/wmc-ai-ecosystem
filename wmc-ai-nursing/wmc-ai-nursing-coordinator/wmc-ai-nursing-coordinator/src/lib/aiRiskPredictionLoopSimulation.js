@@ -180,18 +180,7 @@ function confidenceFromSignals(noteCount, hasVitals) {
  * @returns {Record<string, object>} keyed by patientId
  */
 export function computeAiPredictionSnapshots(patients, notes, prevInstances, nowMs = Date.now()) {
-  const roster = patients?.length
-    ? patients
-    : [
-        {
-          id: 'demo',
-          fullName: 'Demo Resident',
-          assignedNurse: 'Demo Nurse',
-          fallRisk: 'Moderate',
-          pressureSoreRisk: 'Moderate',
-          room: '100A',
-        },
-      ]
+  const roster = patients?.length ? patients : []
 
   const getPatientById = (id) => roster.find((p) => p.id === id) || null
   const analyses = analyzeAllPatientsFromNotes(roster, notes, getPatientById)

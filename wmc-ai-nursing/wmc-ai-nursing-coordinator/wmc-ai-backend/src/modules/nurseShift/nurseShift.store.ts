@@ -8,6 +8,10 @@ export const nurseShiftOtMemoryStore = {
     return record
   },
 
+  clear(): void {
+    rows.length = 0
+  },
+
   list(): NurseShiftOtRecord[] {
     return [...rows].sort(
       (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),

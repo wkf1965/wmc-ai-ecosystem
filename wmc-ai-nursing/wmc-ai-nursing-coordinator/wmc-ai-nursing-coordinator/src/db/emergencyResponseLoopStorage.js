@@ -121,7 +121,7 @@ function seedDemoRecords(patients) {
   const list =
     patients?.length > 0
       ? patients.slice(0, 12)
-      : [{ id: 'demo', fullName: 'Demo Resident', roomNumber: '100A' }]
+      : []
 
   const nurses = ['R.N. Patel', 'LPN Santos', 'R.N. Kim', 'Charge: Okonkwo']
   const records = []

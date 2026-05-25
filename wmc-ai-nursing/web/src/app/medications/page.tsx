@@ -25,9 +25,14 @@ export default function MedicationsPage() {
           <p className="text-sm uppercase tracking-wide text-slate-500">Medication Operations</p>
           <h1 className="text-2xl font-semibold text-slate-900">Medication Dashboard</h1>
         </div>
-        <Link href="/dashboard" className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
-          Back to dashboard
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          <Link href="/nurse-duty-roster" className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+            Open duty roster
+          </Link>
+          <Link href="/dashboard" className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+            Back to dashboard
+          </Link>
+        </div>
       </div>
 
       <section className="rounded-2xl border border-slate-200 bg-white">

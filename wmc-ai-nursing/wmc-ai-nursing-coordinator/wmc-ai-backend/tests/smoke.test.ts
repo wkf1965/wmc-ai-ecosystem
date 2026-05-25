@@ -371,6 +371,93 @@ test('GET /api/v1/dashboard/summary (dev JWT bypass)', async () => {
   }
 })
 
+test('GET /api/v1/dashboard (dev JWT bypass)', async () => {
+  const prevEnv = process.env.NODE_ENV
+  process.env.NODE_ENV = 'development'
+  try {
+    const res = await request(app).get('/api/v1/dashboard').expect(200)
+
+    assert.ok(res.body.summary && typeof res.body.summary === 'object')
+    assert.ok(Array.isArray(res.body.nursingRecords))
+    assert.ok(Array.isArray(res.body.sideTurning))
+    assert.ok(res.body.ot && typeof res.body.ot === 'object')
+    assert.ok(Number.isFinite(res.body.ot.recordCount))
+    assert.ok(Array.isArray(res.body.alerts))
+    assert.ok(typeof res.body.fetchedAt === 'string')
+  } finally {
+    process.env.NODE_ENV = prevEnv
+  }
+})
+
+test('POST /api/v1/admin/clear-records (dev JWT bypass)', async () => {
+  const prevEnv = process.env.NODE_ENV
+  process.env.NODE_ENV = 'development'
+  try {
+    const res = await request(app).post('/api/v1/admin/clear-records').expect(200)
+
+    assert.equal(res.body.ok, true)
+    assert.ok(Array.isArray(res.body.memoryStoresCleared))
+    assert.ok(typeof res.body.clearedAt === 'string')
+  } finally {
+    process.env.NODE_ENV = prevEnv
+  }
+})
+
+test('POST /api/v1/nursing/parse (dev JWT bypass)', async () => {
+  const prevEnv = process.env.NODE_ENV
+  process.env.NODE_ENV = 'development'
+  try {
+    const res = await request(app)
+      .post('/api/v1/nursing/parse')
+      .send({
+        text: 'Room 2 Ali poor appetite weak mobility turned left',
+        nurseName: 'Nurse Test',
+        source: 'api',
+      })
+      .expect(201)
+
+    assert.equal(res.body.ok, true)
+    assert.equal(res.body.rawText, 'Room 2 Ali poor appetite weak mobility turned left')
+    assert.ok(res.body.parsed)
+    assert.equal(res.body.parsed.room, '2')
+    assert.ok(Array.isArray(res.body.alerts))
+    assert.ok(typeof res.body.confirmationMessage === 'string')
+    assert.ok(['rules', 'deepseek', 'openai'].includes(res.body.parser))
+  } finally {
+    process.env.NODE_ENV = prevEnv
+  }
+})
+
+test('DELETE /api/v1/admin/reset (dev JWT bypass)', async () => {
+  const prevEnv = process.env.NODE_ENV
+  process.env.NODE_ENV = 'development'
+  try {
+    const res = await request(app).delete('/api/v1/admin/reset').expect(200)
+
+    assert.equal(res.body.ok, true)
+    assert.equal(res.body.message, 'Records deleted successfully')
+    assert.ok(Array.isArray(res.body.memoryStoresCleared))
+  } finally {
+    process.env.NODE_ENV = prevEnv
+  }
+})
+
+test('DELETE /api/v1/admin/reset-patients (dev JWT bypass)', async () => {
+  const prevEnv = process.env.NODE_ENV
+  process.env.NODE_ENV = 'development'
+  try {
+    const res = await request(app).delete('/api/v1/admin/reset-patients').expect(200)
+
+    assert.equal(res.body.ok, true)
+    assert.equal(res.body.message, 'Patient records cleared')
+    assert.ok(Array.isArray(res.body.categoriesCleared))
+    assert.ok(res.body.categoriesCleared.includes('patients'))
+    assert.ok(res.body.categoriesCleared.includes('rehabProgress'))
+  } finally {
+    process.env.NODE_ENV = prevEnv
+  }
+})
+
 test('GET /api/v1/tasks/queue (dev JWT bypass)', async () => {
   const prevEnv = process.env.NODE_ENV
   process.env.NODE_ENV = 'development'

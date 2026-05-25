@@ -70,21 +70,11 @@ export async function dispatchCommandOrFormStep(text, chatId, ctx = {}) {
 
   // ── 1. /cancel ──────────────────────────────────────────────────────────
   if (/^\/cancel\b/i.test(t)) {
-    const session = await getActiveSession(chatId)
-    if (session) {
-      const def = getCommandDef(session.command_name)
-      await clearSession(chatId, 'cancelled')
-      return {
-        handled: true,
-        reply: [
-          `❌ *${def?.description ?? session.command_name} form cancelled.*`,
-          '',
-          'No data was saved.',
-          'Send any command to start again, or /help to see all commands.',
-        ].join('\n'),
-      }
+    await clearSession(chatId, 'cancelled')
+    return {
+      handled: true,
+      reply: 'Current flow cancelled. You can send nursing note now.',
     }
-    return { handled: true, reply: 'No active form to cancel.' }
   }
 
   // ── 2. /help or /start ────────────────────────────────────────────────────

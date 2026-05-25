@@ -51,6 +51,8 @@ import {
   TestTube2,
   DoorOpen,
   Braces,
+  Package,
+  Baby,
 } from 'lucide-react'
 import { useState } from 'react'
 import { facilityName } from '../data/dummyData'
@@ -60,7 +62,7 @@ const nav = [
   { to: '/patients', label: 'Patients', icon: Users },
   { to: '/patient-registration', label: 'Patient registration', icon: UserPlus },
   { to: '/nursing-notes', label: 'Daily Nursing Notes', icon: ClipboardList },
-  { to: '/rehab', label: 'Rehabilitation Progress', icon: Activity },
+  { to: '/rehab', label: 'Nursing Progress', icon: Activity },
   { to: '/ai-risk', label: 'AI Risk Detection', icon: ScanHeart },
   { to: '/ai-risk-prediction-loop', label: 'AI Risk Prediction Loop', icon: BrainCircuit },
   { to: '/alerts', label: 'AI Alerts', icon: Sparkles },
@@ -74,6 +76,7 @@ const nav = [
   /** Prominent placement — long nav scrolls; these must stay easy to find */
   { to: '/side-turning', label: 'Side Turning', icon: BedDouble },
   { to: '/side-turning-loop', label: 'Side Turning Loop', icon: RotateCw },
+  { to: '/attendance-dashboard', label: 'Attendance & OT', icon: UserRoundCheck },
   { to: '/overtime', label: 'Overtime', icon: Clock },
   { to: '/staff-overtime-loop', label: 'Staff Overtime Loop', icon: ClockAlert },
   { to: '/emergency-response-loop', label: 'Emergency Response Loop', icon: Siren },
@@ -83,7 +86,7 @@ const nav = [
   { to: '/health-check-loop', label: 'Health Check Loop', icon: MonitorSmartphone },
   { to: '/hydration-loop', label: 'Hydration Loop', icon: Droplets },
   { to: '/nutrition-loop', label: 'Feeding / Nutrition Loop', icon: UtensilsCrossed },
-  { to: '/rehabilitation-loop', label: 'Rehabilitation Loop', icon: Dumbbell },
+  { to: '/rehabilitation-loop', label: 'Mobility Support Loop', icon: Dumbbell },
   { to: '/wound-care-loop', label: 'Wound Care Loop', icon: Bandage },
   { to: '/infection-control-loop', label: 'Infection Control Loop', icon: Microscope },
   { to: '/mental-health-loop', label: 'Mental Health Loop', icon: Brain },
@@ -95,7 +98,7 @@ const nav = [
   { to: '/doctor-review-loop', label: 'Doctor Review Loop', icon: ClipboardSignature },
   { to: '/medications', label: 'Medication Tracking', icon: Pill },
   { to: '/medication-loop', label: 'Medication Loop', icon: PillBottle },
-  { to: '/rehab-tracking', label: 'Rehabilitation Tracking', icon: LineChart },
+  { to: '/rehab-tracking', label: 'Care Progress Tracking', icon: LineChart },
   { to: '/nurse-input', label: 'Nurse Vital Input', icon: HeartPulse },
   { to: '/mobile-nurse', label: 'Mobile Nurse Input', icon: Smartphone },
   { to: '/staff-attendance', label: 'Staff Attendance', icon: ClipboardClock },
@@ -103,6 +106,8 @@ const nav = [
   { to: '/ot-reports', label: 'OT Reports', icon: Table2 },
   { to: '/settings/google-sheet', label: 'Google Sheet', icon: Settings },
   { to: '/settings/telegram', label: 'Telegram Bot', icon: Bot },
+  { to: '/inventory', label: 'Inventory', icon: Package },
+  { to: '/pampers', label: 'Pampers / Wet Tissue', icon: Baby },
   { to: '/backend-api-test', label: 'Backend API test', icon: Braces },
   { to: '/reports', label: 'Reports', icon: FileBarChart },
 ]
@@ -146,9 +151,7 @@ export default function Layout() {
             <Stethoscope className="h-5 w-5 text-white" aria-hidden />
           </div>
           <div className="min-w-0 text-left">
-            <p className="truncate text-xs font-semibold uppercase tracking-wider text-teal-300/90">
-              AI Coordinator
-            </p>
+            <p className="truncate text-xs font-semibold uppercase tracking-wider text-teal-300/90">WMC</p>
             <p className="truncate text-sm font-semibold text-white">{facilityName}</p>
           </div>
         </div>
@@ -156,7 +159,7 @@ export default function Layout() {
           <NavItems />
         </div>
         <div className="shrink-0 border-t border-slate-800/80 p-4 text-xs text-slate-500">
-          Demo dashboard · No live PHI
+          Local dashboard · No live PHI
         </div>
       </aside>
 
@@ -202,7 +205,7 @@ export default function Layout() {
             </button>
             <div className="min-w-0">
               <h1 className="truncate text-lg font-semibold text-slate-900 sm:text-xl">
-                Internal Nursing Coordinator
+                WMC AI Nursing Coordinator
               </h1>
               <p className="hidden truncate text-sm text-slate-500 sm:block">
                 {location.pathname === '/'

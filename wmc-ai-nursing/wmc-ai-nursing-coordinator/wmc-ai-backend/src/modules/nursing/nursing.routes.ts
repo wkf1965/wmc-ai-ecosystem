@@ -5,6 +5,7 @@ import { asyncHandler } from '../../middleware/asyncHandler.js'
 import { routeParam } from '../../utils/routeParam.js'
 import { nursingRecordsController } from './nursing.records.controller.js'
 import { nursingService } from './nursing.service.js'
+import { nursingParseController } from './parse/nursing.parse.controller.js'
 
 export const nursingRouter = Router()
 nursingRouter.use(requireRoles('admin', 'doctor', 'nurse'))
@@ -46,6 +47,12 @@ nursingRouter.post(
   asyncHandler(async (req, res) => {
     await nursingRecordsController.create(req, res)
   }),
+)
+
+/** Natural language nursing note parser — LLM/rules → structured JSON → storage + alerts. */
+nursingRouter.post(
+  '/parse',
+  asyncHandler(async (req, res) => nursingParseController.parse(req, res)),
 )
 
 /** Legacy: friendly vitals + optional `patientName` → persists to `vital_signs`. */

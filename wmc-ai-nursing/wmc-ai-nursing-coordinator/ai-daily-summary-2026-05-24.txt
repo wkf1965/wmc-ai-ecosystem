@@ -1,0 +1,30 @@
+AI Daily Nursing Summary (5/24/2026, 8:03:57 PM)
+
+Overall ward status
+Ward status today shows 1 resident snapshots. 0 residents require urgent handover-level review and 0 require frequent review. Average AI risk score is 0.
+
+High-risk patients today
+
+Fall risk alerts
+
+Dehydration / poor appetite alerts
+
+Emotional or confusion alerts
+
+Medication issues
+- No medication deviation alerts identified.
+
+Patients needing follow-up
+
+Family update suggestions
+
+Nursing action checklist
+
+Doctor review needed
+
+Family communication draft
+Family communication draft for today:
+- No high-risk patient required escalation during this shift.
+- Fall risk remains present in 0 patient(s).
+- Dehydration or appetite concerns: 0 patient(s).
+- Family-recommended contacts: 0 patient(s).

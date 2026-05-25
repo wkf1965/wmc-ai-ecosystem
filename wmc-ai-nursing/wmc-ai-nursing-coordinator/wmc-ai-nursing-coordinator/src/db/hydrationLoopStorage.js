@@ -83,34 +83,7 @@ export function mergeHydrationLoopRows(patients) {
   const today = todayLocalStr()
   const INTERVAL_MIN = 120
 
-  if (!patients?.length) {
-    const id = 'demo'
-    const over = raw.instances[id] || {}
-    return [
-      {
-        patientId: id,
-        patientName: 'Demo Resident',
-        room: '100A',
-        fluidTargetMl: 2000,
-        intakeSoFarMl: over.intakeSoFarMl ?? 640,
-        intakeDay: over.intakeDay ?? today,
-        lastDrinkAt: over.lastDrinkAt ?? new Date(Date.now() - 90 * 60000).toISOString(),
-        nextHydrationDueAt: over.nextHydrationDueAt ?? new Date(Date.now() + 45 * 60000).toISOString(),
-        intervalMinutes: INTERVAL_MIN,
-        snoozeUntil: over.snoozeUntil ?? null,
-        nurseAssigned: over.nurseAssigned ?? 'Demo Nurse',
-        swallowingRisk: over.swallowingRisk ?? 'Moderate — thickened liquids PRN',
-        dehydrationRiskLevel: over.dehydrationRiskLevel ?? 'Moderate',
-        notes: Array.isArray(over.notes) ? over.notes : [],
-        escalated: Boolean(over.escalated),
-        refusedToday: over.refusedToday ?? 0,
-        refusedDay: over.refusedDay ?? today,
-        simDryMouthNote: Boolean(over.simDryMouthNote),
-        simDizzinessNote: Boolean(over.simDizzinessNote),
-        onTargetScoredDay: over.onTargetScoredDay ?? null,
-      },
-    ]
-  }
+  if (!patients?.length) return []
 
   return patients.map((patient, idx) => {
     const id = patient.id

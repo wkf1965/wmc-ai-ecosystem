@@ -28,6 +28,7 @@ import {
   handleTimelineCommand,
 } from './src/lib/telegramTimelineHandler.js'
 import { dispatchCommandOrFormStep } from './src/lib/commands/commandDispatcher.js'
+import { routeNlpMessage } from './src/bot/services/nlpRouter.js'
 
 function telegramSenderDisplay(from) {
   if (!from || typeof from !== 'object') return null
@@ -368,6 +369,7 @@ export async function processTelegramInboundUpdate(bodyJson) {
       username,
     })
     if (cmdResult.handled) {
+      console.log('[COMMAND ROUTE]', String(text).split(' ')[0])
       console.log('[telegram] command workflow handled:', String(text).split(' ')[0])
       const emptyParsed = {
         originalText: String(text),
@@ -412,6 +414,59 @@ export async function processTelegramInboundUpdate(bodyJson) {
     // Fall through to nursing note pipeline on dispatcher error
   }
   // ── end command workflow dispatcher ──────────────────────────────────────
+
+  // ── NLP Router (free-text — no workflow required) ───────────────────────
+  const trimmedText = String(text).trim()
+  if (trimmedText && !trimmedText.startsWith('/')) {
+    const nlpResult = await routeNlpMessage({
+      text: trimmedText,
+      chatId,
+      nurseName: nurseDisplayName,
+      bot: null,
+      clearWorkflowOnNursing: false,
+    })
+
+    if (nlpResult.handled && nlpResult.reply) {
+      const intent = nlpResult.intent ?? {}
+      const parsedFields = nlpResult.backendData?.parsed ?? {}
+      const alerts = Array.isArray(nlpResult.backendData?.alerts) ? nlpResult.backendData.alerts : []
+      const fallbackParsed = parseTelegramNurseMessage(trimmedText)
+
+      return {
+        extracted,
+        rawUpdate,
+        nursingRecord: {
+          room: parsedFields.room ?? intent.room ?? fallbackParsed.patientRoom ?? null,
+          patient: parsedFields.patientName ?? intent.patient_name ?? null,
+          patientId: nlpResult.backendData?.patientId ?? null,
+          note: parsedFields.notes ?? trimmedText,
+          category: intent.category ?? 'Nursing Record',
+          loopKey: fallbackParsed.suggestedLoopCategory,
+          riskKeywords: alerts.map((a) => a.message),
+          nurseName: nurseDisplayName,
+          symptoms: (parsedFields.symptoms ?? []).join('; ') || trimmedText.slice(0, 280),
+          dashboardCategories: alerts.length > 0 ? ['Clinical Alert'] : [intent.category ?? 'Nursing Record'],
+          dashboardCategoryDisplay: intent.category ?? 'Nursing Record',
+          riskLevel: alerts.some((a) => a.severity === 'critical' || a.severity === 'high') ? 'High' : 'Normal',
+          workflowRiskLabel: alerts.length > 0 ? 'Review' : 'Normal',
+          recommendedAction: alerts[0]?.message ?? '',
+          nursingRiskScore: null,
+          nursingRiskLevel: alerts[0]?.severity ?? null,
+          nursingRiskDetected: alerts.map((a) => a.type),
+          parser: nlpResult.backendData?.parser ?? 'rules-local',
+          storage: nlpResult.backendData?.storage ?? 'file',
+        },
+        brainSignals: buildBrainSignals(
+          buildTelegramProcessingErrorIntegration(fallbackParsed).analysis,
+          fallbackParsed,
+        ),
+        replyText: nlpResult.reply,
+        integration: buildTelegramProcessingErrorIntegration(fallbackParsed),
+        backendParse: nlpResult.backendData ?? null,
+      }
+    }
+  }
+  // ── end NLP Router ────────────────────────────────────────────────────────
 
   // ── /handover command intercept ──────────────────────────────────────────
   if (isTelegramHandoverCommand(String(text))) {

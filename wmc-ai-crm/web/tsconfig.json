@@ -3,11 +3,27 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@wmc/ui": ["../../shared-resources/ui/src/index.ts"], "@wmc/ui" : ["../../shared-resources/ui/src/index.ts"], "@wmc/ui/*": ["../../shared-resources/ui/src/*"]
-    }
+      "@wmc/ui": [
+        "../../shared-resources/ui/src/index.ts"
+      ],
+      "@wmc/ui/*": [
+        "../../shared-resources/ui/src/*"
+      ]
+    },
+    "esModuleInterop": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }
-
-

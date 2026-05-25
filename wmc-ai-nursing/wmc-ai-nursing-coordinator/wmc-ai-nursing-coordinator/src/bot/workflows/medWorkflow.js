@@ -2,7 +2,12 @@
  * Medication Administration Workflow — Stage 2
  */
 
-const D = '━━━━━━━━━━━━━━━━━━━━━━━━━'
+import {
+  DIVIDER,
+  htmlConfirmHeader,
+  htmlConfirmFooter,
+  htmlField,
+} from '../utils/workflowFormat.js'
 
 export const MED_WORKFLOW = {
   name: 'med',
@@ -30,18 +35,18 @@ export const MED_WORKFLOW = {
       : data.time
 
     return [
-      '📋 *Please confirm this medication record:*',
-      D, '',
-      `👤 Patient: ${data.patientName}`,
-      `🏥 Room: ${data.room}`,
-      `🕐 Time: ${time}`,
-      `💊 Medication: ${data.medication}`,
-      `💉 Dose & Route: ${data.dose}`,
-      `🩺 Indication: ${data.indication}`,
-      `📊 Response: ${data.response}`,
-      `📝 Remark: ${data.remark}`,
-      '', D,
-      'Reply *yes* to save  |  *no* to cancel',
+      htmlConfirmHeader('Please confirm this medication record:'),
+      DIVIDER, '',
+      htmlField('👤 Patient:', data.patientName),
+      htmlField('🏥 Room:', data.room),
+      htmlField('🕐 Time:', time),
+      htmlField('💊 Medication:', data.medication),
+      htmlField('💉 Dose & Route:', data.dose),
+      htmlField('🩺 Indication:', data.indication),
+      htmlField('📊 Response:', data.response),
+      htmlField('📝 Remark:', data.remark),
+      '', DIVIDER,
+      htmlConfirmFooter(),
     ].join('\n')
   },
 }

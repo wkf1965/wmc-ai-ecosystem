@@ -217,17 +217,7 @@ export function scoreTotalsWithRows(instanceMap, nowMs = Date.now()) {
  * @returns {Record<string, object>}
  */
 export function computeFamilyUpdateSnapshots(patients, notes, prevInstances, nowMs = Date.now()) {
-  const roster = patients?.length
-    ? patients
-    : [
-        {
-          id: 'demo',
-          fullName: 'Demo Resident',
-          assignedNurse: 'Demo Nurse',
-          room: '100A',
-          familyContact: 'Jamie Chen — +60123456789',
-        },
-      ]
+  const roster = patients?.length ? patients : []
 
   const doctorRecords = getDoctorReviewRecordsSnapshot()
   const riskMap = getAiRiskPredictionInstancesObject()

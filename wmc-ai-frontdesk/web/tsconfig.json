@@ -3,6 +3,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
+      "@/*": ["./src/*"],
       "@wmc/ui": [
         "../../shared-resources/ui/src/index.ts"
       ],

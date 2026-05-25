@@ -10,7 +10,14 @@ import { analyzeVitals } from '../vitals/vitalsAnalyze.service.js'
 import { evaluateDoctorEscalation } from '../escalation/doctorEscalation.service.js'
 import { generateFallRiskAssessment } from '../risk/fallScore.service.js'
 import { generatePressureUlcerRiskAssessment } from '../risk/pressureUlcer.service.js'
-import type { DashboardAlerts, DashboardSummaryResponse } from './dashboard.types.js'
+import { nursingService } from '../nursing/nursing.service.js'
+import { nurseShiftOtMemoryStore } from '../nurseShift/nurseShift.store.js'
+import type {
+  DashboardAlerts,
+  DashboardOtSummary,
+  DashboardResponse,
+  DashboardSummaryResponse,
+} from './dashboard.types.js'
 
 export const MOCK_DASHBOARD_SUMMARY: DashboardSummaryResponse = {
   totalPatients: 3,
@@ -243,4 +250,30 @@ export async function buildDashboardSummary(): Promise<DashboardSummaryResponse>
 
   summary.shiftStatus = shiftFromSignals(summary)
   return summary
+}
+
+function buildOtSummary(): DashboardOtSummary {
+  const records = nurseShiftOtMemoryStore.list()
+  const totalOvertimeHours = records.reduce((sum, row) => sum + (row.overtimeHours ?? 0), 0)
+  return {
+    recordCount: records.length,
+    totalOvertimeHours: Math.round(totalOvertimeHours * 100) / 100,
+    pendingApprovalCount: records.filter((row) => row.overtimeHours > 0).length,
+  }
+}
+
+/** Full dashboard payload for GET /dashboard — nursing, side turning, OT, alerts + summary rollup. */
+export async function buildDashboard(): Promise<DashboardResponse> {
+  const [summary, alerts] = await Promise.all([buildDashboardSummary(), nursingService.listAlerts()])
+  const nursingRecords = nursingClinicalRecordsMemoryStore.list()
+  const sideTurning = sideTurningMemoryStore.list()
+
+  return {
+    summary,
+    nursingRecords,
+    sideTurning,
+    ot: buildOtSummary(),
+    alerts,
+    fetchedAt: new Date().toISOString(),
+  }
 }

@@ -10,9 +10,12 @@
     "preview": "vite preview",
     "bot": "node src/bot/index.js",
     "bot:dev": "node --watch src/bot/index.js",
-    "telegram": "node src/telegramWebhookServer.js",
-    "telegram:watch": "node --watch src/telegramWebhookServer.js",
-    "test:parser": "node --test src/lib/telegramNurseParser.room.test.js"
+    "telegram": "node src/telegram/bot.js",
+    "telegram:watch": "node --watch src/telegram/bot.js",
+    "test:parser": "node --test src/lib/telegramNurseParser.room.test.js",
+    "test:intent": "node --test src/lib/telegramIntentClassifier.test.js",
+    "test:session": "node --test src/bot/services/sessionReset.test.js",
+    "test:nlp-router": "node --test src/bot/services/nlpRouter.test.js"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.0",

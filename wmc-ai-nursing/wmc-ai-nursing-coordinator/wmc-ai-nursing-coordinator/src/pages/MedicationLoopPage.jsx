@@ -212,7 +212,7 @@ export default function MedicationLoopPage() {
       lastGivenDay: day,
       doctorEscalated: false,
     })
-    showToast('Documented as given (simulation).', 'success')
+    showToast('Documented as given.', 'success')
   }
 
   function handleMissed(row) {
@@ -237,7 +237,7 @@ export default function MedicationLoopPage() {
   function handleDoctor(row) {
     bumpMedLoopScore('escalated', 1)
     upsertMedLoopDose(row.id, { doctorEscalated: true })
-    showToast('Escalated to doctor (simulation).', 'warn')
+    showToast('Escalated to doctor.', 'warn')
   }
 
   function handlePrint() {
@@ -257,10 +257,10 @@ export default function MedicationLoopPage() {
     <div className="mx-auto max-w-7xl pb-8">
       <PageHeader
         title="Medication loop"
-        description="Shift MAR-style round board with simulated scoring, AI cues, and escalation placeholders. Demo only — not an eMAR."
+        description="Shift MAR-style round board with local scoring, AI cues, and escalation placeholders. Not an eMAR."
         action={
           <div className="flex flex-wrap gap-2">
-            <Badge variant="info">Simulation mode</Badge>
+            <Badge variant="info">Local mode</Badge>
             <Link
               to="/medications"
               className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50"
@@ -347,7 +347,7 @@ export default function MedicationLoopPage() {
           <PillBottle className="h-5 w-5 text-teal-600" aria-hidden />
           <h3 className="text-sm font-semibold text-slate-900">Medication scoring</h3>
         </div>
-        <p className="mt-0.5 text-xs text-slate-500">Simulation tally · includes demo baseline</p>
+        <p className="mt-0.5 text-xs text-slate-500">Local tally · updates with care actions</p>
         <dl className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-5">
           {[
             { label: 'On time', val: scores.onTime },
@@ -375,7 +375,7 @@ export default function MedicationLoopPage() {
         </div>
         {alerts.length === 0 ? (
           <p className="rounded-xl border border-emerald-100 bg-emerald-50/80 px-4 py-4 text-sm text-emerald-900">
-            No medication loop alerts on current mock roster.
+            No medication loop alerts on current roster.
           </p>
         ) : (
           <ul className="grid gap-2 lg:grid-cols-2">

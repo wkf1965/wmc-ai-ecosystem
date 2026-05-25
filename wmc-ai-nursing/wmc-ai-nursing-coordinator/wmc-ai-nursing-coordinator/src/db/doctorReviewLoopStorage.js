@@ -126,7 +126,7 @@ function roomForPatient(id, idx) {
 }
 
 function seedDemoRecords(patients) {
-  const roster = patients?.length ? patients.slice(0, 14) : [{ id: 'p1', fullName: 'Demo Resident', assignedNurse: 'R.N. Patel' }]
+  const roster = patients?.length ? patients.slice(0, 14) : []
   const doctors = ['Dr. Rivera', 'Dr. Okonkwo', 'Dr. Matsuda', 'NP Singh']
   const statuses = /** @type {const} */ ([
     'pending',

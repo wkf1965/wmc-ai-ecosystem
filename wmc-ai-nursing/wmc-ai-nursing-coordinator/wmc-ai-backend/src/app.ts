@@ -32,6 +32,7 @@ import { riskRouter } from './modules/risk/risk.routes.js'
 import { emergencyRouter } from './modules/emergency/emergency.routes.js'
 import { commandCenterRouter } from './modules/commandCenter/commandCenter.routes.js'
 import { reportsRouter } from './modules/reports/reports.routes.js'
+import { adminRouter } from './modules/admin/admin.routes.js'
 
 export function createApp() {
   const app = express()
@@ -74,6 +75,7 @@ export function createApp() {
   api.use('/emergency', emergencyRouter)
   api.use('/command-center', commandCenterRouter)
   api.use('/reports', reportsRouter)
+  api.use('/admin', adminRouter)
 
   app.use(config.apiPrefix, api)
 

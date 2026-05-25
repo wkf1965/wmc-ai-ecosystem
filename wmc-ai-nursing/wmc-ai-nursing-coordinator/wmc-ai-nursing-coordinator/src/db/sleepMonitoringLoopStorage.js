@@ -132,7 +132,7 @@ export function mergeSleepMonitoringInstances(patients) {
   let instances = { ...(raw.instances || {}) }
   let mutated = false
 
-  const roster = patients?.length ? patients : [{ id: 'demo', fullName: 'Demo Resident', assignedNurse: 'R.N. Patel' }]
+  const roster = patients?.length ? patients : []
 
   roster.forEach((p, idx) => {
     const pid = p.id

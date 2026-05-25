@@ -95,27 +95,7 @@ export function seedMedLoopRows(patients) {
   const rows = []
   const today = todayLocalStr()
 
-  if (!patients?.length) {
-    rows.push({
-      id: 'demo::acetaminophen',
-      patientId: 'demo',
-      patientName: 'Demo Resident',
-      room: '100A',
-      medicationName: 'Acetaminophen',
-      dosage: '500 mg',
-      frequency: 'PO q6h',
-      timeDue: '14:00',
-      nurseAssigned: 'Demo Nurse',
-      adminStatus: 'pending',
-      lastGivenAt: null,
-      lastGivenDay: null,
-      notes: [],
-      doctorEscalated: false,
-      delayCount: 0,
-      simAbnormalPostDose: false,
-    })
-    return rows
-  }
+  if (!patients?.length) return rows
 
   patients.forEach((patient, index) => {
     const seeds = MED_LOOP_SEED_BY_PATIENT[patient.id] || [

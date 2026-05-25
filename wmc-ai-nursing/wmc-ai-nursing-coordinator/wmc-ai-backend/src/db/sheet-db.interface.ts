@@ -6,4 +6,6 @@ export interface SheetDb {
   append<T extends object>(tab: SheetTab, row: T): Promise<T>
   update<T extends object>(tab: SheetTab, id: string, patch: Partial<T>): Promise<T | null>
   findById<T extends { id: string }>(tab: SheetTab, id: string): Promise<T | null>
+  /** Optional — file-backed dev store only */
+  clearTabs?(tabs: SheetTab[]): Promise<SheetTab[]>
 }

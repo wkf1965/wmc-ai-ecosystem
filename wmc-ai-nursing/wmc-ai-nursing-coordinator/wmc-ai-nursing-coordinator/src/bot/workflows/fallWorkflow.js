@@ -2,7 +2,13 @@
  * Fall Incident Workflow — Stage 2
  */
 
-const D = '━━━━━━━━━━━━━━━━━━━━━━━━━'
+import {
+  DIVIDER,
+  htmlConfirmHeader,
+  htmlConfirmFooter,
+  htmlField,
+  htmlWarning,
+} from '../utils/workflowFormat.js'
 
 export const FALL_WORKFLOW = {
   name: 'fall',
@@ -34,23 +40,23 @@ export const FALL_WORKFLOW = {
       : data.time
 
     const hasInjury = /^yes/i.test(data.injury ?? '')
-    const flag = hasInjury ? '\n⚠️ *Injury reported — escalate to doctor immediately*' : ''
+    const flag = hasInjury ? htmlWarning('Injury reported — escalate to doctor immediately') : ''
 
     return [
-      '📋 *Please confirm this fall incident report:*',
-      D, '',
-      `👤 Patient: ${data.patientName}`,
-      `🏥 Room: ${data.room}`,
-      `🕐 Time: ${time}`,
-      `📄 What Happened: ${data.whatHappened}`,
-      `🩹 Injury: ${data.injury}`,
-      `💊 Action Taken: ${data.actionTaken}`,
-      `👨‍⚕️ Doctor Informed: ${data.doctorInformed}`,
-      `👨‍👩‍👦 Family Informed: ${data.familyInformed}`,
-      `📝 Remark: ${data.remark}`,
+      htmlConfirmHeader('Please confirm this fall incident report:'),
+      DIVIDER, '',
+      htmlField('👤 Patient:', data.patientName),
+      htmlField('🏥 Room:', data.room),
+      htmlField('🕐 Time:', time),
+      htmlField('📄 What Happened:', data.whatHappened),
+      htmlField('🩹 Injury:', data.injury),
+      htmlField('💊 Action Taken:', data.actionTaken),
+      htmlField('👨‍⚕️ Doctor Informed:', data.doctorInformed),
+      htmlField('👨‍👩‍👦 Family Informed:', data.familyInformed),
+      htmlField('📝 Remark:', data.remark),
       flag,
-      '', D,
-      'Reply *yes* to save  |  *no* to cancel',
-    ].filter(l => l !== undefined).join('\n')
+      '', DIVIDER,
+      htmlConfirmFooter(),
+    ].filter(Boolean).join('\n')
   },
 }

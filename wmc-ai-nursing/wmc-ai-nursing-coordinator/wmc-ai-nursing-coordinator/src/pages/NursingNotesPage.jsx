@@ -1,10 +1,11 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useCallback } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { Filter, Plus, Trash2, UserRound } from 'lucide-react'
+import { Filter, Loader2, Plus, Trash2, UserRound } from 'lucide-react'
 import { PageHeader, Card, Badge } from '../components/ui'
 import ConfirmDialog from '../components/ConfirmDialog.jsx'
 import { usePatients } from '../hooks/usePatients.js'
 import { useNursingNotes } from '../hooks/useNursingNotes.js'
+import { DELETE_RECORDS_CONFIRM, DELETE_RECORDS_SUCCESS, deleteAllOldRecords } from '../api/dashboardApi.js'
 
 function painTone(score) {
   if (score >= 7) return 'text-red-700 bg-red-50 ring-red-100'
@@ -22,10 +23,32 @@ function Mini({ label, children }) {
 }
 
 export default function NursingNotesPage() {
-  const { patients, getById } = usePatients()
-  const { notes, removeNote } = useNursingNotes()
+  const { patients, getById, refresh: refreshPatients } = usePatients()
+  const { notes, removeNote, refresh: refreshNotes } = useNursingNotes()
   const [searchParams, setSearchParams] = useSearchParams()
   const [deleteId, setDeleteId] = useState(null)
+  const [deletingAll, setDeletingAll] = useState(false)
+  const [deleteAllFeedback, setDeleteAllFeedback] = useState(null)
+
+  const handleDeleteOldRecords = useCallback(async () => {
+    if (!window.confirm(DELETE_RECORDS_CONFIRM)) return
+
+    setDeletingAll(true)
+    setDeleteAllFeedback(null)
+    try {
+      await deleteAllOldRecords()
+      refreshPatients()
+      refreshNotes()
+      setDeleteAllFeedback({ type: 'success', message: DELETE_RECORDS_SUCCESS })
+    } catch (error) {
+      const offline = error instanceof Error && error.name === 'BackendOfflineError'
+      const message = offline ? 'Backend offline' : error instanceof Error ? error.message : 'Failed to delete records.'
+      console.error('[Nursing Notes] Delete old records failed:', error)
+      setDeleteAllFeedback({ type: 'error', message })
+    } finally {
+      setDeletingAll(false)
+    }
+  }, [refreshNotes, refreshPatients])
 
   const qPatient = searchParams.get('patient')
   const patientId = useMemo(() => {
@@ -93,9 +116,35 @@ export default function NursingNotesPage() {
               <Plus className="h-4 w-4" aria-hidden />
               Add note
             </Link>
+            <button
+              type="button"
+              onClick={handleDeleteOldRecords}
+              disabled={deletingAll}
+              className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-semibold text-red-800 shadow-sm hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {deletingAll ? (
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+              ) : (
+                <Trash2 className="h-4 w-4" aria-hidden />
+              )}
+              {deletingAll ? 'Deleting...' : 'Delete Old Records'}
+            </button>
           </div>
         }
       />
+
+      {deleteAllFeedback ? (
+        <section
+          role="status"
+          className={`mb-4 rounded-2xl border p-3 text-sm ${
+            deleteAllFeedback.type === 'error'
+              ? 'border-red-200 bg-red-50 text-red-900'
+              : 'border-emerald-200 bg-emerald-50 text-emerald-900'
+          }`}
+        >
+          {deleteAllFeedback.message}
+        </section>
+      ) : null}
 
       {filtered.length === 0 ? (
         <Card padding="p-8" className="text-center text-slate-600">

@@ -23,13 +23,21 @@ import { log } from '../utils/logger.js'
 
 /** @type {Record<string, string>} workflow name → sheet tab name */
 const TAB = {
-  admit:   'Admissions',
-  vitals:  'Vitals',
-  fall:    'Falls',
-  turning: 'Turning',
-  rehab:   'Rehab',
-  med:     'Medicine',
-  alert:   'Alerts',
+  admit:            'Admissions',
+  vitals:           'Vitals',
+  fall:             'Falls',
+  turning:          'Turning',
+  rehab:            'Rehab',
+  med:              'Medicine',
+  alert:            'Alerts',
+  ot_records:         'ot_records',
+  ot_payroll_summary: 'ot_payroll_summary',
+  side_turning:       'side_turning',
+  inventory_logs:     'Inventory_Logs',
+  stock_balance:      'Stock_Balance',
+  patient_usage:      'Patient_Usage',
+  nurse_usage:        'Nurse_Usage',
+  low_stock_alerts:   'Low_Stock_Alerts',
 }
 
 // ── Credential helpers (lazy — read at call time, not at module load) ─────────
@@ -294,6 +302,126 @@ export async function saveAlertRecord(data, nurseInfo) {
   ]
   await appendRow(TAB.alert, row)
   log.info('[sheet] alert record saved — patient:', data.patientName)
+}
+
+// ── OT Payroll ───────────────────────────────────────────────────────────────
+
+/**
+ * Append one OT shift record to the "ot_records" tab.
+ *
+ * Sheet columns (14, in order):
+ *   date | staff_name | shift | scheduled_start | scheduled_end
+ *   punch_in | punch_out | ot_hours | ot_rate | ot_amount
+ *   record_status | approval_status | approved_by | remarks
+ */
+export async function saveOtRecord(data) {
+  const row = [
+    data.date            ?? '',
+    data.staff_name      ?? '',
+    data.shift           ?? '',
+    data.scheduled_start ?? '',
+    data.scheduled_end   ?? '',
+    data.punch_in        ?? '',
+    data.punch_out       ?? '',
+    data.ot_hours        ?? 0,
+    data.ot_rate         ?? 10,
+    data.ot_amount       ?? 0,
+    data.record_status   ?? '',
+    data.approval_status ?? 'Pending',
+    data.approved_by     ?? '',
+    data.remarks         ?? '',
+  ]
+  await appendRow(TAB.ot_records, row)
+  log.info('[sheet] OT record saved — staff:', data.staff_name)
+}
+
+/**
+ * Append one monthly payroll summary row to the "ot_payroll_summary" tab.
+ *
+ * Sheet columns (in order):
+ *   month | staff_name | total_ot_hours | ot_rate | total_ot_amount
+ *   approved_by | remarks
+ */
+export async function saveOtPayrollSummary(data) {
+  const row = [
+    data.month            ?? '',
+    data.staff_name       ?? '',
+    data.total_ot_hours   ?? 0,
+    data.ot_rate          ?? 10,
+    data.total_ot_amount  ?? 0,
+    data.approved_by      ?? '',
+    data.remarks          ?? '',
+  ]
+  await appendRow(TAB.ot_payroll_summary, row)
+  log.info('[sheet] OT payroll summary saved — month:', data.month, 'staff:', data.staff_name)
+}
+
+// ── Inventory ────────────────────────────────────────────────────────────────
+
+/**
+ * Append one inventory usage event to the "Inventory_Logs" tab.
+ *
+ * Sheet columns (9, in order):
+ *   timestamp | nurse_name | telegram_username | patient_name | room
+ *   item_key  | size       | qty               | remarks
+ */
+export async function saveInventoryLog(data) {
+  const row = [
+    data.timestamp         ?? new Date().toISOString(),
+    data.nurse_name        ?? '',
+    data.telegram_username ?? '',
+    data.patient_name      ?? '',
+    data.room              ?? '',
+    data.item_key          ?? '',
+    data.size              ?? '',
+    data.qty               ?? 0,
+    data.remarks           ?? '',
+  ]
+  await appendRow(TAB.inventory_logs, row)
+  log.info('[sheet] inventory log saved — item:', data.item_key, 'qty:', data.qty)
+}
+
+/**
+ * Append a stock snapshot row to the "Stock_Balance" tab.
+ *
+ * Sheet columns (6, in order):
+ *   item_key | item_name | opening_stock | used | balance | minimum_level
+ */
+export async function saveStockBalance(data) {
+  const row = [
+    data.item_key      ?? '',
+    data.item_name     ?? '',
+    data.opening_stock ?? 0,
+    data.used          ?? 0,
+    data.balance       ?? 0,
+    data.minimum_level ?? 0,
+  ]
+  await appendRow(TAB.stock_balance, row)
+  log.info('[sheet] stock balance saved — item:', data.item_key, 'balance:', data.balance)
+}
+
+// ── Side Turning ─────────────────────────────────────────────────────────────
+
+/**
+ * Append one side-turning record to the "side_turning" tab.
+ *
+ * Sheet columns (8, in order):
+ *   timestamp | room_number | patient_name | turning_position
+ *   nurse_name | next_turning_due | status | source
+ */
+export async function saveSideTurningRecord(data) {
+  const row = [
+    data.timestamp        ?? new Date().toISOString(),
+    data.room_number      ?? '',
+    data.patient_name     ?? '',
+    data.turning_position ?? '',
+    data.nurse_name       ?? '',
+    data.next_turning_due ?? '',
+    data.status           ?? 'OK',
+    data.source           ?? 'telegram',
+  ]
+  await appendRow(TAB.side_turning, row)
+  log.info('[sheet] side turning saved — room:', data.room_number, 'position:', data.turning_position)
 }
 
 // ── Dispatcher ───────────────────────────────────────────────────────────────

@@ -2,7 +2,12 @@
  * Admit Workflow — Stage 2
  */
 
-const D = '━━━━━━━━━━━━━━━━━━━━━━━━━'
+import {
+  DIVIDER,
+  htmlConfirmHeader,
+  htmlConfirmFooter,
+  htmlField,
+} from '../utils/workflowFormat.js'
 
 export const ADMIT_WORKFLOW = {
   name: 'admit',
@@ -30,18 +35,18 @@ export const ADMIT_WORKFLOW = {
       : data.admissionDate
 
     return [
-      '📋 *Please confirm this admission record:*',
-      D, '',
-      `👤 Patient Name: ${data.patientName}`,
-      `📅 Age: ${data.age}`,
-      `⚥ Gender: ${data.gender}`,
-      `🏥 Room: ${data.room}`,
-      `🩺 Diagnosis: ${data.diagnosis}`,
-      `👨‍⚕️ Doctor: ${data.doctor}`,
-      `📆 Admission Date: ${date}`,
-      `📝 Remark: ${data.remark}`,
-      '', D,
-      'Reply *yes* to save  |  *no* to cancel',
+      htmlConfirmHeader('Please confirm this admission record:'),
+      DIVIDER, '',
+      htmlField('👤 Patient Name:', data.patientName),
+      htmlField('📅 Age:', data.age),
+      htmlField('⚥ Gender:', data.gender),
+      htmlField('🏥 Room:', data.room),
+      htmlField('🩺 Diagnosis:', data.diagnosis),
+      htmlField('👨‍⚕️ Doctor:', data.doctor),
+      htmlField('📆 Admission Date:', date),
+      htmlField('📝 Remark:', data.remark),
+      '', DIVIDER,
+      htmlConfirmFooter(),
     ].join('\n')
   },
 }

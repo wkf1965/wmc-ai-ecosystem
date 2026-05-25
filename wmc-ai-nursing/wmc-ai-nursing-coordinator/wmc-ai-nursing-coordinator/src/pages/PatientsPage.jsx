@@ -1,10 +1,16 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Eye, Pencil, Plus, Search, Trash2 } from 'lucide-react'
+import { Eye, Loader2, Pencil, Plus, Search, Trash2 } from 'lucide-react'
 import { PageHeader, Card, Badge } from '../components/ui'
 import ConfirmDialog from '../components/ConfirmDialog.jsx'
 import { usePatients } from '../hooks/usePatients.js'
 import { deriveRiskScore, initialsFromFullName } from '../db/patientSchema.js'
+import { useNursingNotes } from '../hooks/useNursingNotes.js'
+import {
+  RESET_PATIENTS_CONFIRM,
+  RESET_PATIENTS_SUCCESS,
+  deletePatientRecords,
+} from '../api/dashboardApi.js'
 
 function riskVariant(score) {
   if (score >= 70) return 'danger'
@@ -13,9 +19,32 @@ function riskVariant(score) {
 }
 
 export default function PatientsPage() {
-  const { patients, removePatient } = usePatients()
+  const { patients, removePatient, refresh: refreshPatients } = usePatients()
+  const { refresh: refreshNotes } = useNursingNotes()
   const [query, setQuery] = useState('')
   const [deleteId, setDeleteId] = useState(null)
+  const [deletingAll, setDeletingAll] = useState(false)
+  const [deleteAllFeedback, setDeleteAllFeedback] = useState(null)
+
+  const handleDeletePatientRecords = useCallback(async () => {
+    if (!window.confirm(RESET_PATIENTS_CONFIRM)) return
+
+    setDeletingAll(true)
+    setDeleteAllFeedback(null)
+    try {
+      await deletePatientRecords()
+      refreshPatients()
+      refreshNotes()
+      setDeleteAllFeedback({ type: 'success', message: RESET_PATIENTS_SUCCESS })
+    } catch (error) {
+      const offline = error instanceof Error && error.name === 'BackendOfflineError'
+      const message = offline ? 'Backend offline' : error instanceof Error ? error.message : 'Failed to delete patient records.'
+      console.error('[Patients] Delete patient records failed:', error)
+      setDeleteAllFeedback({ type: 'error', message })
+    } finally {
+      setDeletingAll(false)
+    }
+  }, [refreshNotes, refreshPatients])
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -42,15 +71,43 @@ export default function PatientsPage() {
         title="Patients"
         description="Live list backed by a local mock database (browser localStorage). Add, edit, or remove residents and rehab clients."
         action={
-          <Link
-            to="/patients/new"
-            className="inline-flex items-center gap-2 rounded-xl bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-teal-700"
-          >
-            <Plus className="h-4 w-4" aria-hidden />
-            Add patient
-          </Link>
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <button
+              type="button"
+              onClick={handleDeletePatientRecords}
+              disabled={deletingAll}
+              className="inline-flex items-center gap-2 rounded-xl border border-red-300 bg-red-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {deletingAll ? (
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+              ) : (
+                <Trash2 className="h-4 w-4" aria-hidden />
+              )}
+              {deletingAll ? 'Deleting...' : 'Delete Patient Records'}
+            </button>
+            <Link
+              to="/patients/new"
+              className="inline-flex items-center gap-2 rounded-xl bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-teal-700"
+            >
+              <Plus className="h-4 w-4" aria-hidden />
+              Add patient
+            </Link>
+          </div>
         }
       />
+
+      {deleteAllFeedback ? (
+        <section
+          role="status"
+          className={`mb-4 rounded-2xl border p-3 text-sm ${
+            deleteAllFeedback.type === 'error'
+              ? 'border-red-200 bg-red-50 text-red-900'
+              : 'border-emerald-200 bg-emerald-50 text-emerald-900'
+          }`}
+        >
+          {deleteAllFeedback.message}
+        </section>
+      ) : null}
 
       <Card className="mb-4" padding="p-4 sm:p-5">
         <label htmlFor="patient-search" className="sr-only">
@@ -141,28 +198,31 @@ export default function PatientsPage() {
                         {p.assignedNurse || '—'}
                       </td>
                       <td className="px-4 py-3">
-                        <div className="flex justify-end gap-1">
+                        <div className="flex justify-end gap-2">
                           <Link
                             to={`/patients/${p.id}`}
-                            className="inline-flex rounded-lg p-2 text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                            className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                             title="View"
                           >
                             <Eye className="h-4 w-4" />
+                            <span className="text-xs font-medium">View</span>
                           </Link>
                           <Link
                             to={`/patients/${p.id}/edit`}
-                            className="inline-flex rounded-lg p-2 text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                            className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                             title="Edit"
                           >
                             <Pencil className="h-4 w-4" />
+                            <span className="text-xs font-medium">Edit</span>
                           </Link>
                           <button
                             type="button"
                             onClick={() => setDeleteId(p.id)}
-                            className="inline-flex rounded-lg p-2 text-red-600 hover:bg-red-50"
+                            className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-red-600 hover:bg-red-50"
                             title="Delete"
                           >
                             <Trash2 className="h-4 w-4" />
+                            <span className="text-xs font-medium">Delete</span>
                           </button>
                         </div>
                       </td>
@@ -177,17 +237,16 @@ export default function PatientsPage() {
 
       <ConfirmDialog
         open={Boolean(pendingDelete)}
-        title="Delete patient?"
-        message={
-          pendingDelete
-            ? `Remove ${pendingDelete.fullName} from the local database. This cannot be undone.`
-            : ''
-        }
+        title="Delete resident?"
+        message="Are you sure you want to delete this resident?"
         confirmLabel="Delete"
         danger
         onCancel={() => setDeleteId(null)}
         onConfirm={() => {
-          if (deleteId) removePatient(deleteId)
+          if (deleteId) {
+            removePatient(deleteId)
+            refreshPatients()
+          }
           setDeleteId(null)
         }}
       />

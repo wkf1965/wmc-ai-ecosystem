@@ -3,6 +3,13 @@ import { PATIENT_STORAGE_KEY } from './patientSchema.js'
 /** Kept for imports that expect the symbol; roster is never auto-filled with fictional rows. */
 export const SEED_PATIENTS = []
 
+const LEGACY_DEMO_PATIENT_NAMES = new Set([
+  'clara nguyen',
+  'david chen',
+  "eleanor o'connor",
+  'demo resident',
+])
+
 function nowIso() {
   return new Date().toISOString()
 }
@@ -29,6 +36,20 @@ export function writePatientsRaw(list) {
   localStorage.setItem(PATIENT_STORAGE_KEY, JSON.stringify(list))
 }
 
+function stripLegacyDemoPatients(list) {
+  if (!Array.isArray(list) || list.length === 0) return []
+  return list.filter((row) => {
+    const fullName = String(row?.fullName || row?.name || '')
+      .trim()
+      .toLowerCase()
+    if (!fullName) return true
+    if (LEGACY_DEMO_PATIENT_NAMES.has(fullName)) return false
+    // Additional guard for old synthetic labels.
+    if (fullName.includes('demo') && fullName.includes('resident')) return false
+    return true
+  })
+}
+
 /** @deprecated Use getAllPatients — does not inject demo data */
 export function ensureSeed() {
   const existing = readPatientsRaw()
@@ -37,7 +58,12 @@ export function ensureSeed() {
 
 export function getAllPatients() {
   const raw = readPatientsRaw()
-  return Array.isArray(raw) ? raw : []
+  if (!Array.isArray(raw)) return []
+  const cleaned = stripLegacyDemoPatients(raw)
+  if (cleaned.length !== raw.length) {
+    writePatientsRaw(cleaned)
+  }
+  return cleaned
 }
 
 export function getPatientById(id) {

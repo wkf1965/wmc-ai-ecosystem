@@ -277,7 +277,7 @@ export default function InfectionControlLoopPage() {
       contactPrecautions: row.contactPrecautions === 'standard' ? 'contact' : row.contactPrecautions,
     })
     bumpInfectionControlScore('isolationNeeded', 1)
-    showToast('Isolation started (simulation).', 'warn')
+    showToast('Isolation started.', 'warn')
   }
 
   function handleMarkPpe() {
@@ -300,7 +300,7 @@ export default function InfectionControlLoopPage() {
       possibleSepsisFlag: Number(row.temperatureC) >= 38 || row.possibleSepsisFlag,
     })
     bumpInfectionControlScore('urgentReview', 1)
-    showToast('Escalated to doctor (simulation).', 'warn')
+    showToast('Escalated to doctor.', 'warn')
   }
 
   function handleReport() {
@@ -319,10 +319,10 @@ export default function InfectionControlLoopPage() {
     <div className="mx-auto max-w-[1680px] pb-8">
       <PageHeader
         title="Infection Control Loop"
-        description="Simulation rounding board for febrile illness cues, isolation, PPE, and escalation — always follow facility infection prevention policy."
+        description="Local rounding board for febrile illness cues, isolation, PPE, and escalation — always follow facility infection prevention policy."
         action={
           <div className="flex flex-wrap gap-2">
-            <Badge variant="info">Simulation mode</Badge>
+            <Badge variant="info">Local mode</Badge>
             <Link
               to="/wound-care-loop"
               className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50"
@@ -388,7 +388,7 @@ export default function InfectionControlLoopPage() {
           </button>
         </div>
         <p className="mt-3 text-xs text-slate-500">
-          Tap a resident card, then document checks or precautions. Resolved cases appear in the board when simulation cues clear.
+          Tap a resident card, then document checks or precautions. Resolved cases appear in the board as local cues clear.
         </p>
       </Card>
 

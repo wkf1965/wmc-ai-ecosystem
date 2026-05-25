@@ -48,6 +48,15 @@ importers:
       '@types/react-dom':
         specifier: ^18.3.3
         version: 18.3.7(@types/react@18.3.28)
+      autoprefixer:
+        specifier: ^10.4.20
+        version: 10.5.0(postcss@8.5.14)
+      postcss:
+        specifier: ^8.4.49
+        version: 8.5.14
+      tailwindcss:
+        specifier: ^3.4.17
+        version: 3.4.19
       typescript:
         specifier: ^5.5.4
         version: 5.9.3
@@ -76,6 +85,15 @@ importers:
       '@types/react-dom':
         specifier: ^18.3.3
         version: 18.3.7(@types/react@18.3.28)
+      autoprefixer:
+        specifier: ^10.4.20
+        version: 10.5.0(postcss@8.5.14)
+      postcss:
+        specifier: ^8.4.49
+        version: 8.5.14
+      tailwindcss:
+        specifier: ^3.4.17
+        version: 3.4.19
       typescript:
         specifier: ^5.5.4
         version: 5.9.3
@@ -104,6 +122,15 @@ importers:
       '@types/react-dom':
         specifier: ^18.3.3
         version: 18.3.7(@types/react@18.3.28)
+      autoprefixer:
+        specifier: ^10.4.20
+        version: 10.5.0(postcss@8.5.14)
+      postcss:
+        specifier: ^8.4.49
+        version: 8.5.14
+      tailwindcss:
+        specifier: ^3.4.17
+        version: 3.4.19
       typescript:
         specifier: ^5.5.4
         version: 5.9.3
@@ -132,6 +159,15 @@ importers:
       '@types/react-dom':
         specifier: ^18.3.3
         version: 18.3.7(@types/react@18.3.28)
+      autoprefixer:
+        specifier: ^10.4.20
+        version: 10.5.0(postcss@8.5.14)
+      postcss:
+        specifier: ^8.4.49
+        version: 8.5.14
+      tailwindcss:
+        specifier: ^3.4.17
+        version: 3.4.19
       typescript:
         specifier: ^5.5.4
         version: 5.9.3
@@ -212,6 +248,15 @@ importers:
       '@types/react-dom':
         specifier: ^18.3.3
         version: 18.3.7(@types/react@18.3.28)
+      autoprefixer:
+        specifier: ^10.4.20
+        version: 10.5.0(postcss@8.5.14)
+      postcss:
+        specifier: ^8.4.49
+        version: 8.5.14
+      tailwindcss:
+        specifier: ^3.4.17
+        version: 3.4.19
       typescript:
         specifier: ^5.5.4
         version: 5.9.3

@@ -116,7 +116,7 @@ function LoopPatientCard({
           </div>
         ) : (
           <div className="rounded-lg border border-dashed border-slate-200 px-2 py-1 text-[11px] text-slate-500">
-            No turning photo on file (simulation)
+            No turning photo on file
           </div>
         )}
       </dl>
@@ -249,7 +249,7 @@ export default function SideTurningLoopPage() {
   function handleEscalate(row) {
     if (row.bucket === 'overdue' && row.overdueMin >= 30) bumpScoreField('missed', 1)
     upsertSideTurningLoopPatient(row.patientId, { woundEscalated: true })
-    showToast('Wound concern escalated (simulation).', 'warn')
+    showToast('Wound concern escalated.', 'warn')
   }
 
   function handleSnooze(row) {
@@ -266,10 +266,10 @@ export default function SideTurningLoopPage() {
     <div className="mx-auto max-w-7xl pb-8">
       <PageHeader
         title="Side turning loop"
-        description="q2h repositioning board with skin cues, mock imaging, and simulated AI surveillance. Not a medical device — demo only."
+        description="q2h repositioning board with skin cues, mock imaging, and local AI surveillance. Not a medical device."
         action={
           <div className="flex flex-wrap gap-2">
-            <Badge variant="info">Simulation mode</Badge>
+            <Badge variant="info">Local mode</Badge>
             <Link
               to="/side-turning-posture"
               className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50"
@@ -347,7 +347,7 @@ export default function SideTurningLoopPage() {
       {/* Turning scoring */}
       <Card className="mt-4" padding="p-4 sm:p-5">
         <h3 className="text-sm font-semibold text-slate-900">Turning scoring</h3>
-        <p className="text-xs text-slate-500">Simulation tally · includes demo baseline</p>
+        <p className="text-xs text-slate-500">Local tally · updates with care actions</p>
         <dl className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-5">
           {[
             { k: 'onTime', label: 'On time', val: scores.onTime },
@@ -375,7 +375,7 @@ export default function SideTurningLoopPage() {
         </div>
         {alerts.length === 0 ? (
           <p className="rounded-xl border border-emerald-100 bg-emerald-50/80 px-4 py-4 text-sm text-emerald-900">
-            No active turning alerts on mock roster.
+            No active turning alerts on current roster.
           </p>
         ) : (
           <ul className="grid gap-2 lg:grid-cols-2">

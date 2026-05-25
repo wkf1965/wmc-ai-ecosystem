@@ -261,14 +261,6 @@ function groupByDate(notes: NursingNote[]) {
     .map(([date, entries]) => ({ date, entries: entries.sort(sortByDateDesc) }))
 }
 
-function patientRoom(patientId: string) {
-  const value = patientId.replace(/\D/g, "")
-  const suffix = value.padStart(3, "0")
-  const wing = Number.parseInt(suffix, 10) % 4
-  const map = ["A", "B", "C", "D"]
-  return `${map[wing]}-2${suffix.slice(-2)}`
-}
-
 export default function PatientProfilePage({ params }: Params) {
   const [patient, setPatient] = useState<Patient | null>(null)
   const [notes, setNotes] = useState<NursingNote[]>([])
@@ -602,7 +594,7 @@ export default function PatientProfilePage({ params }: Params) {
       const escalation = createEscalationFromNote({
         patientId: patient.id,
         patientName: patient.fullName,
-        room: patientRoom(patient.id),
+        room: patient.roomNumber || "—",
         note: savedNote,
         riskScore: noteRisk.totalScore,
       })
@@ -668,7 +660,7 @@ export default function PatientProfilePage({ params }: Params) {
       const escalation = createEscalationFromNote({
         patientId: patient.id,
         patientName: patient.fullName,
-        room: patientRoom(patient.id),
+        room: patient.roomNumber || "—",
         note: savedNote,
         riskScore: noteRisk.totalScore,
       })
@@ -737,7 +729,7 @@ export default function PatientProfilePage({ params }: Params) {
       const escalation = createEscalationFromNote({
         patientId: patient.id,
         patientName: patient.fullName,
-        room: patientRoom(patient.id),
+        room: patient.roomNumber || "—",
         note: savedNote,
         riskScore: noteRisk.totalScore,
       })
@@ -786,7 +778,7 @@ export default function PatientProfilePage({ params }: Params) {
             <p className="text-sm font-semibold text-slate-500 uppercase tracking-wide">Patient Profile</p>
             <h1 className="mt-1 text-2xl font-bold text-slate-900">{patient.fullName}</h1>
             <p className="mt-1 text-slate-500">
-              {patient.age} y/o • {patient.gender} • Admission: {patient.admissionDate} • Room {patientRoom(patient.id)}
+              {patient.age} y/o • {patient.gender} • Admission: {patient.admissionDate} • Room {patient.roomNumber || "—"}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">

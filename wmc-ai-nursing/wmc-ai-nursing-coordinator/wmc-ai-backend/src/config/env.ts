@@ -19,4 +19,8 @@ export const config = {
   googleSheetsSpreadsheetId: process.env.GOOGLE_SHEETS_SPREADSHEET_ID ?? '',
   /** Optional path to service account JSON (else use GOOGLE_APPLICATION_CREDENTIALS) */
   googleServiceAccountJsonPath: process.env.GOOGLE_SERVICE_ACCOUNT_JSON_PATH ?? '',
+  databaseUrl: process.env.DATABASE_URL ?? '',
+  llmProvider: (process.env.LLM_PROVIDER ?? 'auto') as 'auto' | 'deepseek' | 'openai' | 'rules',
+  deepseekApiKey: process.env.DEEPSEEK_API_KEY ?? '',
+  openaiApiKey: process.env.OPENAI_API_KEY ?? '',
 } as const

@@ -14,6 +14,7 @@ export const REHAB_STATUS_OPTIONS = [
 export type Patient = {
   id: string
   fullName: string
+  roomNumber: string
   age: number
   gender: string
   diagnosis: string
@@ -34,6 +35,7 @@ export type Patient = {
 
 export type PatientFormData = {
   fullName: string
+  roomNumber: string
   age: string
   gender: string
   diagnosis: string
@@ -53,6 +55,22 @@ export type PatientFormData = {
 const STORAGE_KEY = "wmc_nursing_patients_v1"
 export const CLINICAL_DATA_UPDATE_EVENT = "wmc:clinical-data-updated"
 const LAST_UPDATE_KEY = "wmc_nursing_last_update"
+const ROOM_NUMBER_PATTERN = /^[A-D]-\d{3}$/
+const LEGACY_DEMO_PATIENT_NAMES = new Set([
+  "demo resident",
+  "clara nguyen",
+  "david chen",
+  "eleanor o'connor",
+  "margaret chen",
+  "samuel rivera",
+  "jamal okafor",
+  "elena morales",
+  "yuki sato",
+  "priya menon",
+  "miguel santos",
+  "fatima al-hassan",
+  "oliver grant",
+])
 
 export function announceClinicalDataUpdate() {
   if (typeof window === "undefined") return
@@ -60,248 +78,7 @@ export function announceClinicalDataUpdate() {
   window.dispatchEvent(new Event(CLINICAL_DATA_UPDATE_EVENT))
 }
 
-export const INITIAL_PATIENTS: Patient[] = [
-  {
-    id: "p1001",
-    fullName: "Margaret Chen",
-    age: 82,
-    gender: "Female",
-    diagnosis: "Congestive heart failure, Type 2 diabetes, mild cognitive impairment",
-    admissionDate: "2026-02-14",
-    mobilityStatus: "Walker with supervision",
-    feedingStatus: "Assisted feeding, soft diet",
-    toiletAssistance: "Assistance x1",
-    fallRisk: "Moderate",
-    pressureSoreRisk: "Moderate",
-    mentalStatus: "Oriented to person and place",
-    currentMedications: "Furosemide, metformin, atorvastatin, donepezil",
-    familyContact: "Amy Chen (daughter) • +86 138 0000 1122",
-    assignedNurse: "R.N. Patel",
-    rehabilitationStatus: "Active rehabilitation",
-    createdAt: "2026-02-14T09:12:00.000Z",
-    updatedAt: "2026-05-13T06:10:00.000Z",
-  },
-  {
-    id: "p1002",
-    fullName: "Samuel Rivera",
-    age: 74,
-    gender: "Male",
-    diagnosis: "Post-stroke weakness, hypertension, chronic kidney disease stage 3",
-    admissionDate: "2026-03-20",
-    mobilityStatus: "Two-person transfer",
-    feedingStatus: "Total assist, minced and moist",
-    toiletAssistance: "Maximal assist",
-    fallRisk: "High",
-    pressureSoreRisk: "High",
-    mentalStatus: "Flat affect, intermittent confusion",
-    currentMedications: "Aspirin, amlodipine, sertraline, sodium bicarbonate",
-    familyContact: "Laura Rivera (daughter) • +1 786 555 0192",
-    assignedNurse: "Nurse Kim",
-    rehabilitationStatus: "Active rehabilitation",
-    createdAt: "2026-03-20T10:40:00.000Z",
-    updatedAt: "2026-05-13T05:40:00.000Z",
-  },
-  {
-    id: "p1003",
-    fullName: "Eleanor O'Connor",
-    age: 89,
-    gender: "Female",
-    diagnosis: "COPD, osteoarthritis, urinary incontinence",
-    admissionDate: "2025-11-02",
-    mobilityStatus: "Wheelchair dependent",
-    feedingStatus: "Independent, chopped solids",
-    toiletAssistance: "Supervision",
-    fallRisk: "Moderate",
-    pressureSoreRisk: "Low",
-    mentalStatus: "Mildly forgetful, generally calm",
-    currentMedications: "Tiotropium, albuterol PRN, acetaminophen, oxybutynin",
-    familyContact: "Michael O'Connor (son) • +1 212 555 2211",
-    assignedNurse: "Nurse Patel",
-    rehabilitationStatus: "Long-term care",
-    createdAt: "2025-11-02T14:11:00.000Z",
-    updatedAt: "2026-05-12T18:20:00.000Z",
-  },
-  {
-    id: "p1004",
-    fullName: "Jamal Okafor",
-    age: 68,
-    gender: "Male",
-    diagnosis: "Chronic obstructive pulmonary disease, atrial fibrillation",
-    admissionDate: "2026-01-08",
-    mobilityStatus: "Independent with cane",
-    feedingStatus: "Independent, regular diet",
-    toiletAssistance: "Assistance x1 for safety",
-    fallRisk: "Low",
-    pressureSoreRisk: "Low",
-    mentalStatus: "Alert and cooperative",
-    currentMedications: "Warfarin, formoterol, budesonide, metoprolol",
-    familyContact: "Chimamanda Okafor (spouse) • +234 801 000 7744",
-    assignedNurse: "Nurse Lee",
-    rehabilitationStatus: "Not in rehabilitation",
-    createdAt: "2026-01-08T08:25:00.000Z",
-    updatedAt: "2026-05-10T20:05:00.000Z",
-  },
-  {
-    id: "p1005",
-    fullName: "Clara Nguyen",
-    age: 76,
-    gender: "Female",
-    diagnosis: "Post-operative hip fracture, atrial fibrillation, anemia",
-    admissionDate: "2026-04-28",
-    mobilityStatus: "Bed-chair transfer only",
-    feedingStatus: "Assisted, high-protein pureed",
-    toiletAssistance: "Partial assist",
-    fallRisk: "High",
-    pressureSoreRisk: "High",
-    mentalStatus: "Anxious, sometimes disoriented at night",
-    currentMedications: "Apixaban, bisacodyl, tramadol, iron supplements",
-    familyContact: "Linh Nguyen (daughter) • +84 909 223 118",
-    assignedNurse: "Nurse Santos",
-    rehabilitationStatus: "Active rehabilitation",
-    createdAt: "2026-04-28T11:09:00.000Z",
-    updatedAt: "2026-05-13T07:05:00.000Z",
-  },
-  {
-    id: "p1006",
-    fullName: "Elena Morales",
-    age: 90,
-    gender: "Female",
-    diagnosis: "Dementia with behavioral symptoms, hypertension",
-    admissionDate: "2025-07-17",
-    mobilityStatus: "Ambulates with close assist",
-    feedingStatus: "Assisted feeding, pureed diet",
-    toiletAssistance: "Full assist",
-    fallRisk: "High",
-    pressureSoreRisk: "Moderate",
-    mentalStatus: "Requires reorientation frequently",
-    currentMedications: "Memantine, lisinopril, trazodone",
-    familyContact: "Rosa Morales (daughter) • +1 305 555 0187",
-    assignedNurse: "Nurse Lee",
-    rehabilitationStatus: "Long-term care",
-    createdAt: "2025-07-17T13:32:00.000Z",
-    updatedAt: "2026-05-12T21:20:00.000Z",
-  },
-  {
-    id: "p1007",
-    fullName: "Yuki Sato",
-    age: 79,
-    gender: "Female",
-    diagnosis: "Parkinson’s disease, glaucoma, constipation",
-    admissionDate: "2026-03-03",
-    mobilityStatus: "Shuffling gait, needs arm support",
-    feedingStatus: "Independent, requires slow eating",
-    toiletAssistance: "Assistance x1",
-    fallRisk: "Moderate",
-    pressureSoreRisk: "Moderate",
-    mentalStatus: "Cooperative, occasionally irritable",
-    currentMedications: "Carbidopa-levodopa, latanoprost, senna",
-    familyContact: "Kenji Sato (son) • +81 90 0000 4455",
-    assignedNurse: "R.N. Patel",
-    rehabilitationStatus: "Active rehabilitation",
-    createdAt: "2026-03-03T10:18:00.000Z",
-    updatedAt: "2026-05-11T09:15:00.000Z",
-  },
-  {
-    id: "p1008",
-    fullName: "Priya Menon",
-    age: 71,
-    gender: "Female",
-    diagnosis: "Rheumatoid arthritis, osteopenia, atrial flutter",
-    admissionDate: "2026-02-02",
-    mobilityStatus: "Uses walker, fatigue with stairs",
-    feedingStatus: "Independent, soft diet",
-    toiletAssistance: "Partial assist",
-    fallRisk: "Moderate",
-    pressureSoreRisk: "Low",
-    mentalStatus: "Clear, low mood",
-    currentMedications: "Hydroxychloroquine, methotrexate, calcium carbonate, vitamin D3",
-    familyContact: "Priya Reddy (daughter-in-law) • +65 8822 9931",
-    assignedNurse: "Nurse Kim",
-    rehabilitationStatus: "Not in rehabilitation",
-    createdAt: "2026-02-02T07:50:00.000Z",
-    updatedAt: "2026-05-09T16:05:00.000Z",
-  },
-  {
-    id: "p1009",
-    fullName: "Miguel Santos",
-    age: 83,
-    gender: "Male",
-    diagnosis: "Dementia, recurrent UTIs, BPH",
-    admissionDate: "2025-12-25",
-    mobilityStatus: "Requires supervision with walker",
-    feedingStatus: "Partial assist, regular diet",
-    toiletAssistance: "Maximal assist",
-    fallRisk: "High",
-    pressureSoreRisk: "High",
-    mentalStatus: "Generally pleasant, worse in late afternoon",
-    currentMedications: "Nitrofurantoin (prophylactic), tamsulosin, omeprazole",
-    familyContact: "Ana Santos (wife) • +34 600 445 778",
-    assignedNurse: "Nurse Santos",
-    rehabilitationStatus: "Long-term care",
-    createdAt: "2025-12-25T14:55:00.000Z",
-    updatedAt: "2026-05-13T07:40:00.000Z",
-  },
-  {
-    id: "p1010",
-    fullName: "David Chen",
-    age: 77,
-    gender: "Male",
-    diagnosis: "Ischemic stroke, hyperlipidemia, depression",
-    admissionDate: "2026-05-01",
-    mobilityStatus: "Limited stand, needs two-person support",
-    feedingStatus: "Assisted, pureed",
-    toiletAssistance: "Assistance x2",
-    fallRisk: "High",
-    pressureSoreRisk: "Moderate",
-    mentalStatus: "Lethargic but cooperative",
-    currentMedications: "Clopidogrel, atorvastatin, citalopram, senna",
-    familyContact: "Emily Chen (son) • +1 646 555 0140",
-    assignedNurse: "R.N. Patel",
-    rehabilitationStatus: "Active rehabilitation",
-    createdAt: "2026-05-01T09:25:00.000Z",
-    updatedAt: "2026-05-13T06:55:00.000Z",
-  },
-  {
-    id: "p1011",
-    fullName: "Fatima Al-Hassan",
-    age: 86,
-    gender: "Female",
-    diagnosis: "Congestive heart failure, atrial fibrillation, chronic wounds",
-    admissionDate: "2025-09-10",
-    mobilityStatus: "Bedbound, Hoyer lift transfers",
-    feedingStatus: "Assisted, pureed with supplements",
-    toiletAssistance: "Total assist",
-    fallRisk: "High",
-    pressureSoreRisk: "High",
-    mentalStatus: "Usually pleasant, intermittent agitation",
-    currentMedications: "Furosemide, digoxin, enoxaparin, vitamin C",
-    familyContact: "Karim Al-Hassan (son) • +971 55 901 2233",
-    assignedNurse: "Nurse Lee",
-    rehabilitationStatus: "Hospice / comfort care",
-    createdAt: "2025-09-10T08:05:00.000Z",
-    updatedAt: "2026-05-12T23:10:00.000Z",
-  },
-  {
-    id: "p1012",
-    fullName: "Oliver Grant",
-    age: 72,
-    gender: "Male",
-    diagnosis: "Chronic kidney disease, anemia, peripheral vascular disease",
-    admissionDate: "2026-01-29",
-    mobilityStatus: "Slow walker, poor endurance",
-    feedingStatus: "Independent, low sodium diet",
-    toiletAssistance: "Assistance x1",
-    fallRisk: "Moderate",
-    pressureSoreRisk: "Moderate",
-    mentalStatus: "Alert, occasionally frustrated",
-    currentMedications: "Epoetin (as prescribed), furosemide, ferrous sulfate",
-    familyContact: "Margaret Grant (niece) • +1 718 555 0129",
-    assignedNurse: "Nurse Santos",
-    rehabilitationStatus: "Short-stay / transitional",
-    createdAt: "2026-01-29T13:02:00.000Z",
-    updatedAt: "2026-05-11T15:33:00.000Z",
-  },
-]
+export const INITIAL_PATIENTS: Patient[] = []
 
 const nowIso = () => new Date().toISOString()
 const nextId = () => `p${Math.floor(Math.random() * 90000) + 10000}`
@@ -309,6 +86,7 @@ const nextId = () => `p${Math.floor(Math.random() * 90000) + 10000}`
 export function emptyPatientForm(): PatientFormData {
   return {
     fullName: "",
+    roomNumber: "",
     age: "",
     gender: "",
     diagnosis: "",
@@ -330,30 +108,90 @@ function isBrowserStorageAvailable() {
   return typeof window !== "undefined" && typeof window.localStorage !== "undefined"
 }
 
+function stripLegacyDemoPatients(list: Patient[]) {
+  return list.filter((row) => {
+    const fullName = String(row?.fullName || "")
+      .trim()
+      .toLowerCase()
+    if (!fullName) return true
+    if (LEGACY_DEMO_PATIENT_NAMES.has(fullName)) return false
+    if (fullName.includes("demo") && fullName.includes("resident")) return false
+    return true
+  })
+}
+
+function fallbackRoomFromPatientId(patientId: string) {
+  const value = String(patientId || "").replace(/\D/g, "")
+  const suffix = value.padStart(3, "0")
+  const wing = Number.parseInt(suffix || "0", 10) % 4
+  const map = ["A", "B", "C", "D"]
+  return `${map[wing]}-2${suffix.slice(-2)}`
+}
+
+function normalizeRoomNumber(value: string) {
+  return String(value || "").trim().toUpperCase()
+}
+
+export function listAllRoomNumbers() {
+  const rooms: string[] = []
+  for (const wing of ["A", "B", "C", "D"]) {
+    for (let number = 201; number <= 220; number += 1) {
+      rooms.push(`${wing}-${number}`)
+    }
+  }
+  return rooms
+}
+
+export function listAvailableRooms(editingPatientId?: string) {
+  const occupied = new Set(
+    readPatients()
+      .filter((patient) => patient.id !== editingPatientId)
+      .map((patient) => normalizeRoomNumber(patient.roomNumber))
+      .filter((room) => room.length > 0),
+  )
+  return listAllRoomNumbers().filter((room) => !occupied.has(room))
+}
+
+function normalizeStoredPatients(list: Patient[]) {
+  let changed = false
+  const normalized = list.map((row) => {
+    const roomNumber = String((row as { roomNumber?: string }).roomNumber || "").trim()
+    if (roomNumber) return row
+    changed = true
+    return {
+      ...row,
+      roomNumber: fallbackRoomFromPatientId(row.id),
+    }
+  })
+  return { normalized, changed }
+}
+
 export function readPatients(): Patient[] {
   if (!isBrowserStorageAvailable()) {
-    return [...INITIAL_PATIENTS]
+    return []
   }
 
   const raw = window.localStorage.getItem(STORAGE_KEY)
   if (!raw) {
-    const seeded = [...INITIAL_PATIENTS]
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(seeded))
-    return seeded
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify([]))
+    return []
   }
 
   try {
     const parsed = JSON.parse(raw) as Patient[]
-    if (!Array.isArray(parsed) || parsed.length === 0) {
-      const seeded = [...INITIAL_PATIENTS]
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(seeded))
-      return seeded
+    if (!Array.isArray(parsed)) {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify([]))
+      return []
     }
-    return parsed
+    const cleaned = stripLegacyDemoPatients(parsed)
+    const { normalized, changed } = normalizeStoredPatients(cleaned)
+    if (cleaned.length !== parsed.length || changed) {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized))
+    }
+    return normalized
   } catch {
-    const seeded = [...INITIAL_PATIENTS]
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(seeded))
-    return seeded
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify([]))
+    return []
   }
 }
 
@@ -387,6 +225,7 @@ export function createPatient(payload: PatientFormData): Patient {
     id: nextId(),
     age: Number.parseInt(payload.age || "0", 10) || 0,
     fullName: payload.fullName.trim(),
+    roomNumber: normalizeRoomNumber(payload.roomNumber),
     diagnosis: payload.diagnosis.trim(),
     admissionDate: payload.admissionDate.trim(),
     mobilityStatus: payload.mobilityStatus.trim(),
@@ -417,6 +256,7 @@ export function updatePatient(patientId: string, payload: PatientFormData): Pati
     ...payload,
     age: Number.parseInt(payload.age || "0", 10) || 0,
     fullName: payload.fullName.trim(),
+    roomNumber: normalizeRoomNumber(payload.roomNumber),
     diagnosis: payload.diagnosis.trim(),
     admissionDate: payload.admissionDate.trim(),
     mobilityStatus: payload.mobilityStatus.trim(),
@@ -450,6 +290,7 @@ export function removePatient(patientId: string) {
 export function toForm(patient: Patient): PatientFormData {
   return {
     fullName: patient.fullName,
+    roomNumber: patient.roomNumber || "",
     age: String(patient.age),
     gender: patient.gender,
     diagnosis: patient.diagnosis,
@@ -467,12 +308,25 @@ export function toForm(patient: Patient): PatientFormData {
   }
 }
 
-export function validatePatientForm(form: PatientFormData) {
+export function validatePatientForm(form: PatientFormData, editingPatientId?: string) {
   const trim = (value: string) => value.trim()
   const errors: Record<string, string> = {}
 
   if (!trim(form.fullName)) errors.fullName = "Full name is required."
   if (trim(form.fullName).length > 0 && trim(form.fullName).length < 2) errors.fullName = "Full name must be at least 2 characters."
+  const roomNumber = normalizeRoomNumber(form.roomNumber)
+  if (!roomNumber) {
+    errors.roomNumber = "Room number is required."
+  } else if (!ROOM_NUMBER_PATTERN.test(roomNumber)) {
+    errors.roomNumber = "Room must match format A-201 (wing A-D and 3 digits)."
+  } else {
+    const hasDuplicate = readPatients().some(
+      (row) => normalizeRoomNumber(row.roomNumber) === roomNumber && row.id !== editingPatientId,
+    )
+    if (hasDuplicate) {
+      errors.roomNumber = "This room is already assigned to another resident."
+    }
+  }
   if (!trim(form.age)) errors.age = "Age is required."
   if (Number.isNaN(Number.parseInt(form.age, 10)) || Number.parseInt(form.age, 10) <= 0) errors.age = "Age must be a positive number."
   if (Number.parseInt(form.age, 10) > 130) errors.age = "Age must be below 130."

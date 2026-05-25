@@ -2,7 +2,13 @@
  * Side Turning Workflow — Stage 2
  */
 
-const D = '━━━━━━━━━━━━━━━━━━━━━━━━━'
+import {
+  DIVIDER,
+  htmlConfirmHeader,
+  htmlConfirmFooter,
+  htmlField,
+  htmlWarning,
+} from '../utils/workflowFormat.js'
 
 export const TURNING_WORKFLOW = {
   name: 'turning',
@@ -28,21 +34,21 @@ export const TURNING_WORKFLOW = {
       : data.time
 
     const flag = /redness|sore|wound|broken/i.test(data.skinCondition ?? '')
-      ? '\n⚠️ *Skin issue noted — document and escalate if required*'
+      ? htmlWarning('Skin issue noted — document and escalate if required')
       : ''
 
     return [
-      '📋 *Please confirm this turning record:*',
-      D, '',
-      `👤 Patient: ${data.patientName}`,
-      `🏥 Room: ${data.room}`,
-      `🕐 Time: ${time}`,
-      `🔄 Position: ${data.position}`,
-      `🩺 Skin Condition: ${data.skinCondition}`,
-      `📝 Remark: ${data.remark}`,
+      htmlConfirmHeader('Please confirm this turning record:'),
+      DIVIDER, '',
+      htmlField('👤 Patient:', data.patientName),
+      htmlField('🏥 Room:', data.room),
+      htmlField('🕐 Time:', time),
+      htmlField('🔄 Position:', data.position),
+      htmlField('🩺 Skin Condition:', data.skinCondition),
+      htmlField('📝 Remark:', data.remark),
       flag,
-      '', D,
-      'Reply *yes* to save  |  *no* to cancel',
-    ].filter(l => l !== undefined).join('\n')
+      '', DIVIDER,
+      htmlConfirmFooter(),
+    ].filter(Boolean).join('\n')
   },
 }

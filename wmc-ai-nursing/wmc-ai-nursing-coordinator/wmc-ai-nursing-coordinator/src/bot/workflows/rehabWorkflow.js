@@ -2,7 +2,12 @@
  * Rehab Progress Workflow — Stage 2
  */
 
-const D = '━━━━━━━━━━━━━━━━━━━━━━━━━'
+import {
+  DIVIDER,
+  htmlConfirmHeader,
+  htmlConfirmFooter,
+  htmlField,
+} from '../utils/workflowFormat.js'
 
 export const REHAB_WORKFLOW = {
   name: 'rehab',
@@ -30,18 +35,18 @@ export const REHAB_WORKFLOW = {
       : data.date
 
     return [
-      '📋 *Please confirm this rehab record:*',
-      D, '',
-      `👤 Patient: ${data.patientName}`,
-      `🏥 Room: ${data.room}`,
-      `📆 Date: ${date}`,
-      `🧑‍⚕️ Therapist: ${data.therapist}`,
-      `🏃 Session Type: ${data.sessionType}`,
-      `📈 Progress: ${data.progress}`,
-      `🎯 Next Goal: ${data.nextGoal}`,
-      `📝 Remark: ${data.remark}`,
-      '', D,
-      'Reply *yes* to save  |  *no* to cancel',
+      htmlConfirmHeader('Please confirm this rehab record:'),
+      DIVIDER, '',
+      htmlField('👤 Patient:', data.patientName),
+      htmlField('🏥 Room:', data.room),
+      htmlField('📆 Date:', date),
+      htmlField('🧑‍⚕️ Therapist:', data.therapist),
+      htmlField('🏃 Session Type:', data.sessionType),
+      htmlField('📈 Progress:', data.progress),
+      htmlField('🎯 Next Goal:', data.nextGoal),
+      htmlField('📝 Remark:', data.remark),
+      '', DIVIDER,
+      htmlConfirmFooter(),
     ].join('\n')
   },
 }

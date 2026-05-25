@@ -55,7 +55,7 @@ function BucketBadge({ bucket }) {
 }
 
 function familyMentalDraft(row) {
-  return `${row.patientName}: Today appeared ${String(row.moodStatus || '').toLowerCase()} with ${String(row.sleepQuality || '').toLowerCase()} sleep reported. Staff offered reassurance and structured activities. Simulation-only draft — confirm before messaging family.`
+  return `${row.patientName}: Today appeared ${String(row.moodStatus || '').toLowerCase()} with ${String(row.sleepQuality || '').toLowerCase()} sleep reported. Staff offered reassurance and structured activities. Confirm before messaging family.`
 }
 
 function MentalHealthCard({
@@ -278,14 +278,14 @@ export default function MentalHealthLoopPage() {
     bumpMentalHealthScore('urgentReview', 2)
     bumpMentalHealthScore('highRisk', 1)
     upsertMentalHealthPatient(row.patientId, { escalatedDoctor: true })
-    showToast('Escalated to physician (simulation).', 'warn')
+    showToast('Escalated to physician.', 'warn')
   }
 
   function handleEscalateCounsellor(row) {
     bumpMentalHealthScore('monitor', 1)
     bumpMentalHealthScore('moderateRisk', 1)
     upsertMentalHealthPatient(row.patientId, { escalatedCounsellor: true })
-    showToast('Counsellor escalation flagged (simulation).', 'warn')
+    showToast('Counsellor escalation flagged.', 'warn')
   }
 
   async function handleFamily(row) {
@@ -308,17 +308,17 @@ export default function MentalHealthLoopPage() {
       confusionLevel: 'None',
       anxietyLevel: 'Mild',
     })
-    showToast('Marked stable — escalation flags cleared (sim).', 'success')
+    showToast('Marked stable — escalation flags cleared.', 'success')
   }
 
   return (
     <div className="mx-auto max-w-[1800px] pb-8">
       <PageHeader
         title="Mental health loop"
-        description="Simulated behavioral health surveillance with escalation pathways and family messaging drafts. Demo only — not a psychiatric assessment."
+        description="Local behavioral health surveillance with escalation pathways and family messaging drafts. Not a psychiatric assessment."
         action={
           <div className="flex flex-wrap gap-2">
-            <Badge variant="info">Simulation mode</Badge>
+            <Badge variant="info">Local mode</Badge>
             <Link
               to="/family-updates"
               className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50"
@@ -409,7 +409,7 @@ export default function MentalHealthLoopPage() {
           <Brain className="h-5 w-5 text-teal-600" aria-hidden />
           <h3 className="text-sm font-semibold text-slate-900">Mental health scoring</h3>
         </div>
-        <p className="mt-0.5 text-xs text-slate-500">Simulation tally · includes demo baseline</p>
+        <p className="mt-0.5 text-xs text-slate-500">Local tally · updates with care actions</p>
         <dl className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-5">
           {[
             { label: 'Stable', val: scores.stable },

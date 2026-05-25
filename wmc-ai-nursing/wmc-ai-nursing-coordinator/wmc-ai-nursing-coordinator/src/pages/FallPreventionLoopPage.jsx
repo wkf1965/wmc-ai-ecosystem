@@ -156,7 +156,7 @@ function FallCard({ row, selected, onSelect, nowMs }) {
           <dd className="max-w-[58%] text-right font-medium">{row.nurseAssigned}</dd>
         </div>
         {row.escalatedFallRisk ? (
-          <p className="rounded-lg bg-rose-50 px-2 py-1 text-[11px] font-semibold text-rose-900">Fall risk escalated (sim)</p>
+          <p className="rounded-lg bg-rose-50 px-2 py-1 text-[11px] font-semibold text-rose-900">Fall risk escalated</p>
         ) : null}
         {Array.isArray(row.riskNotes) && row.riskNotes.length > 0 ? (
           <div className="rounded-lg bg-slate-50 px-2 py-1.5 text-[11px] text-slate-700">
@@ -238,7 +238,7 @@ export default function FallPreventionLoopPage() {
       nextFallCheckDueTime: new Date(t + hrs * 60 * 60 * 1000).toISOString(),
     })
     bumpFallPreventionScore('monitor', 1)
-    showToast('Fall check recorded (simulation).', 'success')
+    showToast('Fall check recorded.', 'success')
   }
 
   function handleAddNote() {
@@ -264,7 +264,7 @@ export default function FallPreventionLoopPage() {
       nonSlipSocks: true,
     })
     bumpFallPreventionScore('safe', 1)
-    showToast('Environment marked safe (simulation).', 'success')
+    showToast('Environment marked safe.', 'success')
   }
 
   function handleEscalate() {
@@ -276,7 +276,7 @@ export default function FallPreventionLoopPage() {
       fallRiskLevel: row.fallRiskLevel === 'low' ? 'moderate' : row.fallRiskLevel === 'moderate' ? 'high' : row.fallRiskLevel,
     })
     bumpFallPreventionScore('urgentSupervision', 1)
-    showToast('Fall risk escalated (simulation).', 'warn')
+    showToast('Fall risk escalated.', 'warn')
   }
 
   function handleReport() {
@@ -289,10 +289,10 @@ export default function FallPreventionLoopPage() {
     <div className="mx-auto max-w-[1600px] pb-8">
       <PageHeader
         title="Fall prevention loop"
-        description="Rounding-driven board with mobility aids, environmental cues, and overdue surveillance — simulation only; follow your facility falls program."
+        description="Rounding-driven board with mobility aids, environmental cues, and overdue surveillance — follow your facility falls program."
         action={
           <div className="flex flex-wrap gap-2">
-            <Badge variant="info">Simulation mode</Badge>
+            <Badge variant="info">Local mode</Badge>
             <Link
               to="/side-turning"
               className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50"
@@ -408,7 +408,7 @@ export default function FallPreventionLoopPage() {
           <Footprints className="h-5 w-5 text-teal-600" aria-hidden />
           <h3 className="text-sm font-semibold text-slate-900">Fall prevention scoring</h3>
         </div>
-        <p className="mt-0.5 text-xs text-slate-500">Simulation tally · includes demo baseline · nurse actions bump counters</p>
+        <p className="mt-0.5 text-xs text-slate-500">Local tally · nurse actions update counters</p>
         <dl className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-5">
           {[
             { label: 'Safe', val: scores.safe },

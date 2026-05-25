@@ -1,0 +1,581 @@
+// WMC AI Central Backend — Prisma schema
+// Status: migration-ready (development only; no production connection)
+// Aligns with DATABASE-SCHEMA-BLUEPRINT.md (PostgreSQL 15+)
+// Updated: 2026-05-20 — added RehabProgress, HandoverLog, extended existing models
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  schemas  = ["core", "nursing", "crm", "rehab", "notify"]
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum UserRole {
+  admin
+  supervisor
+  nurse
+  therapist
+  doctor
+  frontdesk
+
+  @@schema("core")
+}
+
+// ---------------------------------------------------------------------------
+// AuditLog — append-only compliance record (core schema)
+// ---------------------------------------------------------------------------
+
+model AuditLog {
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String?  @map("user_id") @db.Uuid
+  userRole    String   @map("user_role")
+  action      String
+  module      String
+  targetId    String?  @map("target_id")
+  targetType  String?  @map("target_type")
+  description String?
+  ipAddress   String?  @map("ip_address")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  user        User?    @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([action])
+  @@index([module])
+  @@index([createdAt])
+  @@index([targetId, targetType])
+  @@map("audit_logs")
+  @@schema("core")
+}
+
+enum PatientStatus {
+  active
+  discharged
+  deceased
+
+  @@schema("core")
+}
+
+enum StaffStatus {
+  active
+  on_leave
+  inactive
+
+  @@schema("core")
+}
+
+enum FallRiskLevel {
+  low
+  moderate
+  high
+
+  @@schema("core")
+}
+
+enum MobilityStatus {
+  independent
+  assisted
+  wheelchair
+  bedbound
+
+  @@schema("core")
+}
+
+enum PriorityLevel {
+  low
+  medium
+  high
+  urgent
+  critical
+
+  @@schema("core")
+}
+
+enum RecordStatus {
+  draft
+  active
+  archived
+  cancelled
+
+  @@schema("nursing")
+}
+
+enum TaskStatus {
+  pending
+  in_progress
+  done
+  cancelled
+
+  @@schema("nursing")
+}
+
+enum AlertSeverity {
+  low
+  medium
+  high
+  critical
+
+  @@schema("nursing")
+}
+
+enum AlertStatus {
+  open
+  acknowledged
+  resolved
+
+  @@schema("nursing")
+}
+
+enum ShiftType {
+  morning
+  afternoon
+  night
+
+  @@schema("nursing")
+}
+
+enum GaitStatus {
+  normal
+  impaired
+  non_ambulatory
+
+  @@schema("rehab")
+}
+
+enum NotificationStatus {
+  queued
+  sent
+  failed
+  mock_sent
+
+  @@schema("notify")
+}
+
+enum NotificationChannel {
+  telegram
+  whatsapp
+  dashboard
+
+  @@schema("notify")
+}
+
+// ---------------------------------------------------------------------------
+// Core schema — master records
+// ---------------------------------------------------------------------------
+
+model Patient {
+  id               String         @id @default(uuid()) @db.Uuid
+  mrn              String?        @unique @map("mrn")
+  fullName         String         @map("full_name")
+  dateOfBirth      DateTime?      @map("date_of_birth") @db.Date
+
+  /// Computed / denormalised age stored for fast queries; recalculate on update
+  age              Int?
+
+  gender           String?
+  phone            String?
+  email            String?
+
+  /// Primary clinical diagnosis summary
+  diagnosis        String?
+
+  roomNumber       String?        @map("room_number")
+  mobilityStatus   MobilityStatus? @map("mobility_status")
+  fallRiskLevel    FallRiskLevel?  @map("fall_risk_level")
+
+  medicalSummary   String?        @map("medical_summary")
+  consentWhatsapp  Boolean        @default(false) @map("consent_whatsapp")
+  consentTelegram  Boolean        @default(false) @map("consent_telegram")
+  status           PatientStatus  @default(active)
+
+  createdAt        DateTime       @default(now()) @map("created_at")
+  updatedAt        DateTime       @updatedAt @map("updated_at")
+  deletedAt        DateTime?      @map("deleted_at")
+
+  // Relations
+  nursingRecords   NursingRecord[]
+  rehabProgress    RehabProgress[]
+  handoverLogs     HandoverLog[]
+  alerts           Alert[]
+  tasks            Task[]
+  notifications    Notification[]
+  crmAppointments  CrmAppointment[]
+  convertedLeads   CrmLead[]       @relation("ConvertedPatient")
+
+  @@index([status])
+  @@index([roomNumber])
+  @@index([fallRiskLevel])
+  @@map("patients")
+  @@schema("core")
+}
+
+// ---------------------------------------------------------------------------
+// User — authentication identity (core schema)
+// ---------------------------------------------------------------------------
+
+model User {
+  id           String    @id @default(uuid()) @db.Uuid
+  fullName     String    @map("full_name")
+  email        String    @unique
+  passwordHash String    @map("password_hash")
+  role         UserRole  @default(nurse)
+  isActive     Boolean   @default(true) @map("is_active")
+  lastLoginAt  DateTime? @map("last_login_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  staff        Staff?
+  auditLogs    AuditLog[]
+
+  @@index([email])
+  @@index([role])
+  @@map("users")
+  @@schema("core")
+}
+
+model Staff {
+  id             String      @id @default(uuid()) @db.Uuid
+  userId         String?     @unique @map("user_id") @db.Uuid
+  user           User?       @relation(fields: [userId], references: [id])
+  employeeCode   String?     @unique @map("employee_code")
+  fullName       String      @map("full_name")
+  department     String?
+  roleTitle      String?     @map("role_title")
+  phone          String?
+  telegramChatId String?     @map("telegram_chat_id")
+  whatsappNumber String?     @map("whatsapp_number")
+  status         StaffStatus @default(active)
+  createdAt      DateTime    @default(now()) @map("created_at")
+  updatedAt      DateTime    @updatedAt @map("updated_at")
+
+  // Relations
+  nursingRecords       NursingRecord[]
+  handoverLogs         HandoverLog[]
+  alertsReported       Alert[]          @relation("AlertReporter")
+  alertsAcknowledged   Alert[]          @relation("AlertAcknowledger")
+  tasksAssigned        Task[]           @relation("TaskAssignee")
+  tasksCreated         Task[]           @relation("TaskCreator")
+  notifications        Notification[]
+  crmLeadsAssigned     CrmLead[]        @relation("LeadAssignee")
+  crmAppointments      CrmAppointment[] @relation("AppointmentAssignee")
+
+  @@map("staff")
+  @@schema("core")
+}
+
+// ---------------------------------------------------------------------------
+// Nursing schema — clinical records and operations
+// ---------------------------------------------------------------------------
+
+model NursingRecord {
+  id             String       @id @default(uuid()) @db.Uuid
+  patientId      String       @map("patient_id") @db.Uuid
+  staffId        String?      @map("staff_id") @db.Uuid
+
+  /// Denormalised for reports and Telegram summaries
+  nurseName      String?      @map("nurse_name")
+
+  shiftDate      DateTime     @map("shift_date") @db.Date
+  shift          ShiftType?
+  recordType     String?      @map("record_type")
+
+  // Vitals
+  bloodPressure  String?      @map("blood_pressure")
+  pulse          Int?
+  temperature    Float?
+  oxygen         String?
+  painScore      Int?         @map("pain_score")
+
+  // Clinical observations
+  mobility       String?
+  mood           String?
+  sideTurning    String?      @map("side_turning")
+  woundCondition String?      @map("wound_condition")
+  appetite       String?
+  notes          String?
+
+  status         RecordStatus @default(active)
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
+
+  // Relations
+  patient        Patient       @relation(fields: [patientId], references: [id])
+  staff          Staff?        @relation(fields: [staffId], references: [id])
+  alerts         Alert[]
+
+  @@index([patientId])
+  @@index([staffId])
+  @@index([shiftDate])
+  @@index([shift])
+  @@map("nursing_records")
+  @@schema("nursing")
+}
+
+model HandoverLog {
+  id             String    @id @default(uuid()) @db.Uuid
+  patientId      String?   @map("patient_id") @db.Uuid
+  staffId        String?   @map("staff_id") @db.Uuid
+
+  /// Denormalised for fast display
+  nurseInCharge  String?   @map("nurse_in_charge")
+
+  shift          ShiftType
+  shiftDate      DateTime  @map("shift_date") @db.Date
+  summary        String
+
+  /// JSON array of key events: [{ time, event, patientId, notes }]
+  keyEvents      Json?     @map("key_events")
+
+  /// JSON array of pending tasks passed to next shift
+  pendingTasks   Json?     @map("pending_tasks")
+
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  patient        Patient?  @relation(fields: [patientId], references: [id])
+  staff          Staff?    @relation(fields: [staffId], references: [id])
+
+  @@index([patientId])
+  @@index([shiftDate])
+  @@index([shift])
+  @@map("handover_logs")
+  @@schema("nursing")
+}
+
+model Task {
+  id                 String        @id @default(uuid()) @db.Uuid
+  patientId          String?       @map("patient_id") @db.Uuid
+  leadId             String?       @map("lead_id") @db.Uuid
+  assignedToStaffId  String        @map("assigned_to_staff_id") @db.Uuid
+  createdByStaffId   String?       @map("created_by_staff_id") @db.Uuid
+
+  /// Denormalised for Telegram commands (/tasks)
+  assignedTo         String?       @map("assigned_to")
+
+  domain             String?
+  title              String
+  description        String?
+  source             String?
+  dueAt              DateTime?     @map("due_at")
+  status             TaskStatus    @default(pending)
+
+  /// Convenience flag — true when status = done
+  completed          Boolean       @default(false)
+
+  priority           PriorityLevel @default(medium)
+  createdAt          DateTime      @default(now()) @map("created_at")
+  updatedAt          DateTime      @updatedAt @map("updated_at")
+
+  // Relations
+  patient            Patient?      @relation(fields: [patientId], references: [id])
+  lead               CrmLead?      @relation(fields: [leadId], references: [id])
+  assignedToStaff    Staff         @relation("TaskAssignee", fields: [assignedToStaffId], references: [id])
+  createdByStaff     Staff?        @relation("TaskCreator", fields: [createdByStaffId], references: [id])
+
+  @@index([patientId])
+  @@index([leadId])
+  @@index([assignedToStaffId])
+  @@index([status])
+  @@index([completed])
+  @@map("tasks")
+  @@schema("nursing")
+}
+
+model Alert {
+  id                     String        @id @default(uuid()) @db.Uuid
+  patientId              String        @map("patient_id") @db.Uuid
+  nursingRecordId        String?       @map("nursing_record_id") @db.Uuid
+  staffId                String?       @map("staff_id") @db.Uuid
+
+  /// Structured alert type: vitals | turning | medication | fall | wound | other
+  alertType              String?       @map("alert_type")
+
+  severity               AlertSeverity @default(medium)
+  alertLevel             String?       @map("alert_level")
+  category               String?
+  description            String?
+  vitalsSnapshot         Json?         @map("vitals_snapshot")
+  status                 AlertStatus   @default(open)
+
+  /// resolved = true when status = resolved
+  resolved               Boolean       @default(false)
+
+  priority               PriorityLevel @default(medium)
+  acknowledgedByStaffId  String?       @map("acknowledged_by_staff_id") @db.Uuid
+  acknowledgedAt         DateTime?     @map("acknowledged_at")
+  resolvedAt             DateTime?     @map("resolved_at")
+  createdAt              DateTime      @default(now()) @map("created_at")
+  updatedAt              DateTime      @updatedAt @map("updated_at")
+
+  // Relations
+  patient             Patient        @relation(fields: [patientId], references: [id])
+  nursingRecord       NursingRecord? @relation(fields: [nursingRecordId], references: [id])
+  reportedByStaff     Staff?         @relation("AlertReporter", fields: [staffId], references: [id])
+  acknowledgedByStaff Staff?         @relation("AlertAcknowledger", fields: [acknowledgedByStaffId], references: [id])
+
+  @@index([patientId])
+  @@index([status])
+  @@index([severity])
+  @@index([resolved])
+  @@index([alertType])
+  @@map("alerts")
+  @@schema("nursing")
+}
+
+// ---------------------------------------------------------------------------
+// Rehab schema — physiotherapy and rehabilitation
+// ---------------------------------------------------------------------------
+
+model RehabProgress {
+  id              String     @id @default(uuid()) @db.Uuid
+  patientId       String     @map("patient_id") @db.Uuid
+
+  /// Denormalised for reports; link to Staff when auth is added
+  therapistName   String?    @map("therapist_name")
+
+  sessionDate     DateTime   @map("session_date") @db.Date
+
+  /// Muscle power score 0–5 (Oxford scale)
+  musclePower     Int?       @map("muscle_power")
+
+  /// Range of motion in degrees
+  rom             Int?
+
+  gaitStatus      GaitStatus? @map("gait_status")
+  painScore       Int?        @map("pain_score")
+  progressNotes   String?     @map("progress_notes")
+
+  /// Structured goals: [{ goal, achieved, targetDate }]
+  goals           Json?
+
+  /// Overall session outcome: improved | stable | declined
+  outcome         String?
+
+  createdAt       DateTime   @default(now()) @map("created_at")
+  updatedAt       DateTime   @updatedAt @map("updated_at")
+
+  // Relations
+  patient         Patient    @relation(fields: [patientId], references: [id])
+
+  @@index([patientId])
+  @@index([sessionDate])
+  @@index([gaitStatus])
+  @@map("rehab_progress")
+  @@schema("rehab")
+}
+
+// ---------------------------------------------------------------------------
+// CRM schema — leads and appointments
+// ---------------------------------------------------------------------------
+
+model CrmLead {
+  id                  String         @id @default(uuid()) @db.Uuid
+  fullName            String         @map("full_name")
+
+  /// Primary contact number in E.164 format
+  phoneNumber         String?        @map("phone_number")
+
+  email               String?
+  source              String?
+
+  /// Type of care inquiry: nursing_home | rehab | day_care | palliative | other
+  inquiryType         String?        @map("inquiry_type")
+
+  interest            String?
+  message             String?
+  leadStatus          String         @default("New") @map("lead_status")
+  pipelineStage       String?        @map("pipeline_stage")
+  priority            PriorityLevel  @default(medium)
+  classifiedPriority  PriorityLevel? @map("classified_priority")
+  convertedPatientId  String?        @map("converted_patient_id") @db.Uuid
+
+  /// Next scheduled follow-up datetime
+  followUpDate        DateTime?      @map("follow_up_date")
+
+  assignedToStaffId   String?        @map("assigned_to_staff_id") @db.Uuid
+  status              String         @default("Active")
+  createdAt           DateTime       @default(now()) @map("created_at")
+  updatedAt           DateTime       @updatedAt @map("updated_at")
+
+  // Relations
+  convertedPatient    Patient?         @relation("ConvertedPatient", fields: [convertedPatientId], references: [id])
+  assignedTo          Staff?           @relation("LeadAssignee", fields: [assignedToStaffId], references: [id])
+  appointments        CrmAppointment[]
+  tasks               Task[]
+
+  @@index([leadStatus])
+  @@index([inquiryType])
+  @@index([assignedToStaffId])
+  @@index([followUpDate])
+  @@map("crm_leads")
+  @@schema("crm")
+}
+
+model CrmAppointment {
+  id                  String        @id @default(uuid()) @db.Uuid
+  leadId              String?       @map("lead_id") @db.Uuid
+  patientId           String?       @map("patient_id") @db.Uuid
+  leadName            String?       @map("lead_name")
+  phone               String?
+  service             String
+  appointmentDate     DateTime      @map("appointment_date") @db.Date
+  appointmentTime     DateTime      @map("appointment_time") @db.Time(0)
+  assignedToStaffId   String?       @map("assigned_to_staff_id") @db.Uuid
+  status              String        @default("Scheduled")
+  priority            PriorityLevel @default(medium)
+  notes               String?
+  createdAt           DateTime      @default(now()) @map("created_at")
+  updatedAt           DateTime      @updatedAt @map("updated_at")
+
+  // Relations
+  lead                CrmLead? @relation(fields: [leadId], references: [id])
+  patient             Patient? @relation(fields: [patientId], references: [id])
+  assignedTo          Staff?   @relation("AppointmentAssignee", fields: [assignedToStaffId], references: [id])
+
+  @@index([leadId])
+  @@index([appointmentDate])
+  @@map("crm_appointments")
+  @@schema("crm")
+}
+
+// ---------------------------------------------------------------------------
+// Notify schema — outbound notifications and channel logs
+// ---------------------------------------------------------------------------
+
+model Notification {
+  id              String              @id @default(uuid()) @db.Uuid
+  channel         NotificationChannel
+  templateKey     String?             @map("template_key")
+  messageType     String?             @map("message_type")
+  target          String?
+  recipientType   String?             @map("recipient_type")
+  patientId       String?             @map("patient_id") @db.Uuid
+  staffId         String?             @map("staff_id") @db.Uuid
+  payload         Json?
+  status          NotificationStatus  @default(queued)
+  priority        PriorityLevel       @default(medium)
+  idempotencyKey  String?             @unique @map("idempotency_key")
+  sentAt          DateTime?           @map("sent_at")
+  errorMessage    String?             @map("error_message")
+  mock            Boolean             @default(true)
+  createdAt       DateTime            @default(now()) @map("created_at")
+  updatedAt       DateTime            @updatedAt @map("updated_at")
+
+  // Relations
+  patient         Patient? @relation(fields: [patientId], references: [id])
+  staff           Staff?   @relation(fields: [staffId], references: [id])
+
+  @@index([channel])
+  @@index([status])
+  @@index([patientId])
+  @@map("notifications")
+  @@schema("notify")
+}

@@ -14,3 +14,18 @@ export interface DashboardSummaryResponse {
   alerts: DashboardAlerts
   shiftStatus: 'Stable' | 'Attention Required'
 }
+
+export interface DashboardOtSummary {
+  recordCount: number
+  totalOvertimeHours: number
+  pendingApprovalCount: number
+}
+
+export interface DashboardResponse {
+  summary: DashboardSummaryResponse
+  nursingRecords: unknown[]
+  sideTurning: unknown[]
+  ot: DashboardOtSummary
+  alerts: unknown[]
+  fetchedAt: string
+}

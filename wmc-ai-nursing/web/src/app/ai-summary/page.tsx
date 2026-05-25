@@ -73,13 +73,6 @@ const severityBadgeStyles: Record<ReturnType<typeof riskSeverity>, string> = {
   red: "bg-rose-100 text-rose-700",
 }
 
-function patientRoom(patientId: string) {
-  const value = patientId.replace(/\D/g, "")
-  const suffix = value.padStart(3, "0")
-  const area = Number.parseInt(suffix, 10) % 4
-  return `W-${area + 1}-${suffix.slice(-2)}`
-}
-
 function toLower(value: string) {
   return value.toLowerCase()
 }
@@ -147,7 +140,7 @@ function buildRows() {
     const needsNightMonitoring = patient.fallRisk === "High" || hasAny(noteText, ["night", "evening", "wandering", "disoriented", "confusion", "agitated"])
     return {
       patient,
-      room: patientRoom(patient.id),
+      room: patient.roomNumber || "—",
       riskScore: risk.totalScore,
       riskCategory: risk.riskBadge,
       riskSeverity: risk.severity,

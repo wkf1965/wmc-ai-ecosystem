@@ -3,5 +3,5 @@ import { startWorkflow }  from '../services/workflowEngine.js'
 import { setState }       from '../services/stateManager.js'
 
 export function registerAlertCommand(bot) {
-  bot.onText(/^\/alert\b/i, (msg) => startWorkflow(bot, msg, ALERT_WORKFLOW, setState))
+  bot.onText(/^\/alert\b/i, (msg) => { void startWorkflow(bot, msg, ALERT_WORKFLOW, setState) })
 }

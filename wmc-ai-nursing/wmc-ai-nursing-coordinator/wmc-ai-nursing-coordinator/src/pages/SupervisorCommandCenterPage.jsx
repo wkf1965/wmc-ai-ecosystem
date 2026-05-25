@@ -1,10 +1,21 @@
-import { useEffect, useMemo, useState } from 'react'
-import { AlertTriangle, BellRing, Droplets, Pill, RefreshCw, Send, ShieldCheck, UserRoundCheck, ClipboardList } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { AlertTriangle, BedDouble, BellRing, Droplets, Loader2, Pill, RefreshCw, Send, ShieldCheck, Timer, Trash2, UserRoundCheck, ClipboardList } from 'lucide-react'
 import { PageHeader, Card, Badge } from '../components/ui'
 import { usePatients } from '../hooks/usePatients.js'
 import { useNursingNotes } from '../hooks/useNursingNotes.js'
 import { aiAlerts } from '../data/dummyData'
 import { analyzeAllPatientsFromNotes } from '../lib/aiRiskDetection.js'
+import {
+  DELETE_RECORDS_CONFIRM,
+  DELETE_RECORDS_SUCCESS,
+  RESET_PATIENTS_CONFIRM,
+  RESET_PATIENTS_SUCCESS,
+  deleteAllOldRecords,
+  deletePatientRecords,
+  fetchDashboard,
+} from '../api/dashboardApi.js'
+
+const AUTO_REFRESH_MS = 30_000
 
 const actionDefaults = { resolved: false, doctorEscalated: false, familyNotified: false, nursingTaskCreated: false }
 const SEVERITY_STEPS = { red: 85, orange: 55, green: 20 }
@@ -81,8 +92,8 @@ function buildRecommendations(criticalResidents, escalations) {
 }
 
 export default function SupervisorCommandCenterPage() {
-  const { patients, getById } = usePatients()
-  const { notes } = useNursingNotes()
+  const { patients, getById, refresh: refreshPatients } = usePatients()
+  const { notes, refresh: refreshNotes } = useNursingNotes()
   const [alertActions, setAlertActions] = useState(() => {
     const base = {}
     for (const alert of aiAlerts) {
@@ -91,6 +102,11 @@ export default function SupervisorCommandCenterPage() {
     return base
   })
   const [followUpQueue, setFollowUpQueue] = useState([])
+  const [refreshing, setRefreshing] = useState(false)
+  const [clearing, setClearing] = useState(false)
+  const [deletingPatients, setDeletingPatients] = useState(false)
+  const [refreshFeedback, setRefreshFeedback] = useState(null)
+  const [backendSnapshot, setBackendSnapshot] = useState(null)
 
   const resolvePatientName = (patientId) => {
     const patient = getById(patientId)
@@ -138,10 +154,167 @@ export default function SupervisorCommandCenterPage() {
     }
   }, [criticalResidents, patientAnalysis])
 
-  const recommendations = useMemo(
-    () => buildRecommendations(criticalResidents, escalatedAlerts),
-    [criticalResidents, escalatedAlerts],
-  )
+  const recommendations = useMemo(() => {
+    const local = buildRecommendations(criticalResidents, escalatedAlerts)
+    const pendingTasks = backendSnapshot?.summary?.pendingTasks
+    if (Array.isArray(pendingTasks) && pendingTasks.length > 0) {
+      return [...new Set([...pendingTasks, ...local])]
+    }
+    return local
+  }, [criticalResidents, escalatedAlerts, backendSnapshot])
+
+  const backendModuleCards = useMemo(() => {
+    const alertRollup = backendSnapshot?.summary?.alerts
+    const alertTotal = alertRollup
+      ? Object.values(alertRollup).reduce((sum, value) => sum + (Number(value) || 0), 0)
+      : null
+
+    return [
+      {
+        label: 'Nursing records',
+        value: backendSnapshot ? (backendSnapshot.nursingRecords?.length ?? 0) : '—',
+        sub: backendSnapshot ? 'Loaded from backend' : 'Click Refresh data',
+        icon: ClipboardList,
+        tone: 'green',
+      },
+      {
+        label: 'Side turning',
+        value: backendSnapshot ? (backendSnapshot.sideTurning?.length ?? 0) : '—',
+        sub: backendSnapshot?.summary?.pendingTasks?.filter((t) => /side turning/i.test(t)).length
+          ? `${backendSnapshot.summary.pendingTasks.filter((t) => /side turning/i.test(t)).length} pending`
+          : backendSnapshot
+            ? 'Records loaded'
+            : 'Click Refresh data',
+        icon: BedDouble,
+        tone: 'orange',
+      },
+      {
+        label: 'OT',
+        value: backendSnapshot ? (backendSnapshot.ot?.recordCount ?? 0) : '—',
+        sub: backendSnapshot
+          ? `${backendSnapshot.ot?.totalOvertimeHours ?? 0}h OT · ${backendSnapshot.ot?.pendingApprovalCount ?? 0} pending`
+          : 'Click Refresh data',
+        icon: Timer,
+        tone: 'orange',
+      },
+      {
+        label: 'Alerts',
+        value: backendSnapshot
+          ? Math.max(backendSnapshot.alerts?.length ?? 0, alertTotal ?? 0)
+          : '—',
+        sub: backendSnapshot ? 'Nursing + rollup alerts' : 'Click Refresh data',
+        icon: BellRing,
+        tone: 'red',
+      },
+    ]
+  }, [backendSnapshot])
+
+  const dashboardCards = useMemo(() => {
+    const summary = backendSnapshot?.summary
+    const alertRollup = summary?.alerts
+    const alertTotal = alertRollup
+      ? Object.values(alertRollup).reduce((sum, value) => sum + (Number(value) || 0), 0)
+      : escalatedAlerts.length
+
+    return [
+      ['Critical residents', summary?.highRiskPatients?.length ?? criticalResidents.length, AlertTriangle, 'red'],
+      ['Escalated alerts', alertTotal, BellRing, 'orange'],
+      ['Fall risk patients', alertRollup?.fallRisk ?? fallRiskResidents.length, UserRoundCheck, 'orange'],
+      ['Dehydration risk', dehydrationResidents.length, Droplets, 'orange'],
+      ['Missed medications', alertRollup?.medicationAlerts ?? missedMedications.length, Pill, 'red'],
+      ['Nurse follow-up queue', followUpQueue.filter((item) => item.status !== 'done').length, ClipboardList, 'green'],
+      ['AI recommendations', recommendations.length, ShieldCheck, 'green'],
+    ]
+  }, [
+    backendSnapshot,
+    criticalResidents.length,
+    escalatedAlerts.length,
+    fallRiskResidents.length,
+    dehydrationResidents.length,
+    missedMedications.length,
+    followUpQueue,
+    recommendations.length,
+  ])
+
+  const handleRefreshData = useCallback(async () => {
+    setRefreshing(true)
+    setRefreshFeedback(null)
+    try {
+      const response = await fetchDashboard()
+      console.log('[AI Command Center] Dashboard API response:', response)
+      setBackendSnapshot(response)
+      setRefreshFeedback({
+        type: 'success',
+        message: `Data refreshed at ${new Date().toLocaleTimeString()}. Shift status: ${response.summary?.shiftStatus ?? 'unknown'}.`,
+      })
+    } catch (error) {
+      const offline = error instanceof Error && error.name === 'BackendOfflineError'
+      const message = offline ? 'Backend offline' : error instanceof Error ? error.message : 'Failed to refresh dashboard data.'
+      console.error('[AI Command Center] Refresh data failed:', error)
+      setRefreshFeedback({ type: 'error', message })
+    } finally {
+      setRefreshing(false)
+    }
+  }, [])
+
+  const handleClearAllRecords = useCallback(async () => {
+    if (!window.confirm(DELETE_RECORDS_CONFIRM)) return
+
+    setClearing(true)
+    setRefreshFeedback(null)
+    try {
+      await deleteAllOldRecords()
+      refreshPatients()
+      refreshNotes()
+      setAlertActions(() => {
+        const base = {}
+        for (const alert of aiAlerts) {
+          base[alert.id] = { ...actionDefaults }
+        }
+        return base
+      })
+      setFollowUpQueue([])
+      await handleRefreshData()
+      setRefreshFeedback({ type: 'success', message: DELETE_RECORDS_SUCCESS })
+    } catch (error) {
+      const offline = error instanceof Error && error.name === 'BackendOfflineError'
+      const message = offline ? 'Backend offline' : error instanceof Error ? error.message : 'Failed to delete records.'
+      console.error('[AI Command Center] Delete records failed:', error)
+      setRefreshFeedback({ type: 'error', message })
+    } finally {
+      setClearing(false)
+    }
+  }, [handleRefreshData, refreshNotes, refreshPatients])
+
+  const handleDeletePatientRecords = useCallback(async () => {
+    if (!window.confirm(RESET_PATIENTS_CONFIRM)) return
+
+    setDeletingPatients(true)
+    setRefreshFeedback(null)
+    try {
+      await deletePatientRecords()
+      refreshPatients()
+      refreshNotes()
+      setFollowUpQueue([])
+      await handleRefreshData()
+      setRefreshFeedback({ type: 'success', message: RESET_PATIENTS_SUCCESS })
+    } catch (error) {
+      const offline = error instanceof Error && error.name === 'BackendOfflineError'
+      const message = offline ? 'Backend offline' : error instanceof Error ? error.message : 'Failed to delete patient records.'
+      console.error('[AI Command Center] Delete patient records failed:', error)
+      setRefreshFeedback({ type: 'error', message })
+    } finally {
+      setDeletingPatients(false)
+    }
+  }, [handleRefreshData, refreshNotes, refreshPatients])
+
+  useEffect(() => {
+    void handleRefreshData()
+    const intervalId = window.setInterval(() => {
+      void handleRefreshData()
+    }, AUTO_REFRESH_MS)
+    return () => window.clearInterval(intervalId)
+  }, [handleRefreshData])
 
   useEffect(() => {
     setFollowUpQueue((current) => {
@@ -188,16 +361,47 @@ export default function SupervisorCommandCenterPage() {
     <div>
       <PageHeader
         title="AI Supervisor Command Center"
-        description="Simulation mode only. Review critical residents, escalation queue, and nursing tasks before approving handoff actions."
+        description="Review critical residents, escalation queue, and nursing tasks before approving handoff actions."
         action={
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
-              onClick={() => setFollowUpQueue((current) => current)}
-              className="inline-flex items-center gap-2 rounded-xl bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-teal-700"
+              onClick={handleRefreshData}
+              disabled={refreshing || clearing || deletingPatients}
+              className="inline-flex items-center gap-2 rounded-xl bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              <RefreshCw className="h-4 w-4" aria-hidden />
-              Refresh data
+              {refreshing ? (
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+              ) : (
+                <RefreshCw className="h-4 w-4" aria-hidden />
+              )}
+              {refreshing ? 'Refreshing...' : 'Refresh data'}
+            </button>
+            <button
+              type="button"
+              onClick={handleClearAllRecords}
+              disabled={refreshing || clearing || deletingPatients}
+              className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-semibold text-red-800 shadow-sm hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {clearing ? (
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+              ) : (
+                <Trash2 className="h-4 w-4" aria-hidden />
+              )}
+              {clearing ? 'Clearing...' : 'Clear All Records'}
+            </button>
+            <button
+              type="button"
+              onClick={handleDeletePatientRecords}
+              disabled={refreshing || clearing || deletingPatients}
+              className="inline-flex items-center gap-2 rounded-xl border border-red-300 bg-red-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {deletingPatients ? (
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+              ) : (
+                <Trash2 className="h-4 w-4" aria-hidden />
+              )}
+              {deletingPatients ? 'Deleting...' : 'Delete Patient Records'}
             </button>
             <button
               type="button"
@@ -214,20 +418,47 @@ export default function SupervisorCommandCenterPage() {
 
       <section className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-950 ring-1 ring-amber-100">
         <p>
-          <strong>Simulation mode:</strong> All action buttons update local simulation state only and do not send live notifications.
+          <strong>Local mode:</strong> Action buttons update local records and do not send live notifications.
         </p>
       </section>
 
+      {refreshFeedback ? (
+        <section
+          role="status"
+          className={`mb-4 rounded-2xl border p-3 text-sm ${
+            refreshFeedback.type === 'error'
+              ? 'border-red-200 bg-red-50 text-red-900'
+              : 'border-emerald-200 bg-emerald-50 text-emerald-900'
+          }`}
+        >
+          {refreshFeedback.message}
+        </section>
+      ) : null}
+
+      <section className="mb-5">
+        <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-500">Backend live data</h3>
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {backendModuleCards.map(({ label, value, sub, icon: Icon, tone }) => (
+            <Card key={label} padding="p-4">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-semibold text-slate-500">{label}</p>
+                <span className={`rounded-full px-2 py-1 text-xs font-semibold ${severityClass(tone)}`}>{tone}</span>
+              </div>
+              <div className="mt-2 flex items-center gap-2">
+                <Icon className="h-5 w-5 text-slate-500" aria-hidden />
+                <p className="text-2xl font-bold text-slate-900">{value}</p>
+              </div>
+              <p className="mt-1 text-xs text-slate-500">{sub}</p>
+            </Card>
+          ))}
+        </div>
+        {backendSnapshot?.fetchedAt ? (
+          <p className="mt-2 text-xs text-slate-500">Last synced: {new Date(backendSnapshot.fetchedAt).toLocaleString()} · auto-refresh every 30s</p>
+        ) : null}
+      </section>
+
       <section className="mb-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {[
-          ['Critical residents', criticalResidents.length, AlertTriangle, 'red'],
-          ['Escalated alerts', escalatedAlerts.length, BellRing, 'orange'],
-          ['Fall risk patients', fallRiskResidents.length, UserRoundCheck, 'orange'],
-          ['Dehydration risk', dehydrationResidents.length, Droplets, 'orange'],
-          ['Missed medications', missedMedications.length, Pill, 'red'],
-          ['Nurse follow-up queue', followUpQueue.filter((item) => item.status !== 'done').length, ClipboardList, 'green'],
-          ['AI recommendations', recommendations.length, ShieldCheck, 'green'],
-        ].map(([label, count, Icon, tone]) => (
+        {dashboardCards.map(([label, count, Icon, tone]) => (
           <Card key={String(label)} padding="p-4">
             <div className="flex items-center justify-between">
               <p className="text-sm font-semibold text-slate-500">{label}</p>
@@ -417,7 +648,7 @@ export default function SupervisorCommandCenterPage() {
                   <button
                     type="button"
                     onClick={() => {
-                      window.alert(`Create medication follow-up for ${item.patientName} in simulation mode.`)
+                      window.alert(`Create medication follow-up for ${item.patientName} in local mode.`)
                     }}
                     className="rounded-lg border border-amber-200 bg-amber-50 px-2 py-1 text-xs font-semibold text-amber-800 hover:bg-amber-100"
                   >

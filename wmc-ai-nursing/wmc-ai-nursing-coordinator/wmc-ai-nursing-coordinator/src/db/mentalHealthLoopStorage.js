@@ -99,34 +99,7 @@ export function mergeMentalHealthLoopRows(patients, nowMs = Date.now()) {
   ensureMentalHealthBaseline()
   const raw = loadRaw()
 
-  if (!patients?.length) {
-    const id = 'demo'
-    const over = raw.instances[id] || {}
-    return [
-      {
-        patientId: id,
-        patientName: 'Demo Resident',
-        room: '100A',
-        moodStatus: over.moodStatus ?? 'Neutral',
-        anxietyLevel: over.anxietyLevel ?? 'Mild',
-        sleepQuality: over.sleepQuality ?? 'Fair',
-        appetiteChange: over.appetiteChange ?? 'Stable',
-        confusionLevel: over.confusionLevel ?? 'None',
-        agitationLevel: over.agitationLevel ?? 'None',
-        socialInteraction: over.socialInteraction ?? 'Active',
-        hallucinationDelusionObs: over.hallucinationDelusionObs ?? 'None',
-        wanderingBehavior: over.wanderingBehavior ?? 'None',
-        selfHarmRiskObs: over.selfHarmRiskObs ?? 'None',
-        nurseAssigned: over.nurseAssigned ?? 'Demo Nurse',
-        lastMentalHealthCheckAt:
-          over.lastMentalHealthCheckAt ?? new Date(nowMs - 6 * 3600000).toISOString(),
-        nextDueAt: over.nextDueAt ?? new Date(nowMs + 55 * 60000).toISOString(),
-        notes: Array.isArray(over.notes) ? over.notes : [],
-        escalatedDoctor: Boolean(over.escalatedDoctor),
-        escalatedCounsellor: Boolean(over.escalatedCounsellor),
-      },
-    ]
-  }
+  if (!patients?.length) return []
 
   return patients.map((patient, idx) => {
     const id = patient.id

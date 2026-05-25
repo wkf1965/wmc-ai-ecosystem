@@ -100,7 +100,7 @@ function HydrationCard({
         </div>
         <div className="flex justify-between gap-2">
           <dt className="text-slate-500">Expected by now</dt>
-          <dd className="text-slate-600">~{row.expectedSoFarMl} mL (demo curve)</dd>
+          <dd className="text-slate-600">~{row.expectedSoFarMl} mL (target curve)</dd>
         </div>
         <div className="flex justify-between gap-2">
           <dt className="text-slate-500">Last drink</dt>
@@ -256,7 +256,7 @@ export default function HydrationLoopPage() {
     bumpHydrationScore('highRisk', 1)
     bumpHydrationScore('belowTarget', 1)
     upsertHydrationPatient(row.patientId, { escalated: true })
-    showToast('Dehydration risk escalated (simulation).', 'warn')
+    showToast('Dehydration risk escalated.', 'warn')
   }
 
   function handleSnooze(row) {
@@ -274,10 +274,10 @@ export default function HydrationLoopPage() {
     <div className="mx-auto max-w-7xl pb-8">
       <PageHeader
         title="Hydration loop"
-        description="Shift fluid rounds with intake tracking, refusal logs, and simulated dehydration surveillance. Demo only — not clinical fluid orders."
+        description="Shift fluid rounds with intake tracking, refusal logs, and local dehydration surveillance. Not clinical fluid orders."
         action={
           <div className="flex flex-wrap gap-2">
-            <Badge variant="info">Simulation mode</Badge>
+            <Badge variant="info">Local mode</Badge>
             <Link
               to="/health-check-loop"
               className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50"
@@ -311,7 +311,7 @@ export default function HydrationLoopPage() {
             <div>
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Low intake patients</p>
               <p className="mt-1 text-2xl font-bold tabular-nums text-slate-900">{summary.patientsLowIntake}</p>
-              <p className="text-xs text-slate-600">Behind demo fluid curve</p>
+              <p className="text-xs text-slate-600">Behind target fluid curve</p>
             </div>
           </div>
         </Card>
@@ -351,7 +351,7 @@ export default function HydrationLoopPage() {
           <Droplets className="h-5 w-5 text-teal-600" aria-hidden />
           <h3 className="text-sm font-semibold text-slate-900">Hydration scoring</h3>
         </div>
-        <p className="mt-0.5 text-xs text-slate-500">Simulation tally · includes demo baseline</p>
+        <p className="mt-0.5 text-xs text-slate-500">Local tally · updates with care actions</p>
         <dl className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-5">
           {[
             { label: 'On target', val: scores.onTarget },

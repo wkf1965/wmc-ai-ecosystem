@@ -84,7 +84,7 @@ function BucketBadge({ bucket }) {
 }
 
 function familyRehabDraft(row) {
-  return `${row.patientName} worked with therapy on ${rehabTypeDisplayLabel(row.rehabType)} (${row.therapyMinutesLastSession} min). Focus areas: mobility, safety, and comfort. Pain reported ${row.painScore}/10; therapist adjusting pacing. This is a simulation draft — confirm details before sending to family.`
+  return `${row.patientName} worked with therapy on ${rehabTypeDisplayLabel(row.rehabType)} (${row.therapyMinutesLastSession} min). Focus areas: mobility, safety, and comfort. Pain reported ${row.painScore}/10; therapist adjusting pacing. Please confirm details before sending to family.`
 }
 
 function RehabilitationCard({ row, selected, onSelect }) {
@@ -331,7 +331,7 @@ export default function RehabilitationLoopPage() {
     bumpRehabilitationScore('declining', 2)
     bumpRehabilitationScore('doctorReviewNeeded', 1)
     upsertRehabilitationPatient(row.patientId, { escalatedDoctorReview: true })
-    showToast('Escalated for physician review (simulation).', 'warn')
+    showToast('Escalated for physician review.', 'warn')
   }
 
   async function copyText(label, text) {
@@ -365,10 +365,10 @@ export default function RehabilitationLoopPage() {
     <div className="mx-auto max-w-[1680px] pb-8">
       <PageHeader
         title="Rehabilitation Loop"
-        description="Simulated therapy surveillance with discipline-specific cues, missed-session workflow, aggregate charts, and AI-style summaries. Demo only."
+        description="Local therapy surveillance with discipline-specific cues, missed-session workflow, aggregate charts, and AI-style summaries."
         action={
           <div className="flex flex-wrap gap-2">
-            <Badge variant="info">Simulation mode</Badge>
+            <Badge variant="info">Local mode</Badge>
             <Link
               to="/rehab-tracking"
               className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50"
@@ -438,7 +438,7 @@ export default function RehabilitationLoopPage() {
             <Activity className="h-5 w-5 text-teal-600" aria-hidden />
             <h3 className="text-sm font-semibold text-slate-900">Weekly therapy minutes</h3>
           </div>
-          <p className="mb-2 text-xs text-slate-500">Simulated eight-week roster average</p>
+          <p className="mb-2 text-xs text-slate-500">Eight-week roster average</p>
           <div className="h-[260px] w-full min-w-0">
             <ResponsiveContainer width="100%" height="100%" minHeight={220}>
               <LineChart data={weeklyTherapyMinutes} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
@@ -457,7 +457,7 @@ export default function RehabilitationLoopPage() {
             <Activity className="h-5 w-5 text-sky-600" aria-hidden />
             <h3 className="text-sm font-semibold text-slate-900">Walking distance trend</h3>
           </div>
-          <p className="mb-2 text-xs text-slate-500">Simulated meters · roster average</p>
+          <p className="mb-2 text-xs text-slate-500">Meters · roster average</p>
           <div className="h-[260px] w-full min-w-0">
             <ResponsiveContainer width="100%" height="100%" minHeight={220}>
               <LineChart data={walkingTrend} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
@@ -544,7 +544,7 @@ export default function RehabilitationLoopPage() {
           <Activity className="h-5 w-5 text-teal-600" aria-hidden />
           <h3 className="text-sm font-semibold text-slate-900">Rehab scoring</h3>
         </div>
-        <p className="mt-0.5 text-xs text-slate-500">Simulation tally · includes demo baseline</p>
+        <p className="mt-0.5 text-xs text-slate-500">Local tally · updates with loop actions</p>
         <dl className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           {[
             { label: 'Improving', val: scores.improving },

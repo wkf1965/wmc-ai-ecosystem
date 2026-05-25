@@ -9,6 +9,7 @@ import {
   FALL_RISK_OPTIONS,
   GENDER_OPTIONS,
   getPatientById,
+  listAvailableRooms,
   PRESSURE_SORE_RISK_OPTIONS,
   REHAB_STATUS_OPTIONS,
   updatePatient,
@@ -17,6 +18,7 @@ import {
 
 type PatientFormFields = {
   fullName: string
+  roomNumber: string
   age: string
   gender: string
   diagnosis: string
@@ -44,6 +46,7 @@ export default function PatientForm({ patientId, mode }: { patientId?: string; m
       if (!patient) return emptyPatientForm()
       return {
         fullName: patient.fullName,
+        roomNumber: patient.roomNumber || "",
         age: String(patient.age),
         gender: patient.gender,
         diagnosis: patient.diagnosis,
@@ -67,12 +70,35 @@ export default function PatientForm({ patientId, mode }: { patientId?: string; m
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [submitError, setSubmitError] = useState("")
   const [isSaving, setIsSaving] = useState(false)
+  const [roomEntryMode, setRoomEntryMode] = useState<"select" | "manual">("select")
 
   const patientMissing = useMemo(() => {
     if (mode === "create") return false
     if (!patientId) return true
     return !getPatientById(patientId)
   }, [mode, patientId])
+
+  const availableRoomOptions = useMemo(() => {
+    const list = listAvailableRooms(mode === "edit" ? patientId : undefined)
+    const current = String(form.roomNumber || "").trim().toUpperCase()
+    if (current && !list.includes(current)) {
+      return [current, ...list]
+    }
+    return list
+  }, [form.roomNumber, mode, patientId])
+
+  const availableRoomsByWing = useMemo(() => {
+    const groups: Record<string, string[]> = {}
+    for (const room of availableRoomOptions) {
+      const [wing] = room.split("-")
+      const key = wing || "Other"
+      if (!groups[key]) groups[key] = []
+      groups[key].push(room)
+    }
+    return Object.entries(groups).sort(([left], [right]) => left.localeCompare(right))
+  }, [availableRoomOptions])
+
+  const shouldShowManualRoomInput = roomEntryMode === "manual" || availableRoomOptions.length === 0
 
   if (patientMissing) {
     return (
@@ -97,7 +123,7 @@ export default function PatientForm({ patientId, mode }: { patientId?: string; m
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    const nextErrors = validatePatientForm(form)
+    const nextErrors = validatePatientForm(form, mode === "edit" ? patientId : undefined)
     setErrors(nextErrors)
     setSubmitError("")
     if (Object.keys(nextErrors).length > 0) return
@@ -128,6 +154,47 @@ export default function PatientForm({ patientId, mode }: { patientId?: string; m
             onChange={(event) => setField("fullName", event.target.value)}
           />
           {errors.fullName ? <p className="mt-1 text-xs text-red-600">{errors.fullName}</p> : null}
+        </div>
+        <div>
+          <label className={labelClass}>Room number</label>
+          {!shouldShowManualRoomInput ? (
+            <select
+              className={`${inputClass} ${errors.roomNumber ? "border-rose-400 ring-1 ring-rose-300" : ""}`}
+              value={form.roomNumber}
+              onChange={(event) => setField("roomNumber", event.target.value)}
+            >
+              <option value="" disabled>
+                Total vacant rooms: {availableRoomOptions.length}
+              </option>
+              <option value="">Select vacant room</option>
+              {availableRoomsByWing.map(([wing, rooms]) => (
+                <optgroup key={wing} label={`Wing ${wing} (${rooms.length} available)`}>
+                  {rooms.map((room) => (
+                    <option key={room} value={room}>
+                      {room}
+                    </option>
+                  ))}
+                </optgroup>
+              ))}
+            </select>
+          ) : (
+            <input
+              className={`${inputClass} ${errors.roomNumber ? "border-rose-400 ring-1 ring-rose-300" : ""}`}
+              value={form.roomNumber}
+              onChange={(event) => setField("roomNumber", event.target.value)}
+              placeholder="e.g. A-201"
+            />
+          )}
+          <div className="mt-2">
+            <button
+              type="button"
+              onClick={() => setRoomEntryMode((previous) => (previous === "select" ? "manual" : "select"))}
+              className="text-xs font-medium text-sky-700 hover:underline"
+            >
+              {shouldShowManualRoomInput ? "Choose from vacant rooms" : "Enter room manually"}
+            </button>
+          </div>
+          {errors.roomNumber ? <p className="mt-1 text-xs text-red-600">{errors.roomNumber}</p> : null}
         </div>
         <div>
           <label className={labelClass}>Age</label>

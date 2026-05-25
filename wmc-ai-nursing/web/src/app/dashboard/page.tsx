@@ -7,7 +7,10 @@ import {
   ArrowRight,
   AlertTriangle,
   Bell,
+  Building2,
   Calendar,
+  CalendarClock,
+  Clock3,
   LineChart,
   Pill,
   Search,
@@ -88,6 +91,9 @@ const kpiTone: Record<string, string> = {
 
 const navItems = [
   { name: "Dashboard", href: "/dashboard" },
+  { name: "Rooms", href: "/rooms" },
+  { name: "Nurse Duty Roster", href: "/nurse-duty-roster" },
+  { name: "Overtime OT", href: "/overtime-ot" },
   { name: "Patients", href: "/patients" },
   { name: "Nursing Notes", href: "/ai-note-analyzer" },
   { name: "AI Alerts", href: "/ai-risk" },
@@ -107,14 +113,6 @@ function riskColor(level: string) {
 
 function statusColor(status: string) {
   return status === "active" ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"
-}
-
-function patientRoom(patientId: string) {
-  const value = patientId.replace(/\D/g, "")
-  const suffix = value.padStart(3, "0")
-  const wing = Number.parseInt(suffix, 10) % 4
-  const map = ["A", "B", "C", "D"]
-  return `${map[wing]}-2${suffix.slice(-2)}`
 }
 
 function riskStyle(level: string) {
@@ -158,7 +156,7 @@ function buildRows(keepTopOnly = true) {
       const risk = analyzePatientRisk(patient)
       return {
         patient: patient.fullName,
-        room: patientRoom(patient.id),
+        room: patient.roomNumber || "—",
         diagnosis: patient.diagnosis,
         mobility: patient.mobilityStatus,
         risk: risk.riskBadge,
@@ -382,6 +380,55 @@ export default function DashboardPage() {
                     <p className='text-xs text-slate-500'>On duty: {shift.onDuty} nurses - Handoff: {shift.handoff}</p>
                   </div>
                 ))}
+              </div>
+            </article>
+
+            <article className='panel-card lg:col-span-2'>
+              <header className='mb-4 flex items-center justify-between'>
+                <div>
+                  <h2 className='text-lg font-semibold text-slate-900'>Nurse duty roster module</h2>
+                  <p className='text-sm text-slate-500'>Roster planning linked with OT, handover, and medication desk</p>
+                </div>
+                <span className='metric-chip'>New module</span>
+              </header>
+              <div className='rounded-xl border border-slate-200 p-4'>
+                <p className='text-sm text-slate-600'>Open nurse duty roster to manage shift allocation and jump to connected nurse workflows.</p>
+                <Link href="/nurse-duty-roster" className='mt-3 inline-flex items-center gap-2 rounded-lg bg-slate-900 px-3 py-2 text-sm font-semibold text-white'>
+                  <CalendarClock className='h-4 w-4' />
+                  Open Nurse Duty Roster
+                </Link>
+              </div>
+            </article>
+            <article className='panel-card lg:col-span-2'>
+              <header className='mb-4 flex items-center justify-between'>
+                <div>
+                  <h2 className='text-lg font-semibold text-slate-900'>Rooms module</h2>
+                  <p className='text-sm text-slate-500'>Patient rooms, occupancy, and bedside risk view</p>
+                </div>
+                <span className='metric-chip'>New module</span>
+              </header>
+              <div className='rounded-xl border border-slate-200 p-4'>
+                <p className='text-sm text-slate-600'>Open the dedicated rooms page to view room allocation and risk status per resident.</p>
+                <Link href="/rooms" className='mt-3 inline-flex items-center gap-2 rounded-lg bg-slate-900 px-3 py-2 text-sm font-semibold text-white'>
+                  <Building2 className='h-4 w-4' />
+                  Open Rooms Module
+                </Link>
+              </div>
+            </article>
+            <article className='panel-card lg:col-span-2'>
+              <header className='mb-4 flex items-center justify-between'>
+                <div>
+                  <h2 className='text-lg font-semibold text-slate-900'>Overtime OT module</h2>
+                  <p className='text-sm text-slate-500'>OT calculation, punch in/out, and Telegram handoff</p>
+                </div>
+                <span className='metric-chip'>New module</span>
+              </header>
+              <div className='rounded-xl border border-slate-200 p-4'>
+                <p className='text-sm text-slate-600'>Open OT workflow for staff punch logs, overtime totals, and Telegram bot integration.</p>
+                <Link href="/overtime-ot" className='mt-3 inline-flex items-center gap-2 rounded-lg bg-slate-900 px-3 py-2 text-sm font-semibold text-white'>
+                  <Clock3 className='h-4 w-4' />
+                  Open Overtime OT Module
+                </Link>
               </div>
             </article>
           </section>

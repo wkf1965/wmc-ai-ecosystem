@@ -154,9 +154,7 @@ function symptomPick(h, idx) {
  * @returns {Record<string, object>}
  */
 export function computeInfectionControlSnapshots(patients, prevInstances, nowMs = Date.now()) {
-  const roster = patients?.length
-    ? patients
-    : [{ id: 'demo', fullName: 'Demo Resident', assignedNurse: 'Demo Nurse', room: '100A' }]
+  const roster = patients?.length ? patients : []
 
   const out = {}
 

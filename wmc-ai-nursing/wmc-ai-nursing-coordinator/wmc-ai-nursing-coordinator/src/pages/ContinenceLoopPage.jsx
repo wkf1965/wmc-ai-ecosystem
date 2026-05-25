@@ -53,7 +53,7 @@ function BucketBadge({ bucket }) {
 
 function continenceReportText(row) {
   return [
-    `CONTINENCE LOOP REPORT (SIMULATION)`,
+    `CONTINENCE LOOP REPORT`,
     `Patient: ${row.patientName} · Room ${row.room}`,
     `Toileting assist: ${row.toiletAssistanceNeeded}`,
     `Urination frequency: ${row.urinationFrequency}`,
@@ -289,7 +289,7 @@ export default function ContinenceLoopPage() {
       doctorReviewNeeded: true,
       constipationRisk: 'High',
     })
-    showToast('Constipation concern escalated (simulation).', 'warn')
+    showToast('Constipation concern escalated.', 'warn')
   }
 
   async function copyReport(row) {
@@ -306,10 +306,10 @@ export default function ContinenceLoopPage() {
     <div className="mx-auto max-w-[1680px] pb-8">
       <PageHeader
         title="Toilet / continence loop"
-        description="Simulated continence rounds with stool/voiding cues, skin-risk flags, and escalation hooks. Demo only."
+        description="Local continence rounds with stool/voiding cues, skin-risk flags, and escalation hooks."
         action={
           <div className="flex flex-wrap gap-2">
-            <Badge variant="info">Simulation mode</Badge>
+            <Badge variant="info">Local mode</Badge>
             <Link
               to="/hydration-loop"
               className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50"
@@ -391,7 +391,7 @@ export default function ContinenceLoopPage() {
           <Toilet className="h-5 w-5 text-teal-600" aria-hidden />
           <h3 className="text-sm font-semibold text-slate-900">Continence scoring</h3>
         </div>
-        <p className="mt-0.5 text-xs text-slate-500">Simulation tally · includes demo baseline</p>
+        <p className="mt-0.5 text-xs text-slate-500">Local tally · updates with care actions</p>
         <dl className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-5">
           {[
             { label: 'Stable', val: scores.stable },

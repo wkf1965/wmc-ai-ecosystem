@@ -117,38 +117,7 @@ export function mergeNutritionLoopRows(patients, nowMs = Date.now()) {
   const raw = loadRaw()
   const today = todayLocalStr(new Date(nowMs))
 
-  if (!patients?.length) {
-    const id = 'demo'
-    const over = raw.instances[id] || {}
-    return [
-      {
-        patientId: id,
-        patientName: 'Demo Resident',
-        room: '100A',
-        mealType: /** @type {MealType} */ (over.mealType || 'lunch'),
-        foodIntakePercent: typeof over.foodIntakePercent === 'number' ? over.foodIntakePercent : 52,
-        fluidIntakeMl: typeof over.fluidIntakeMl === 'number' ? over.fluidIntakeMl : 180,
-        swallowingRisk:
-          over.swallowingRisk ?? 'Moderate — Speech evaluated; chin tuck with thin liquids avoided.',
-        swallowingRiskTier: /** @type {'Low'|'Moderate'|'High'} */ (over.swallowingRiskTier || 'Moderate'),
-        feedingAssistanceNeeded: over.feedingAssistanceNeeded ?? 'Partial assist',
-        appetiteLevel: /** @type {'Poor'|'Fair'|'Good'} */ (over.appetiteLevel || 'Fair'),
-        weightTrend: over.weightTrend ?? 'Stable',
-        nurseAssigned: over.nurseAssigned ?? 'Demo Nurse',
-        dietType: /** @type {DietType} */ (over.dietType || 'soft'),
-        nextMealDueAt:
-          over.nextMealDueAt ?? new Date(nowMs + 40 * 60000).toISOString(),
-        lastMealRecordedAt: over.lastMealRecordedAt ?? new Date(nowMs - 70 * 60000).toISOString(),
-        mealTrackingDay: over.mealTrackingDay ?? today,
-        refusedToday: over.refusedToday ?? 0,
-        refusedDay: over.refusedDay ?? today,
-        notes: Array.isArray(over.notes) ? over.notes : [],
-        escalatedPoorIntake: Boolean(over.escalatedPoorIntake),
-        recordedForSlot: over.recordedForSlot ?? null,
-        lastScoreSlotDay: over.lastScoreSlotDay ?? null,
-      },
-    ]
-  }
+  if (!patients?.length) return []
 
   return patients.map((patient, idx) => {
     const id = patient.id

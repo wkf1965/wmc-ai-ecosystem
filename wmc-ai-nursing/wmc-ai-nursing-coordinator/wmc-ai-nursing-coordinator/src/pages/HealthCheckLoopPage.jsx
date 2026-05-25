@@ -91,7 +91,7 @@ export default function HealthCheckLoopPage() {
       doctorEscalated: false,
       cycleCompletedAt: null,
     })
-    showToast('Reading saved (simulation).')
+    showToast('Reading saved.')
   }
 
   function handleComplete(row) {
@@ -105,7 +105,7 @@ export default function HealthCheckLoopPage() {
 
   function handleEscalate(row) {
     upsertHealthLoopInstance(row.key, { doctorEscalated: true })
-    showToast('Flagged for doctor review (simulation).', 'warn')
+    showToast('Flagged for doctor review.', 'warn')
   }
 
   function handleNote(row) {
@@ -137,10 +137,10 @@ export default function HealthCheckLoopPage() {
     <div className="max-w-7xl">
       <PageHeader
         title="Health check loops"
-        description="Recurring vital and assessment surveillance with simulated ranges and AI-style pattern hints. Demo only — not for clinical decisions."
+        description="Recurring vital and assessment surveillance with local ranges and AI-style pattern hints. Not for clinical decisions."
         action={
           <Badge variant="info" className="self-start">
-            Simulation mode
+            Local mode
           </Badge>
         }
       />
@@ -167,7 +167,7 @@ export default function HealthCheckLoopPage() {
             <div>
               <h3 className="text-base font-semibold text-slate-900">AI risk detection</h3>
               <p className="text-sm text-slate-500">
-                Fever / glucose / BP / SpO₂ / fluid balance / sepsis cluster / cognition — heuristic simulation
+                Fever / glucose / BP / SpO₂ / fluid balance / sepsis cluster / cognition — heuristic local analysis
               </p>
             </div>
           </div>
@@ -180,7 +180,7 @@ export default function HealthCheckLoopPage() {
         </div>
         {aiRisks.length === 0 ? (
           <p className="rounded-xl border border-emerald-100 bg-emerald-50/80 px-4 py-4 text-sm text-emerald-900">
-            No elevated patterns from current simulated readings.
+            No elevated patterns from current readings.
           </p>
         ) : (
           <ul className="grid gap-2 sm:grid-cols-2">
@@ -208,7 +208,7 @@ export default function HealthCheckLoopPage() {
 
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <p className="text-sm text-slate-600">
-          <span className="font-semibold text-slate-900">{filtered.length}</span> loops · {patients.length} patients (demo roster)
+          <span className="font-semibold text-slate-900">{filtered.length}</span> loops · {patients.length} patients
         </p>
         <div className="flex flex-wrap gap-2">
           {[

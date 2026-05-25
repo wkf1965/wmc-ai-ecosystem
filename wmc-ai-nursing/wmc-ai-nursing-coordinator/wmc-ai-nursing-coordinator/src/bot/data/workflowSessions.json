@@ -1,0 +1,30 @@
+{
+  "-4853741756:646736592": {
+    "workflow": "admit",
+    "step": 7,
+    "data": {
+      "patientName": "Yip Pooi Fong",
+      "age": "67",
+      "gender": "Female",
+      "room": "2",
+      "diagnosis": "Stroke (Intracerebral Hemorrhage Hemisphere)",
+      "doctor": "Dr Wong",
+      "admissionDate": "26/05/25"
+    },
+    "nurseInfo": {
+      "chatId": "-4853741756",
+      "userId": "646736592",
+      "username": "leongweifun",
+      "firstName": "weifun"
+    },
+    "awaitingConfirmation": false,
+    "awaitingReply": true,
+    "processing": false,
+    "sessionGeneration": 7,
+    "lastProcessedMessageId": 633,
+    "startedAt": "2026-05-23T07:03:54.284Z",
+    "chatId": -4853741756,
+    "userId": 646736592,
+    "lastCommandWarnKey": null
+  }
+}

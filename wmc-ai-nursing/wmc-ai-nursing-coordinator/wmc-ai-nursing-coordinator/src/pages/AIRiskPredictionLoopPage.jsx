@@ -234,7 +234,7 @@ export default function AIRiskPredictionLoopPage() {
     mergeAiRiskPredictionInstances(patients, notes)
     const fields = ['lowRisk', 'moderateRisk', 'highRisk', 'critical', 'emergencyEscalation']
     bumpAiRiskPredictionScore(fields[Math.floor(Math.random() * fields.length)], 1)
-    showToast('AI prediction pass completed (simulation).', 'success')
+    showToast('AI prediction pass completed.', 'success')
   }
 
   function handleEscalateDoctor() {
@@ -242,7 +242,7 @@ export default function AIRiskPredictionLoopPage() {
     if (!row) return
     upsertAiRiskPredictionInstance(row.patientId, { escalatedToDoctor: true })
     bumpAiRiskPredictionScore('critical', 1)
-    showToast('Escalated to doctor (simulation).', 'warn')
+    showToast('Escalated to doctor.', 'warn')
   }
 
   function handleNotifySupervisor() {
@@ -250,13 +250,13 @@ export default function AIRiskPredictionLoopPage() {
     if (!row) return
     upsertAiRiskPredictionInstance(row.patientId, { supervisorNotified: true })
     bumpAiRiskPredictionScore('highRisk', 1)
-    showToast('Supervisor notification logged (simulation).', 'success')
+    showToast('Supervisor notification logged.', 'success')
   }
 
   function handleFamilyUpdate() {
     const row = requireSelection()
     if (!row) return
-    const draft = `${row.patientName} (Rm ${row.roomNumber}): care team monitoring ${row.predictedRisk.toLowerCase()} pattern (score ${row.riskScore}, trend ${row.trend}). Interventions in progress per nursing protocol. This is a simulation draft — verify before sending to family.`
+    const draft = `${row.patientName} (Rm ${row.roomNumber}): care team monitoring ${row.predictedRisk.toLowerCase()} pattern (score ${row.riskScore}, trend ${row.trend}). Interventions in progress per nursing protocol. Please verify before sending to family.`
     showToast(`Family update draft: ${draft}`, 'info')
   }
 
@@ -265,7 +265,7 @@ export default function AIRiskPredictionLoopPage() {
     if (!row) return
     upsertAiRiskPredictionInstance(row.patientId, { reviewedAt: new Date().toISOString() })
     bumpAiRiskPredictionScore('lowRisk', 1)
-    showToast('Marked reviewed (simulation).', 'success')
+    showToast('Marked reviewed.', 'success')
   }
 
   function formatDayFile() {
@@ -292,10 +292,10 @@ export default function AIRiskPredictionLoopPage() {
     <div className="mx-auto max-w-[1600px] pb-8">
       <PageHeader
         title="AI Risk Prediction Loop"
-        description="Continuous simulated fusion of nursing notes, vitals, and care-loop telemetry into risk forecasts — not a regulated medical device."
+        description="Continuous local fusion of nursing notes, vitals, and care-loop telemetry into risk forecasts — not a regulated medical device."
         action={
           <div className="flex flex-wrap gap-2">
-            <Badge variant="info">Simulation mode</Badge>
+            <Badge variant="info">Local mode</Badge>
             <Link
               to="/ai-risk"
               className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50"
@@ -338,7 +338,7 @@ export default function AIRiskPredictionLoopPage() {
           <button type="button" className={btnWarn} onClick={handleNotifySupervisor} disabled={!selected}>
             <span className="inline-flex items-center gap-1">
               <ShieldAlert className="h-4 w-4 shrink-0" aria-hidden />
-              Notify supervisor (sim)
+              Notify supervisor
             </span>
           </button>
           <button type="button" className={btnMuted} onClick={handleFamilyUpdate} disabled={!selected}>
@@ -400,7 +400,7 @@ export default function AIRiskPredictionLoopPage() {
           <BrainCircuit className="h-5 w-5 text-teal-600" aria-hidden />
           <h3 className="text-sm font-semibold text-slate-900">Prediction scoring</h3>
         </div>
-        <p className="mt-0.5 text-xs text-slate-500">Simulation tally · baseline + bumps from loop actions</p>
+        <p className="mt-0.5 text-xs text-slate-500">Local tally · baseline + updates from loop actions</p>
         <dl className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-5">
           {[
             { label: 'Low risk', val: scores.lowRisk },

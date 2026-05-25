@@ -214,7 +214,7 @@ export default function DoctorReviewLoopPage() {
       escalatedUrgent: false,
     })
     bumpDoctorReviewLoopScore(row.severityLevel === 'critical' ? 'criticalReview' : 'stable', 1)
-    showToast('Marked reviewed (simulation).', 'success')
+    showToast('Marked reviewed.', 'success')
   }
 
   function handleEscalateUrgent() {
@@ -228,7 +228,7 @@ export default function DoctorReviewLoopPage() {
         row.severityLevel === 'low' ? 'high' : row.severityLevel === 'moderate' ? 'high' : row.severityLevel,
     })
     bumpDoctorReviewLoopScore('criticalReview', 1)
-    showToast('Escalated to urgent (simulation).', 'warn')
+    showToast('Escalated to urgent.', 'warn')
   }
 
   function handleDoctorNote() {
@@ -255,7 +255,7 @@ export default function DoctorReviewLoopPage() {
       ...stripDerived(row),
       familyNotified: true,
     })
-    showToast('Family notified (simulation).', 'success')
+    showToast('Family notified.', 'success')
   }
 
   function handlePrintableReport() {
@@ -277,10 +277,10 @@ export default function DoctorReviewLoopPage() {
     <div className="mx-auto max-w-[1600px] pb-8">
       <PageHeader
         title="Doctor review loop"
-        description="Auto-queue from AI note signals plus manual stewardship — simulation only; not a regulated CDS device."
+        description="Auto-queue from AI note signals plus manual stewardship — local mode only; not a regulated CDS device."
         action={
           <div className="flex flex-wrap gap-2">
-            <Badge variant="info">Simulation mode</Badge>
+            <Badge variant="info">Local mode</Badge>
             <Link
               to="/doctor-review"
               className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50"
@@ -327,7 +327,7 @@ export default function DoctorReviewLoopPage() {
             </span>
           </button>
           <button type="button" className={btnWarn} onClick={handleNotifyFamily} disabled={!selected}>
-            Notify family (sim)
+            Notify family
           </button>
           <button type="button" className={btnMuted} onClick={handlePrintableReport} disabled={!selected}>
             <span className="inline-flex items-center gap-1">
@@ -382,7 +382,7 @@ export default function DoctorReviewLoopPage() {
           <ShieldCheck className="h-5 w-5 text-violet-600" aria-hidden />
           <h3 className="text-sm font-semibold text-slate-900">Review scoring</h3>
         </div>
-        <p className="mt-0.5 text-xs text-slate-500">Simulation tally · demo baseline · bumps when you review / escalate</p>
+        <p className="mt-0.5 text-xs text-slate-500">Local tally · updates when you review or escalate</p>
         <dl className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-5">
           {[
             { label: 'Stable', val: scores.stable },

@@ -1,0 +1,9 @@
+{
+  "name": "wmc-ai-nursing-coordinator",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "telegram": "node src/telegram/bot.js"
+  }
+}

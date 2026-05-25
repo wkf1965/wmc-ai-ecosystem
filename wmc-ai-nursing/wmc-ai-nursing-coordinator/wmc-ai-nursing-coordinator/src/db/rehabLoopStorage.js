@@ -128,50 +128,7 @@ export function mergeRehabilitationLoopRows(patients, nowMs = Date.now()) {
   const raw = loadRaw()
   const today = todayLocalStr(new Date(nowMs))
 
-  if (!patients?.length) {
-    const id = 'demo'
-    const over = raw.instances[id] || {}
-    const trend = /** @type {'improving'|'stable'|'declining'} */ (
-      over.progressTrend === 'declining' ? 'declining' : over.progressTrend === 'improving' ? 'improving' : 'stable'
-    )
-    const h = 90421
-    return [
-      {
-        patientId: id,
-        patientName: 'Demo Resident',
-        room: '100A',
-        diagnosis: over.diagnosis ?? 'Deconditioning post hospitalization',
-        rehabType: /** @type {RehabType} */ (over.rehabType || 'physiotherapy'),
-        therapyMinutesLastSession: typeof over.therapyMinutesLastSession === 'number' ? over.therapyMinutesLastSession : 40,
-        walkingDistanceM: typeof over.walkingDistanceM === 'number' ? over.walkingDistanceM : 85,
-        transferAbility: over.transferAbility ?? 'Contact guard assist',
-        balanceScore: typeof over.balanceScore === 'number' ? over.balanceScore : 6,
-        muscleStrength: over.muscleStrength ?? '4/5 major muscle groups',
-        painScore: typeof over.painScore === 'number' ? over.painScore : 4,
-        adlIndependence: typeof over.adlIndependence === 'number' ? over.adlIndependence : 62,
-        speechProgress: typeof over.speechProgress === 'number' ? over.speechProgress : 55,
-        therapistAssigned: over.therapistAssigned ?? 'Demo Therapist',
-        nextSessionDueAt: over.nextSessionDueAt ?? new Date(nowMs + 35 * 60000).toISOString(),
-        lastSessionAt: over.lastSessionAt ?? new Date(nowMs - 26 * 3600000).toISOString(),
-        missedSessionsWeek: over.missedSessionsWeek ?? 0,
-        sessionsCompletedWeek: over.sessionsCompletedWeek ?? 3,
-        progressTrend: /** @type {'improving'|'stable'|'declining'} */ (
-          over.progressTrend || 'stable'
-        ),
-        recoveryPotential: /** @type {'high'|'moderate'|'low'} */ (over.recoveryPotential || 'moderate'),
-        rehabPlateau: Boolean(over.rehabPlateau),
-        notes: Array.isArray(over.notes) ? over.notes : [],
-        escalatedDoctorReview: Boolean(over.escalatedDoctorReview),
-        lastSessionCompleted: Boolean(over.lastSessionCompleted ?? false),
-        lastSessionDay: over.lastSessionDay ?? today,
-        mentalStatusSnap: over.mentalStatusSnap ?? 'Alert ×3',
-        fallRiskSnap: over.fallRiskSnap ?? 'Moderate',
-        functionalSeries: Array.isArray(over.functionalSeries)
-          ? over.functionalSeries
-          : weeklyFunctionalSeries(h, trend),
-      },
-    ]
-  }
+  if (!patients?.length) return []
 
   return patients.map((patient, idx) => {
     const id = patient.id

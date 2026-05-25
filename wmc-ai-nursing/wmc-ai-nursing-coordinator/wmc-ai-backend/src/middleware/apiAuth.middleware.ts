@@ -35,6 +35,7 @@ const DEV_TESTING_ROUTES: ReadonlyArray<{ method: string; path: string }> = [
   { method: 'POST', path: '/crm/leads' },
   { method: 'GET', path: '/nursing/records' },
   { method: 'POST', path: '/nursing/records' },
+  { method: 'POST', path: '/nursing/parse' },
   { method: 'POST', path: '/nursing/quick-record' },
   { method: 'POST', path: '/rehab/progress' },
   { method: 'POST', path: '/rehabilitation/progress' },
@@ -56,6 +57,7 @@ const DEV_TESTING_ROUTES: ReadonlyArray<{ method: string; path: string }> = [
   { method: 'POST', path: '/family/update' },
   { method: 'GET', path: '/family/communication-queue' },
   { method: 'POST', path: '/escalation/check' },
+  { method: 'GET', path: '/dashboard' },
   { method: 'GET', path: '/dashboard/summary' },
   { method: 'GET', path: '/tasks/queue' },
   { method: 'POST', path: '/reminders/create' },
@@ -72,6 +74,9 @@ const DEV_TESTING_ROUTES: ReadonlyArray<{ method: string; path: string }> = [
   { method: 'POST', path: '/emergency/respond' },
   { method: 'GET', path: '/command-center/status' },
   { method: 'GET', path: '/reports/daily-facility' },
+  { method: 'POST', path: '/admin/clear-records' },
+  { method: 'DELETE', path: '/admin/reset' },
+  { method: 'DELETE', path: '/admin/reset-patients' },
 ]
 
 const DEV_SYNTH_PRINCIPAL: AuthPayload = {

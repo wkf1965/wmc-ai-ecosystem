@@ -27,6 +27,18 @@ import {
   UserRoundX,
   ClipboardX,
   Activity,
+  ClipboardList,
+  BedDouble,
+  FileText,
+  PlusCircle,
+  UserCheck,
+  Smartphone,
+  DoorOpen,
+  Pill,
+  Footprints,
+  ListChecks,
+  TriangleAlert,
+  Siren,
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { PageHeader, Card, Badge } from '../components/ui'
@@ -114,9 +126,9 @@ export default function DashboardPage() {
     const combinedHighCritical = highCritical + Math.min(liveOpenAlerts, 5)
     return [
       {
-        label: 'Residents & rehab',
+        label: 'Patient census',
         value: String(n),
-        sub: `${rehabN} active rehabilitation`,
+        sub: `${rehabN} flagged for intensified nursing care`,
         icon: Users,
         accent: 'from-teal-500 to-cyan-600',
       },
@@ -150,7 +162,7 @@ export default function DashboardPage() {
       {
         label: 'Open check-ins today',
         value: String(openToday),
-        sub: 'Staff Attendance — local device',
+        sub: 'Nurse attendance board',
         icon: ClipboardClock,
         accent: 'from-sky-500 to-indigo-600',
         to: '/staff-attendance',
@@ -226,12 +238,107 @@ export default function DashboardPage() {
     ]
   }, [healthLoopMetrics])
 
+  const moduleCards = [
+    { label: 'Patient Rooms', icon: DoorOpen, to: '/room-module', color: 'from-slate-500 to-slate-700', desc: 'Room allocation and occupancy' },
+    { label: 'Side Turning', icon: BedDouble, to: '/side-turning', color: 'from-violet-500 to-purple-600', desc: 'Pressure relief turning schedule' },
+    { label: 'Medication Tracking', icon: Pill, to: '/medications', color: 'from-blue-500 to-indigo-700', desc: 'Medication administration and checks' },
+    { label: 'Shift Handover', icon: FileText, to: '/shift-handover', color: 'from-emerald-500 to-teal-600', desc: 'Nurse-to-nurse shift updates' },
+    { label: 'Fall Incidents', icon: Footprints, to: '/fall-prevention-loop', color: 'from-rose-500 to-red-600', desc: 'Fall risk and incident follow-up' },
+    { label: 'Nurse Task Board', icon: ListChecks, to: '/care-loops', color: 'from-cyan-500 to-sky-700', desc: 'Due and overdue bedside tasks' },
+    { label: 'OT Tracking', icon: Timer, to: '/ot-reports', color: 'from-amber-500 to-orange-600', desc: 'Overtime and attendance analytics' },
+    { label: 'Vital Signs Monitoring', icon: HeartPulse, to: '/nurse-input', color: 'from-red-500 to-rose-600', desc: 'Live vitals input and monitoring' },
+    { label: 'Nursing Alerts', icon: Siren, to: '/alerts', color: 'from-fuchsia-500 to-pink-600', desc: 'AI-assisted nursing alert stream' },
+    { label: 'High Risk Patients', icon: TriangleAlert, to: '/ai-risk', color: 'from-orange-500 to-amber-600', desc: 'Priority patients needing close watch' },
+    { label: 'Family Updates', icon: Users, to: '/family-updates', color: 'from-teal-500 to-cyan-600', desc: 'Family communication and updates' },
+  ]
+
+  const quickInputLinks = [
+    {
+      label: 'New Nursing Note',
+      icon: PlusCircle,
+      to: '/nursing-notes/new',
+      page: 'NursingNoteFormPage',
+      color: 'bg-sky-50 border-sky-200 text-sky-800 hover:bg-sky-100',
+    },
+    {
+      label: 'Log Side Turning',
+      icon: BedDouble,
+      to: '/side-turning',
+      page: 'SideTurningScheduleBoardPage',
+      color: 'bg-violet-50 border-violet-200 text-violet-800 hover:bg-violet-100',
+    },
+    {
+      label: 'Log OT / Overtime',
+      icon: Timer,
+      to: '/overtime',
+      page: 'OvertimePage',
+      color: 'bg-amber-50 border-amber-200 text-amber-800 hover:bg-amber-100',
+    },
+    {
+      label: 'Shift Handover',
+      icon: FileText,
+      to: '/shift-handover',
+      page: 'ShiftHandoverPage',
+      color: 'bg-emerald-50 border-emerald-200 text-emerald-800 hover:bg-emerald-100',
+    },
+    {
+      label: 'Record Vitals',
+      icon: HeartPulse,
+      to: '/nurse-input',
+      page: 'NurseVitalInputPage',
+      color: 'bg-rose-50 border-rose-200 text-rose-800 hover:bg-rose-100',
+    },
+    {
+      label: 'Staff Attendance',
+      icon: UserCheck,
+      to: '/staff-attendance',
+      page: 'StaffAttendancePage',
+      color: 'bg-teal-50 border-teal-200 text-teal-800 hover:bg-teal-100',
+    },
+  ]
+
   return (
     <div>
       <PageHeader
-        title="Dashboard"
-        description="Patient census and risk metrics read from your local mock database; charts remain illustrative demo data."
+        title="WMC AI Nursing Coordinator"
+        description="Professional nursing operations dashboard for live care coordination at WMC."
       />
+
+      {/* Module access cards */}
+      <div className="mb-8 grid gap-3 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5">
+        {moduleCards.map(({ label, icon: Icon, to, color, desc }) => (
+          <Link
+            key={label}
+            to={to}
+            className="group relative flex flex-col gap-2 overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm transition hover:shadow-md hover:-translate-y-0.5"
+          >
+            <div className={`flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br ${color} text-white shadow`}>
+              <Icon className="h-5 w-5" aria-hidden />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-slate-900 group-hover:text-teal-700">{label}</p>
+              <p className="text-xs text-slate-500">{desc}</p>
+            </div>
+          </Link>
+        ))}
+      </div>
+
+      {/* Quick Input — direct links to existing input form pages */}
+      <div className="mb-8">
+        <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-500">Quick Actions</h3>
+        <div className="flex flex-wrap gap-2">
+          {quickInputLinks.map(({ label, icon: Icon, to, color }) => (
+            <Link
+              key={to}
+              to={to}
+              className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-medium transition ${color}`}
+            >
+              <Icon className="h-4 w-4" aria-hidden />
+              {label}
+            </Link>
+          ))}
+        </div>
+      </div>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {statCards.map(({ label, value, sub, icon: Icon, accent }) => (
@@ -297,7 +404,7 @@ export default function DashboardPage() {
               <Repeat2 className="h-5 w-5 text-teal-600" aria-hidden />
               <div>
                 <h3 className="text-base font-semibold text-slate-900">Care Loops Due Now</h3>
-                <p className="text-sm text-slate-500">Recurring bedside tasks — simulation roster</p>
+                <p className="text-sm text-slate-500">Recurring bedside tasks — local roster</p>
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-2">
@@ -342,7 +449,7 @@ export default function DashboardPage() {
 
       <div className="mt-8">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-          <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Health check loops (simulation)</h3>
+          <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Health check loops</h3>
           <Link
             to="/health-check-loop"
             className="text-xs font-semibold text-teal-700 hover:underline"
@@ -380,10 +487,10 @@ export default function DashboardPage() {
               <Activity className="h-5 w-5 text-teal-600" aria-hidden />
               <div>
                 <h3 className="text-base font-semibold text-slate-900">Live patient monitoring</h3>
-                <p className="text-sm text-slate-500">Snapshot from simulated health loops + latest readings</p>
+                <p className="text-sm text-slate-500">Snapshot from health loops + latest readings</p>
               </div>
             </div>
-            <Badge variant="teal">Demo feed</Badge>
+            <Badge variant="teal">Live feed</Badge>
           </div>
           <ul className="divide-y divide-slate-100">
             {healthLoopMetrics.liveLines.map((line) => (

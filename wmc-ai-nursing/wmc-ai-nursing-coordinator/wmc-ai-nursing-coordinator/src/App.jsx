@@ -52,6 +52,10 @@ import TelegramNursingDashboardPage from './pages/TelegramNursingDashboardPage'
 import RoomModulePage from './pages/RoomModulePage'
 import BackendApiTesterPage from './pages/BackendApiTesterPage'
 import NursingSupervisorDashboardPage from './pages/NursingSupervisorDashboardPage'
+import InventoryPage from './pages/InventoryPage'
+import InventoryMobilePage from './pages/InventoryMobilePage'
+import PampersPage from './pages/PampersPage'
+import AttendanceDashboardPage from './pages/AttendanceDashboardPage'
 
 export default function App() {
   return (
@@ -59,6 +63,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<DashboardPage />} />
+          <Route path="dashboard" element={<DashboardPage />} />
           <Route path="patients/new" element={<PatientFormPage />} />
           <Route path="patient-registration" element={<PatientRegistrationPage />} />
           <Route path="patients/:id/edit" element={<PatientFormPage />} />
@@ -81,6 +86,7 @@ export default function App() {
           <Route path="side-turning-posture" element={<SideTurningPosturePage />} />
           <Route path="reports" element={<ReportsPage />} />
           <Route path="shift-handover" element={<ShiftHandoverPage />} />
+          <Route path="handover" element={<ShiftHandoverPage />} />
           <Route path="supervisor" element={<SupervisorCommandCenterPage />} />
           <Route path="nursing-supervisor" element={<NursingSupervisorDashboardPage />} />
           <Route path="doctor-review" element={<DoctorReviewQueuePage />} />
@@ -112,6 +118,10 @@ export default function App() {
           <Route path="settings/google-sheet" element={<GoogleSheetSettingsPage />} />
           <Route path="settings/telegram" element={<TelegramSettingsPage />} />
           <Route path="backend-api-test" element={<BackendApiTesterPage />} />
+          <Route path="inventory" element={<InventoryPage />} />
+          <Route path="inventory-mobile" element={<InventoryMobilePage />} />
+          <Route path="pampers" element={<PampersPage />} />
+          <Route path="attendance-dashboard" element={<AttendanceDashboardPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>

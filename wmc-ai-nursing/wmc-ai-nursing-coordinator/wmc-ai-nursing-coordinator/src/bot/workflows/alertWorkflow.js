@@ -2,7 +2,13 @@
  * Clinical Alert Workflow — Stage 2
  */
 
-const D = '━━━━━━━━━━━━━━━━━━━━━━━━━'
+import {
+  DIVIDER,
+  htmlConfirmHeader,
+  htmlConfirmFooter,
+  htmlField,
+  htmlCritical,
+} from '../utils/workflowFormat.js'
 
 export const ALERT_WORKFLOW = {
   name: 'alert',
@@ -30,22 +36,22 @@ export const ALERT_WORKFLOW = {
       : data.time
 
     const critical = /seizure|unresponsive|cardiac|code/i.test(data.alertType ?? '')
-    const flag = critical ? '\n🚨 *CRITICAL ALERT — immediate escalation required*' : ''
+    const flag = critical ? htmlCritical('CRITICAL ALERT — immediate escalation required') : ''
 
     return [
-      '📋 *Please confirm this clinical alert:*',
-      D, '',
-      `👤 Patient: ${data.patientName}`,
-      `🏥 Room: ${data.room}`,
-      `🕐 Alert Time: ${time}`,
-      `🚨 Alert Type: ${data.alertType}`,
-      `👁️ Observation: ${data.observation}`,
-      `💊 Action Taken: ${data.actionTaken}`,
-      `👨‍⚕️ Doctor Informed: ${data.doctorInformed}`,
-      `📝 Remark: ${data.remark}`,
+      htmlConfirmHeader('Please confirm this clinical alert:'),
+      DIVIDER, '',
+      htmlField('👤 Patient:', data.patientName),
+      htmlField('🏥 Room:', data.room),
+      htmlField('🕐 Alert Time:', time),
+      htmlField('🚨 Alert Type:', data.alertType),
+      htmlField('👁️ Observation:', data.observation),
+      htmlField('💊 Action Taken:', data.actionTaken),
+      htmlField('👨‍⚕️ Doctor Informed:', data.doctorInformed),
+      htmlField('📝 Remark:', data.remark),
       flag,
-      '', D,
-      'Reply *yes* to save  |  *no* to cancel',
-    ].filter(l => l !== undefined).join('\n')
+      '', DIVIDER,
+      htmlConfirmFooter(),
+    ].filter(Boolean).join('\n')
   },
 }

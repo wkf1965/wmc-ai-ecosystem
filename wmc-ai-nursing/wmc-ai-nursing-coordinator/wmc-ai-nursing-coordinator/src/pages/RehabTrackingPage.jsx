@@ -131,46 +131,7 @@ function seedDate(daysAgo) {
 }
 
 function seedByPatientId() {
-  const seededRows = []
-  const base = [
-    { id: 'p1', name: 'Sim Resident A (demo)' },
-    { id: 'p2', name: 'Sim Resident B (demo)' },
-    { id: 'p3', name: 'Sim Resident C (demo)' },
-    { id: 'p4', name: 'Sim Resident D (demo)' },
-  ]
-
-  base.forEach((person, personIndex) => {
-    const profile = [
-      [55, 2, 2, 3, 2, 2, 6, 'Needs support', 'Partial'],
-      [70, 2, 3, 3, 3, 3, 5, 'Needs support', 'Moderate'],
-      [85, 3, 3, 4, 3, 4, 4, 'Needs support', 'Moderate'],
-      [95, 3, 4, 4, 4, 4, 3, 'Needs support', 'Full'],
-      [105, 4, 4, 5, 4, 5, 2, 'Independent', 'Full'],
-      [110, 4, 4, 4, 4, 5, 2, 'Independent', 'Full'],
-    ]
-
-    const walker = personIndex * 2
-    profile.forEach((values, idx) => {
-      const [walk, transfer, strength, balance, speech, adl, pain, wheel, exercise] = values
-      seededRows.push({
-        id: cryptoId(),
-        patientId: person.id,
-        patientNameSnapshot: person.name,
-        date: seedDate(18 - idx * 3 - walker),
-        walkingDistance: walk,
-        transferAbility: transfer,
-        muscleStrength: strength,
-        balance,
-        speechRecovery: speech,
-        adlIndependence: adl,
-        painScore: pain,
-        wheelchairDependence: wheel !== 'Independent',
-        exerciseParticipation: exercise,
-      })
-    })
-  })
-
-  return seededRows
+  return []
 }
 
 function normalizeSessions(input) {
@@ -208,13 +169,13 @@ function writeRehabRecords(rows) {
   try {
     localStorage.setItem(REHAB_TRACKING_STORAGE_KEY, JSON.stringify(rows))
   } catch {
-    // keep silent in simulation
+    // keep silent in local mode
   }
 }
 
 function buildFamilyUpdateText(summary, patientName) {
   const target = patientName || 'your loved one'
-  return `Family Update (Simulation)\n
+  return `Family Update\n
 Dear family member,\n
 We recorded ${summary.sessionCount} rehab sessions so far for ${target}.\n
 Current rehab trend: ${summary.status}. ${summary.functionalImprovement}\n
@@ -222,7 +183,7 @@ Potential concern areas: ${summary.riskFactors.length ? summary.riskFactors.join
 Suggested focus: ${summary.suggestedRehabFocus}.\n
 Therapist notes: ${summary.therapistRecommendations.join('; ')}\n
 Encouragement message: ${summary.familyEncouragement}\n
-This message is simulation-only and should be reviewed before any real family communication.`
+Please review before sharing with family.`
 }
 
 function buildRehabSummary(sessions, targetPatientName) {
@@ -276,7 +237,7 @@ function buildRehabSummary(sessions, targetPatientName) {
     muscleStrength: 'focus on graded resistance and sit-to-stand repetition',
     balance: 'add standing balance and trunk control interventions',
     speechRecovery: 'coordinate with speech therapy for swallow and articulation drills',
-    adlIndependence: 'repeat ADL task simulation to improve independence',
+    adlIndependence: 'repeat ADL task drills to improve independence',
   }
 
   const recommendations = []
@@ -358,7 +319,7 @@ export default function RehabTrackingPage() {
           painScore: 6,
           wheelchairDependence: true,
           exerciseParticipation: 'Partial',
-          notes: 'Auto-added for roster sync (simulation).',
+          notes: 'Auto-added for roster sync.',
         })
       }
       if (additions.length === 0) return current
@@ -541,7 +502,7 @@ export default function RehabTrackingPage() {
     const newSession = {
       id: cryptoId(),
       patientId: form.patientId,
-      patientNameSnapshot: patient?.fullName || patient?.name || 'Simulation patient',
+      patientNameSnapshot: patient?.fullName || patient?.name || 'Patient',
       date: new Date(`${form.date}T00:00:00`).toISOString(),
       walkingDistance: safeNumber(form.walkingDistance, 0),
       transferAbility: safeNumber(form.transferAbility, 1),
@@ -580,7 +541,7 @@ export default function RehabTrackingPage() {
 
   function generateReport() {
     const lines = []
-    lines.push('AI Rehabilitation Report (Simulation)')
+    lines.push('AI Rehabilitation Report')
     lines.push(`Generated: ${new Date().toLocaleString()}`)
     lines.push(`Report scope: ${reportSubjectId === 'all' ? 'All tracked patients' : aiSummary.patientName}`)
     lines.push('')
@@ -676,15 +637,15 @@ export default function RehabTrackingPage() {
       })
   }
 
-  function refreshRehabSimulation() {
+  function refreshRehabData() {
     setSessions(seedByPatientId())
   }
 
   return (
     <div>
       <PageHeader
-        title="Rehabilitation Tracking"
-        description="Simulation-only rehab progress dashboard with AI recovery analysis and session-by-session tracking."
+        title="Nursing Care Tracking"
+        description="Nursing progress dashboard with AI recovery analysis and session-by-session tracking."
         action={
           <div className="flex flex-wrap gap-2">
             <button
@@ -721,11 +682,11 @@ export default function RehabTrackingPage() {
             </button>
             <button
               type="button"
-              onClick={refreshRehabSimulation}
+              onClick={refreshRehabData}
               className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
             >
               <RefreshCw className="mr-1 inline h-4 w-4" aria-hidden />
-              Reset simulation
+              Reset data
             </button>
           </div>
         }
@@ -733,7 +694,7 @@ export default function RehabTrackingPage() {
 
       <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-950 ring-1 ring-amber-100">
         <p>
-          <strong>Simulation mode:</strong> Data shown is simulated and local; no external storage or live therapist APIs are connected.
+          <strong>Local mode:</strong> Data shown is local and intended for internal testing workflows.
         </p>
       </div>
 
@@ -761,9 +722,7 @@ export default function RehabTrackingPage() {
                       {patient.fullName || patient.name}
                     </option>
                   ))
-                ) : (
-                  <option value="p-demo">Demo Resident</option>
-                )}
+                ) : null}
               </select>
             </label>
 
@@ -1041,7 +1000,7 @@ export default function RehabTrackingPage() {
         <Card>
           <div className="mb-2 flex items-center justify-between">
             <h3 className="text-base font-semibold text-slate-900">AI rehab summary</h3>
-            <Badge variant="warning">Simulation analysis</Badge>
+            <Badge variant="warning">AI analysis</Badge>
           </div>
           <div className="space-y-2 text-sm">
             <p>

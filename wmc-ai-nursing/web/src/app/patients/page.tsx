@@ -12,14 +12,6 @@ const riskClass = (risk: string) => {
   return "bg-emerald-100 text-emerald-700 border-emerald-200"
 }
 
-function patientRoom(patientId: string) {
-  const value = patientId.replace(/\D/g, "")
-  const suffix = value.padStart(3, "0")
-  const wing = Number.parseInt(suffix, 10) % 4
-  const map = ["A", "B", "C", "D"]
-  return `${map[wing]}-2${suffix.slice(-2)}`
-}
-
 export default function PatientsPage() {
   const [patients, setPatients] = useState<Patient[]>([])
   const [query, setQuery] = useState("")
@@ -50,7 +42,7 @@ export default function PatientsPage() {
           person.fullName.toLowerCase().includes(search) ||
           person.diagnosis.toLowerCase().includes(search) ||
           person.assignedNurse.toLowerCase().includes(search) ||
-          personRoom(person.id).toLowerCase().includes(search)
+          (person.roomNumber || "").toLowerCase().includes(search)
         )
       })
       .sort((left, right) => left.fullName.localeCompare(right.fullName))
@@ -76,6 +68,9 @@ export default function PatientsPage() {
           <p className="text-sm text-slate-500">Clinical profile directory and resident snapshots</p>
         </div>
         <div className="flex gap-2">
+          <Link href="/rooms" className="inline-flex rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700">
+            Rooms module
+          </Link>
           <Link
             href="/patients/new"
             className="inline-flex rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white"
@@ -159,7 +154,7 @@ export default function PatientsPage() {
                   <p className="font-medium text-slate-900">{person.fullName}</p>
                   <p className="text-xs text-slate-500">ID: {person.id}</p>
                 </td>
-                <td className="px-4 py-3 text-slate-700">{patientRoom(person.id)}</td>
+                <td className="px-4 py-3 text-slate-700">{person.roomNumber || "—"}</td>
                 <td className="px-4 py-3 text-slate-700">{person.diagnosis}</td>
                 <td className="px-4 py-3 text-slate-700">{person.age}</td>
                 <td className="px-4 py-3 text-slate-700">{person.mobilityStatus}</td>

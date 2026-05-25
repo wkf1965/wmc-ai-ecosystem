@@ -3,5 +3,5 @@ import { startWorkflow } from '../services/workflowEngine.js'
 import { setState }      from '../services/stateManager.js'
 
 export function registerFallCommand(bot) {
-  bot.onText(/^\/fall\b/i, (msg) => startWorkflow(bot, msg, FALL_WORKFLOW, setState))
+  bot.onText(/^\/fall\b/i, (msg) => { void startWorkflow(bot, msg, FALL_WORKFLOW, setState) })
 }

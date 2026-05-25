@@ -136,13 +136,6 @@ const riskToneStyles: Record<ReturnType<typeof riskSeverity>, string> = {
   red: "bg-rose-100 text-rose-700",
 }
 
-function patientRoom(patientId: string) {
-  const value = patientId.replace(/\D/g, "")
-  const suffix = value.padStart(3, "0")
-  const wing = Number.parseInt(suffix, 10) % 4
-  return `W-${wing + 1}-${suffix.slice(-2)}`
-}
-
 function inShiftWindow(targetIso: string, shift: ShiftWindow) {
   const parsed = new Date(targetIso)
   if (Number.isNaN(parsed.getTime())) return false
@@ -226,7 +219,7 @@ function collectRows(shift: ShiftWindow) {
 
     return {
       patient,
-      room: patientRoom(patient.id),
+      room: patient.roomNumber || "—",
       risk,
       severity: risk.severity,
       section,
@@ -527,7 +520,7 @@ export default function ShiftHandoverPage() {
           patientName: `Shift Supervisor Handover`,
           room: `Control-${shift}`,
           riskType: "Shift Handover",
-          severity: summary.highRisk.length ? "red" : summary.moodBehaviorObservations.length ? "orange" : "yellow",
+          severity: (summary?.highRisk?.length ?? 0) ? "red" : (summary?.moodBehaviorObservations?.length ?? 0) ? "orange" : "yellow",
           observation: handoverText,
           recommendedAction: "Run simulated handover briefing and complete critical follow-ups.",
           nurseName: "Shift Coordinator",
@@ -583,9 +576,14 @@ export default function ShiftHandoverPage() {
               Morning, evening, and night handover summaries generated from nursing notes, AI alerts, escalations, vital trends, and meds.
             </p>
           </div>
-          <Link href="/dashboard" className="rounded-lg border border-white/30 px-4 py-2 text-sm font-semibold text-white">
-            Back to dashboard
-          </Link>
+          <div className="flex flex-wrap gap-2">
+            <Link href="/nurse-duty-roster" className="rounded-lg border border-white/30 px-4 py-2 text-sm font-semibold text-white">
+              Open duty roster
+            </Link>
+            <Link href="/dashboard" className="rounded-lg border border-white/30 px-4 py-2 text-sm font-semibold text-white">
+              Back to dashboard
+            </Link>
+          </div>
         </div>
 
         <div className="flex flex-wrap gap-2">
@@ -721,12 +719,12 @@ export default function ShiftHandoverPage() {
             <p className="font-semibold text-slate-800">Mood / behavior observations</p>
             {renderLines(
               "Mood / behavior",
-              summary.moodBehaviorObservations.map((line) => line),
+              (summary?.moodBehaviorObservations ?? []).map((line) => line),
             )}
             <p className="font-semibold text-slate-800">AI recommendations</p>
             {renderLines(
               "Recommendations",
-              summary.recommendations.map((line) => line),
+              (summary?.recommendations ?? []).map((line) => line),
             )}
             <p className="font-semibold text-slate-800">Pending follow-up actions</p>
             {renderLines(
@@ -822,7 +820,7 @@ export default function ShiftHandoverPage() {
                     Escalation severity: {escalationSeverityTone(escalation.severity)}
                   </p>
                 ))}
-              </div>
+              </article>
             )
           })}
         </div>

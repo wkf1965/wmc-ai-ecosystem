@@ -97,35 +97,7 @@ export function mergeWoundCareLoopRows(patients, nowMs = Date.now()) {
   ensureWoundCareBaseline()
   const raw = loadRaw()
 
-  if (!patients?.length) {
-    const id = 'demo'
-    const over = raw.instances[id] || {}
-    return [
-      {
-        patientId: id,
-        patientName: 'Demo Resident',
-        room: '100A',
-        woundLocation: over.woundLocation ?? 'Sacrum',
-        woundType: over.woundType ?? 'Pressure injury — stage II',
-        woundSize: over.woundSize ?? '3.2 × 2.0 cm',
-        redness: over.redness ?? 'Moderate',
-        swelling: over.swelling ?? 'Mild',
-        discharge: over.discharge ?? 'Minimal serous',
-        odor: over.odor ?? 'None',
-        painScore: typeof over.painScore === 'number' ? over.painScore : 4,
-        dressingDueAt: over.dressingDueAt ?? new Date(nowMs + 40 * 60000).toISOString(),
-        lastDressingAt: over.lastDressingAt ?? new Date(nowMs - 4 * 3600000).toISOString(),
-        nurseAssigned: over.nurseAssigned ?? 'Demo Nurse',
-        photoUploaded: Boolean(over.photoUploaded),
-        mockPhotoFilename: over.mockPhotoFilename ?? null,
-        notes: Array.isArray(over.notes) ? over.notes : [],
-        escalatedInfection: Boolean(over.escalatedInfection),
-        doctorReviewNeeded: Boolean(over.doctorReviewNeeded),
-        healingTrend: /** @type {'improving'|'stable'|'worsening'} */ (over.healingTrend ?? 'stable'),
-        pressureRiskSnap: over.pressureRiskSnap ?? 'Moderate',
-      },
-    ]
-  }
+  if (!patients?.length) return []
 
   return patients.map((patient, idx) => {
     const id = patient.id

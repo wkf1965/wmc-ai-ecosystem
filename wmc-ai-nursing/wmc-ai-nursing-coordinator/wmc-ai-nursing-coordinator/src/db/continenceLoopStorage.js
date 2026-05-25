@@ -86,36 +86,7 @@ export function mergeContinenceLoopRows(patients, nowMs = Date.now()) {
   ensureContinenceBaseline()
   const raw = loadRaw()
 
-  if (!patients?.length) {
-    const id = 'demo'
-    const over = raw.instances[id] || {}
-    return [
-      {
-        patientId: id,
-        patientName: 'Demo Resident',
-        room: '100A',
-        toiletAssistanceNeeded: over.toiletAssistanceNeeded ?? 'Stand-by assist',
-        urinationFrequency: over.urinationFrequency ?? 'Increased',
-        bowelMovementStatus: over.bowelMovementStatus ?? 'Regular',
-        nextDiaperChangeDueAt:
-          over.nextDiaperChangeDueAt ?? new Date(nowMs + 50 * 60000).toISOString(),
-        lastDiaperChangeAt:
-          over.lastDiaperChangeAt ?? new Date(nowMs - 3 * 3600000).toISOString(),
-        incontinenceEpisodes: typeof over.incontinenceEpisodes === 'number' ? over.incontinenceEpisodes : 1,
-        stoolConsistency: over.stoolConsistency ?? 'Formed',
-        urineColorObservation: over.urineColorObservation ?? 'Yellow',
-        constipationRisk: over.constipationRisk ?? 'Low',
-        skinIrritation: over.skinIrritation ?? 'None',
-        nurseAssigned: over.nurseAssigned ?? 'Demo Nurse',
-        lastContinenceCheckAt:
-          over.lastContinenceCheckAt ?? new Date(nowMs - 5 * 3600000).toISOString(),
-        nextDueAt: over.nextDueAt ?? new Date(nowMs + 70 * 60000).toISOString(),
-        notes: Array.isArray(over.notes) ? over.notes : [],
-        escalatedConstipation: Boolean(over.escalatedConstipation),
-        doctorReviewNeeded: Boolean(over.doctorReviewNeeded),
-      },
-    ]
-  }
+  if (!patients?.length) return []
 
   return patients.map((patient, idx) => {
     const id = patient.id

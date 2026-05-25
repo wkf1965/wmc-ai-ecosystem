@@ -4,6 +4,9 @@
  */
 
 import { readTelegramMockStoreState } from './telegramMockStore.mjs'
+import { writeFileSync, mkdirSync } from 'node:fs'
+import { dirname, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import {
   readTelegramNursingMemoryState,
   updateTelegramNursingMemoryRecord,
@@ -18,6 +21,10 @@ import {
 import { processMobileNurseSubmit } from './mobileNurseSubmitApi.mjs'
 
 const inboundQueue = []
+const WORKFLOW_SESSIONS_FILE = resolve(
+  dirname(fileURLToPath(import.meta.url)),
+  'src/bot/data/workflowSessions.json',
+)
 
 function readTelegramEnv() {
   return {
@@ -107,6 +114,27 @@ export function telegramWebhookPlugin() {
   return {
     name: 'wmc-telegram-webhook',
     configureServer(server) {
+      server.middlewares.use('/api/admin/clear-workflow-sessions', async (req, res) => {
+        if (req.method !== 'POST') {
+          json(res, 405, { ok: false, error: 'Use POST' })
+          return
+        }
+        try {
+          mkdirSync(dirname(WORKFLOW_SESSIONS_FILE), { recursive: true })
+          writeFileSync(WORKFLOW_SESSIONS_FILE, '{}', 'utf8')
+          let clearedInMemory = 0
+          try {
+            const { clearAllSessions } = await import('./src/bot/services/stateManager.js')
+            clearedInMemory = clearAllSessions()
+          } catch {
+            /* bot module unavailable in some dev setups */
+          }
+          json(res, 200, { ok: true, clearedInMemory, file: WORKFLOW_SESSIONS_FILE })
+        } catch (e) {
+          json(res, 500, { ok: false, error: String(e?.message || e) })
+        }
+      })
+
       server.middlewares.use('/api/nursing/mobile-submit', async (req, res) => {
         if (req.method !== 'POST') {
           json(res, 405, { ok: false, error: 'Use POST' })

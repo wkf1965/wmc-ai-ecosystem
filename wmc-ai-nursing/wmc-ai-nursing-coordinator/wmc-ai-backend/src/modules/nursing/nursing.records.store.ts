@@ -9,6 +9,10 @@ export const nursingClinicalRecordsMemoryStore = {
     return record
   },
 
+  clear(): void {
+    rows.length = 0
+  },
+
   list(): NursingClinicalRecord[] {
     return [...rows].sort(
       (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),

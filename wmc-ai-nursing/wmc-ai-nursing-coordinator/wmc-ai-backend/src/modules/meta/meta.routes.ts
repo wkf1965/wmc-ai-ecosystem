@@ -79,7 +79,7 @@ metaRouter.get('/', (_req, res) => {
       {
         name: 'dashboard',
         base: `${config.apiPrefix}/dashboard`,
-        routes: ['GET /summary'],
+        routes: ['GET /', 'GET /summary'],
       },
       {
         name: 'tasks',

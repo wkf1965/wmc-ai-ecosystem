@@ -65,5 +65,14 @@ export function createFileSheetDb(opts: { dataDir: string }): SheetDb {
       const rows = await this.list<T>(tab)
       return rows.find((r) => r.id === id) ?? null
     },
+
+    async clearTabs(tabs: SheetTab[]): Promise<SheetTab[]> {
+      const s = await readStore()
+      for (const tab of tabs) {
+        s[tab] = []
+      }
+      await writeStore(s)
+      return tabs
+    },
   }
 }

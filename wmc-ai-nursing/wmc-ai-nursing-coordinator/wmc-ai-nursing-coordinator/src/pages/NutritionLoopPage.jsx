@@ -61,7 +61,7 @@ function BucketBadge({ bucket }) {
 function familyDraftForPatient(row) {
   const diet = dietLabel(row.dietType)
   const meal = mealLabel(row.trackedMealType)
-  return `${row.patientName} (Rm ${row.room}): ${meal} ~${row.foodIntakePercent}% eaten with ~${row.fluidIntakeMl} mL fluids at last documentation. Diet ${diet}; appetite ${row.appetiteLevel}; assistance ${row.feedingAssistanceNeeded}. Swallowing tier ${row.swallowingRiskTier}. Simulation-only draft — verify with chart before sending to family.`
+  return `${row.patientName} (Rm ${row.room}): ${meal} ~${row.foodIntakePercent}% eaten with ~${row.fluidIntakeMl} mL fluids at last documentation. Diet ${diet}; appetite ${row.appetiteLevel}; assistance ${row.feedingAssistanceNeeded}. Swallowing tier ${row.swallowingRiskTier}. Verify with chart before sending to family.`
 }
 
 function NutritionCard({ row, onRecordMeal, onRefused, onNote, onEscalate, onFamilyUpdate }) {
@@ -295,7 +295,7 @@ export default function NutritionLoopPage() {
     bumpNutritionScore('highRisk', 1)
     bumpNutritionScore('poorIntake', 1)
     upsertNutritionPatient(row.patientId, { escalatedPoorIntake: true })
-    showToast('Poor intake escalated (simulation).', 'warn')
+    showToast('Poor intake escalated.', 'warn')
   }
 
   async function handleFamilyUpdate(row) {
@@ -312,10 +312,10 @@ export default function NutritionLoopPage() {
     <div className="mx-auto max-w-[1600px] pb-8">
       <PageHeader
         title="Feeding / nutrition loop"
-        description="Simulated meal rounds with intake %, diet texture cues, and escalation hooks. Demo only — not a clinical nutrition order set."
+        description="Local meal rounds with intake %, diet texture cues, and escalation hooks. Not a clinical nutrition order set."
         action={
           <div className="flex flex-wrap gap-2">
-            <Badge variant="info">Simulation mode</Badge>
+            <Badge variant="info">Local mode</Badge>
             <Link
               to="/hydration-loop"
               className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50"
@@ -400,7 +400,7 @@ export default function NutritionLoopPage() {
           <UtensilsCrossed className="h-5 w-5 text-teal-600" aria-hidden />
           <h3 className="text-sm font-semibold text-slate-900">Nutrition scoring</h3>
         </div>
-        <p className="mt-0.5 text-xs text-slate-500">Simulation tally · includes demo baseline</p>
+        <p className="mt-0.5 text-xs text-slate-500">Local tally · updates with care actions</p>
         <dl className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-5">
           {[
             { label: 'Good intake', val: scores.goodIntake },

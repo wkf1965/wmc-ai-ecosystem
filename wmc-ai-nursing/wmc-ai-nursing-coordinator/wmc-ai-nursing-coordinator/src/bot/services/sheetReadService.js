@@ -238,3 +238,67 @@ export async function getAllTodayRecords() {
 export function hasAnyRecords(records) {
   return Object.values(records).some(arr => arr.length > 0)
 }
+
+// ── OT Payroll readers ────────────────────────────────────────────────────────
+
+/**
+ * Map a raw ot_records sheet row → labelled object.
+ * Column order matches googleSheetService.saveOtRecord (14 cols):
+ *   [0]date [1]staff_name [2]shift [3]scheduled_start [4]scheduled_end
+ *   [5]punch_in [6]punch_out [7]ot_hours [8]ot_rate [9]ot_amount
+ *   [10]record_status [11]approval_status [12]approved_by [13]remarks
+ */
+const mapOtRecord = (r) => ({
+  date:            r[0]  ?? '',
+  staff_name:      r[1]  ?? '',
+  shift:           r[2]  ?? '',
+  scheduled_start: r[3]  ?? '',
+  scheduled_end:   r[4]  ?? '',
+  punch_in:        r[5]  ?? '',
+  punch_out:       r[6]  ?? '',
+  ot_hours:        Number(r[7]  ?? 0),
+  ot_rate:         Number(r[8]  ?? 10),
+  ot_amount:       Number(r[9]  ?? 0),
+  record_status:   r[10] ?? '',
+  approval_status: r[11] ?? 'Pending',
+  approved_by:     r[12] ?? '',
+  remarks:         r[13] ?? '',
+})
+
+/**
+ * Map a raw ot_payroll_summary row → labelled object.
+ * Column order matches googleSheetService.saveOtPayrollSummary:
+ *   [0]month [1]staff_name [2]total_ot_hours [3]ot_rate [4]total_ot_amount
+ *   [5]approved_by [6]remarks
+ */
+const mapOtSummary = (r) => ({
+  month:            r[0] ?? '',
+  staff_name:       r[1] ?? '',
+  total_ot_hours:   Number(r[2] ?? 0),
+  ot_rate:          Number(r[3] ?? 10),
+  total_ot_amount:  Number(r[4] ?? 0),
+  approved_by:      r[5] ?? '',
+  remarks:          r[6] ?? '',
+})
+
+/**
+ * Read all OT shift records for a given month from the ot_records sheet tab.
+ * @param {string} month  YYYY-MM
+ * @returns {Promise<object[]>}
+ */
+export async function getOtRecordsForMonth(month) {
+  const prefix = (month ?? '').slice(0, 7)
+  const rows   = await readTab('ot_records')
+  return rows.filter(r => String(r[0] ?? '').startsWith(prefix)).map(mapOtRecord)
+}
+
+/**
+ * Read monthly payroll summaries from the ot_payroll_summary tab.
+ * @param {string} month  YYYY-MM
+ * @returns {Promise<object[]>}
+ */
+export async function getOtPayrollSummary(month) {
+  const prefix = (month ?? '').slice(0, 7)
+  const rows   = await readTab('ot_payroll_summary')
+  return rows.filter(r => String(r[0] ?? '').startsWith(prefix)).map(mapOtSummary)
+}

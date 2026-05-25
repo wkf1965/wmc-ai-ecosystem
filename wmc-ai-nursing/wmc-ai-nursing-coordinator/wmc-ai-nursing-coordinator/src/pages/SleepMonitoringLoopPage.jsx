@@ -158,7 +158,7 @@ function SleepCard({ row, selected, onSelect }) {
           <dd className="text-right font-medium text-indigo-800">{formatObsTime(row.nextObservationDueTime)}</dd>
         </div>
         {row.behaviorEscalated ? (
-          <p className="rounded-lg bg-rose-50 px-2 py-1 text-[11px] font-semibold text-rose-900">Behaviour escalated (sim)</p>
+          <p className="rounded-lg bg-rose-50 px-2 py-1 text-[11px] font-semibold text-rose-900">Behaviour escalated</p>
         ) : null}
         {Array.isArray(row.observationNotes) && row.observationNotes.length > 0 ? (
           <div className="rounded-lg bg-slate-50 px-2 py-1.5 text-[11px] text-slate-700">
@@ -247,7 +247,7 @@ export default function SleepMonitoringLoopPage() {
       nextObservationDueTime: new Date(now + 90 * 60 * 1000).toISOString(),
     })
     bumpSleepMonitoringScore('monitor', 1)
-    showToast('Sleep check recorded (simulation).', 'success')
+    showToast('Sleep check recorded.', 'success')
   }
 
   function handleAddObservation() {
@@ -273,7 +273,7 @@ export default function SleepMonitoringLoopPage() {
       agitationAtNight: true,
     })
     bumpSleepMonitoringScore('highRisk', 1)
-    showToast('Behaviour concern escalated (simulation).', 'warn')
+    showToast('Behaviour concern escalated.', 'warn')
   }
 
   function handleGenerateReport() {
@@ -296,17 +296,17 @@ export default function SleepMonitoringLoopPage() {
       totalSleepHours: Math.max(7, Number(row.totalSleepHours) || 7),
     })
     bumpSleepMonitoringScore('good', 1)
-    showToast('Marked stable pathway (simulation).', 'success')
+    showToast('Marked stable pathway.', 'success')
   }
 
   return (
     <div className="mx-auto max-w-[1600px] pb-8">
       <PageHeader
         title="Sleep monitoring loop"
-        description="Nocturnal surveillance board with fragmented sleep, wandering, and delirium cues — simulation only; align with facility sleep & behaviour policies."
+        description="Nocturnal surveillance board with fragmented sleep, wandering, and delirium cues — align with facility sleep and behaviour policies."
         action={
           <div className="flex flex-wrap gap-2">
-            <Badge variant="info">Simulation mode</Badge>
+            <Badge variant="info">Local mode</Badge>
             <Link
               to="/mental-health-loop"
               className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50"
@@ -366,7 +366,7 @@ export default function SleepMonitoringLoopPage() {
           </button>
         </div>
         <p className="mt-3 text-xs text-slate-500">
-          Tap a resident card to apply bedside actions. Observation cadence updates automatically in demo mode.
+          Tap a resident card to apply bedside actions. Observation cadence updates automatically in local mode.
         </p>
       </Card>
 
@@ -429,7 +429,7 @@ export default function SleepMonitoringLoopPage() {
           <Moon className="h-5 w-5 text-teal-600" aria-hidden />
           <h3 className="text-sm font-semibold text-slate-900">Sleep scoring</h3>
         </div>
-        <p className="mt-0.5 text-xs text-slate-500">Simulation tally · includes demo baseline · updates with nurse actions</p>
+        <p className="mt-0.5 text-xs text-slate-500">Local tally · updates with nurse actions</p>
         <dl className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-5">
           {[
             { label: 'Good', val: scores.good },

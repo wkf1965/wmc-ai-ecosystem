@@ -178,7 +178,7 @@ function MonthlyStaffCard({ row }) {
           <dd className="font-semibold tabular-nums">{row.pendingHours.toFixed(2)}</dd>
         </div>
         <div className="flex justify-between gap-2">
-          <dt className="text-slate-500">Est. OT cost (demo)</dt>
+          <dt className="text-slate-500">Est. OT cost</dt>
           <dd className="font-bold text-slate-900 tabular-nums">${row.estimatedCost.toLocaleString()}</dd>
         </div>
       </dl>
@@ -260,7 +260,7 @@ export default function StaffOvertimeLoopPage() {
       repeatedLateClockOut: ot >= 3 && Math.random() > 0.65,
       understaffingFlag: Math.random() > 0.8,
     })
-    showToast('OT row added (simulation).', 'success')
+    showToast('OT row added.', 'success')
   }
 
   function handleApprove() {
@@ -276,7 +276,7 @@ export default function StaffOvertimeLoopPage() {
     upsertOvertimeRecord({
       ...stripDerivedFields(selected),
       approvalStatus: 'approved',
-      approvedBy: 'Supervisor (sim)',
+      approvedBy: 'Supervisor',
       excessiveOtWarning: Boolean(selected.excessiveOtWarning || Number(selected.overtimeHours) >= 4),
     })
     showToast(`Approved OT for ${selected.staffName}.`, 'success')
@@ -327,10 +327,10 @@ export default function StaffOvertimeLoopPage() {
     <div className="mx-auto max-w-[1600px] pb-8">
       <PageHeader
         title="Staff Overtime Loop"
-        description="Supervisor workflow for simulated overtime approvals, fatigue cues, and payroll-friendly exports. Demo only — not legal payroll advice."
+        description="Supervisor workflow for local overtime approvals, fatigue cues, and payroll-friendly exports. For operational support only — not legal payroll advice."
         action={
           <div className="flex flex-wrap gap-2">
-            <Badge variant="info">Simulation mode</Badge>
+            <Badge variant="info">Local mode</Badge>
             <Link
               to="/overtime"
               className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50"
@@ -462,7 +462,7 @@ export default function StaffOvertimeLoopPage() {
           <Timer className="h-5 w-5 text-teal-600" aria-hidden />
           <h3 className="text-sm font-semibold text-slate-900">OT scoring</h3>
         </div>
-        <p className="mt-0.5 text-xs text-slate-500">Simulation tally · includes demo baseline · bumps when you approve/reject</p>
+        <p className="mt-0.5 text-xs text-slate-500">Local tally · updates when you approve/reject</p>
         <dl className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-5">
           {[
             { label: 'Normal', val: scores.normal },
@@ -489,7 +489,7 @@ export default function StaffOvertimeLoopPage() {
         </div>
         {alerts.length === 0 ? (
           <p className="rounded-xl border border-emerald-100 bg-emerald-50/80 px-4 py-4 text-sm text-emerald-900">
-            No overtime alerts on this simulation snapshot.
+            No overtime alerts on this snapshot.
           </p>
         ) : (
           <ul className="grid gap-2 lg:grid-cols-2">

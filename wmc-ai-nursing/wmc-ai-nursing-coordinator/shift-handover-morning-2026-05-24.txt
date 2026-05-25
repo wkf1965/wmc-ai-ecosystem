@@ -1,0 +1,27 @@
+AI Shift Handover Summary
+Shift: MORNING
+Generated: 5/24/2026, 8:05:04 PM
+Overall workflow status: acknowledged
+
+Critical patients: 0
+
+New escalations: 0
+
+Medication reminders:
+- LEE KEOW YOKE (A-224) • SIMVASTATIN
+
+Fall risk patients: 0
+
+Mood/behavior observations:
+- LEE KEOW YOKE (A-224): No recent note
+
+AI alerts:
+- none
+
+AI recommendations:
+- none
+
+Pending follow-up actions:
+- no pending actions
+
+Nurse action checklist:

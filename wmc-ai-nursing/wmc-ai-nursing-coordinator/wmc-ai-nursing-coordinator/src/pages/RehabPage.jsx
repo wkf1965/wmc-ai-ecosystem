@@ -18,8 +18,8 @@ export default function RehabPage() {
   return (
     <div>
       <PageHeader
-        title="Rehabilitation progress"
-        description="FIM / Barthel trends, therapy minutes, and milestone tracking for active rehab caseload."
+        title="Nursing care progress"
+        description="Functional trends, therapy minutes, and milestone tracking for active nursing support caseload."
       />
 
       <div className="space-y-6">
