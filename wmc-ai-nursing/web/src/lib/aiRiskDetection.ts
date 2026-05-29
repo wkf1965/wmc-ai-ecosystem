@@ -48,13 +48,13 @@ function scoreFromTerms(text: string, map: Record<string, number>) {
   return { score, matched }
 }
 
-function mapTone(score: number) {
+function mapTone(score: number): "low" | "medium" | "high" {
   if (score >= 60) return "high"
   if (score >= 35) return "medium"
   return "low"
 }
 
-export function riskSeverity(score: number) {
+export function riskSeverity(score: number): "green" | "yellow" | "orange" | "red" {
   if (score >= 80) return "red"
   if (score >= 60) return "orange"
   if (score >= 35) return "yellow"

@@ -228,12 +228,13 @@ export async function saveFallRecord(data, nurseInfo) {
  *          | Time | Position | SkinCondition | Remark
  */
 export async function saveTurningRecord(data, nurseInfo) {
+  const turningPosition = String(data.turning_position ?? data.position ?? '').trim()
   const row = [
     ...metaColumns('turning', nurseInfo),
     data.patientName    ?? '',
     data.room           ?? '',
     data.time           ?? '',
-    data.position       ?? '',
+    turningPosition,
     data.skinCondition  ?? '',
     data.remark         ?? '',
   ]
@@ -410,11 +411,12 @@ export async function saveStockBalance(data) {
  *   nurse_name | next_turning_due | status | source
  */
 export async function saveSideTurningRecord(data) {
+  const turningPosition = String(data.turning_position ?? data.position ?? '').trim()
   const row = [
     data.timestamp        ?? new Date().toISOString(),
     data.room_number      ?? '',
     data.patient_name     ?? '',
-    data.turning_position ?? '',
+    turningPosition,
     data.nurse_name       ?? '',
     data.next_turning_due ?? '',
     data.status           ?? 'OK',

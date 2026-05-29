@@ -172,11 +172,13 @@ export async function sendFallToBackend(data, nurseInfo, recordId) {
  * POST /api/nursing/turning — side turning record
  */
 export async function sendTurningToBackend(data, nurseInfo, recordId) {
+  const turningPosition = String(data.turning_position ?? data.position ?? '').trim()
   const payload = envelope('turning', {
     patientName:   data.patientName   ?? '',
     room:          data.room          ?? '',
     turningTime:   data.time          ?? '',
-    position:      data.position      ?? '',
+    position:      turningPosition,
+    turning_position: turningPosition,
     skinCondition: data.skinCondition ?? '',
     remark:        data.remark        ?? '',
   }, nurseInfo, recordId)

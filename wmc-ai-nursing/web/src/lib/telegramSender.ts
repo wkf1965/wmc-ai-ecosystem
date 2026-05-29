@@ -25,7 +25,7 @@ export class TelegramOtError extends Error {
   }
 }
 
-export async function sendTelegramOtSummary(input: SendTelegramOtInput): Promise<TelegramOtResult> {
+export async function sendTelegramMessage(input: SendTelegramOtInput): Promise<TelegramOtResult> {
   const message = String(input.message || "").trim()
   if (!message) throw new TelegramOtError("Message is required.", "MISSING_MESSAGE", 400)
 
@@ -70,6 +70,10 @@ export async function sendTelegramOtSummary(input: SendTelegramOtInput): Promise
     message,
     response: payload,
   }
+}
+
+export async function sendTelegramOtSummary(input: SendTelegramOtInput): Promise<TelegramOtResult> {
+  return sendTelegramMessage(input)
 }
 
 export type { SendTelegramOtInput }

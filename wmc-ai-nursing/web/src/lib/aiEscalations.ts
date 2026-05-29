@@ -353,7 +353,7 @@ export function recordEscalationWhatsappTrigger(id: string, actor: string, succe
   const record = escalations[index]
   const status = success ? "escalated" : record.status
   const timestamp = new Date().toISOString()
-  const actionDetail = success
+  const actionDetail: Extract<EscalationAction, { type: "whatsapp-trigger" }> = success
     ? {
         type: "whatsapp-trigger",
         action: "Escalation message triggered",

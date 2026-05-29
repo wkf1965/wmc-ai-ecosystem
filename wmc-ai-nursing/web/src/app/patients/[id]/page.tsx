@@ -222,6 +222,7 @@ function hasAnyVitalContent(form: VitalForm) {
 function toPatientPayload(patient: Patient): PatientFormData {
   return {
     fullName: patient.fullName,
+    roomNumber: patient.roomNumber || "",
     age: String(patient.age),
     gender: patient.gender,
     diagnosis: patient.diagnosis,
@@ -590,7 +591,11 @@ export default function PatientProfilePage({ params }: Params) {
       const notes = addNote(payload)
       const savedNote = notes[0]
       refreshNotesFromStore()
-      const noteRisk = analyzePatientNoteRisk(patient, payload)
+      if (!savedNote) {
+        setNoteError("Unable to read saved nursing note. Try again.")
+        return
+      }
+      const noteRisk = analyzePatientNoteRisk(patient, savedNote)
       const escalation = createEscalationFromNote({
         patientId: patient.id,
         patientName: patient.fullName,
@@ -656,7 +661,11 @@ export default function PatientProfilePage({ params }: Params) {
       const notes = addNote(payload)
       const savedNote = notes[0]
       refreshNotesFromStore()
-      const noteRisk = analyzePatientNoteRisk(patient, payload)
+      if (!savedNote) {
+        setVitalError("Unable to read saved vital-sign note. Try again.")
+        return
+      }
+      const noteRisk = analyzePatientNoteRisk(patient, savedNote)
       const escalation = createEscalationFromNote({
         patientId: patient.id,
         patientName: patient.fullName,

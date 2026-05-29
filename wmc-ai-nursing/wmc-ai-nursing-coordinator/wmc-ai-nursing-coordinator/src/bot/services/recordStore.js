@@ -52,12 +52,24 @@ async function persist() {
  * @returns {Promise<{ id: string, timestamp: string, workflow: string, data: object }>}
  */
 export async function saveRecord(workflowName, data, chatId = '') {
+  const normalizedData =
+    workflowName === 'turning'
+      ? (() => {
+          const next = { ...data }
+          const turningPosition = String(next.turning_position ?? next.position ?? '').trim()
+          if (turningPosition) {
+            next.turning_position = turningPosition
+            next.position = turningPosition
+          }
+          return next
+        })()
+      : { ...data }
   const store = await load()
   const record = {
     id: randomUUID(),
     timestamp: new Date().toISOString(),
     workflow: workflowName,
-    data: { ...data },
+    data: normalizedData,
     savedBy: String(chatId),
   }
   store.records.unshift(record)

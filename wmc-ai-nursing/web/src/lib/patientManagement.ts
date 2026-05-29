@@ -361,3 +361,96 @@ export function validatePatientForm(form: PatientFormData, editingPatientId?: st
 
   return errors
 }
+
+type TelegramAdmissionRecord = {
+  telegramRecordId: string
+  timestamp: string
+  fullName: string
+  age: string
+  gender: string
+  roomNumber: string
+  diagnosis: string
+  doctor: string
+  admissionDate: string
+  remark: string
+}
+
+let telegramSyncInFlight = false
+
+function normalizeTelegramRoom(value: string, fallbackId: string) {
+  const raw = String(value || "").trim().toUpperCase()
+  if (!raw) return fallbackRoomFromPatientId(fallbackId)
+  const compact = raw.replace(/\s+/g, "")
+  const lettersDigits = compact.match(/^([A-D])[-]?(\d{1,3})$/)
+  if (lettersDigits) {
+    return `${lettersDigits[1]}-${lettersDigits[2].padStart(3, "0")}`
+  }
+  if (ROOM_NUMBER_PATTERN.test(compact)) return compact
+  const digits = compact.replace(/\D/g, "")
+  if (digits) return `A-${digits.padStart(3, "0").slice(-3)}`
+  return fallbackRoomFromPatientId(fallbackId)
+}
+
+function normalizeTelegramGender(value: string) {
+  const raw = String(value || "").trim().toLowerCase()
+  if (!raw) return GENDER_OPTIONS[0]
+  if (raw.startsWith("m")) return "Male"
+  if (raw.startsWith("f")) return "Female"
+  if (raw.startsWith("n")) return "Non-binary"
+  return GENDER_OPTIONS[0]
+}
+
+export async function syncPatientsFromTelegramAdmissions() {
+  if (typeof window === "undefined") return { imported: 0, total: 0 }
+  if (telegramSyncInFlight) return { imported: 0, total: 0 }
+  telegramSyncInFlight = true
+  try {
+    const response = await fetch("/api/modules/telegram-admissions", { cache: "no-store" })
+    if (!response.ok) return { imported: 0, total: 0 }
+    const payload = (await response.json().catch(() => null)) as { ok?: boolean; data?: TelegramAdmissionRecord[] } | null
+    if (!payload?.ok || !Array.isArray(payload.data)) return { imported: 0, total: 0 }
+
+    const current = readPatients()
+    const nameIndex = new Set(current.map((row) => row.fullName.trim().toLowerCase()))
+    let imported = 0
+    for (const row of payload.data) {
+      const fullName = String(row.fullName || "").trim()
+      if (!fullName) continue
+      const key = fullName.toLowerCase()
+      if (nameIndex.has(key)) continue
+
+      const fallbackId = `tg${String(row.telegramRecordId || Date.now()).replace(/[^a-zA-Z0-9]/g, "").slice(-8)}`
+      const created = cloneWithTimestamp({
+        id: fallbackId,
+        fullName,
+        roomNumber: normalizeTelegramRoom(row.roomNumber, fallbackId),
+        age: Number.parseInt(String(row.age || "0"), 10) || 0,
+        gender: normalizeTelegramGender(row.gender),
+        diagnosis: String(row.diagnosis || row.remark || "Admitted via Telegram bot").trim(),
+        admissionDate: String(row.admissionDate || new Date().toISOString().slice(0, 10)).trim(),
+        mobilityStatus: "Pending assessment",
+        feedingStatus: "Pending assessment",
+        toiletAssistance: "Pending assessment",
+        fallRisk: FALL_RISK_OPTIONS[1],
+        pressureSoreRisk: PRESSURE_SORE_RISK_OPTIONS[0],
+        mentalStatus: "Pending assessment",
+        currentMedications: "-",
+        familyContact: "-",
+        assignedNurse: String(row.doctor || "Telegram admission").trim(),
+        rehabilitationStatus: REHAB_STATUS_OPTIONS[0],
+      })
+      current.unshift(created)
+      nameIndex.add(key)
+      imported += 1
+    }
+    if (imported > 0) {
+      writePatients(current)
+      announceClinicalDataUpdate()
+    }
+    return { imported, total: payload.data.length }
+  } catch {
+    return { imported: 0, total: 0 }
+  } finally {
+    telegramSyncInFlight = false
+  }
+}

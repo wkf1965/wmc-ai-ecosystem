@@ -69,15 +69,15 @@ const BOT_COMMANDS = [
   // ── SIDE TURNING (quick commands) ────────────────────────────────────────
   {
     command:     'turn_left',
-    description: '⬅️ Record LEFT side turn — usage: /turn_left Room 2',
+    description: '⬅️ Start turning workflow with LEFT — usage: /turn_left Room 2',
   },
   {
     command:     'turn_right',
-    description: '➡️ Record RIGHT side turn — usage: /turn_right Room 2',
+    description: '➡️ Start turning workflow with RIGHT — usage: /turn_right Room 2',
   },
   {
     command:     'turn_supine',
-    description: '🔼 Record SUPINE (back) position — usage: /turn_supine Room 2',
+    description: '🔼 Start turning workflow with SUPINE — usage: /turn_supine Room 2',
   },
   {
     command:     'turn_done',

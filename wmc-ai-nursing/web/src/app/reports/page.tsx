@@ -1,8 +1,10 @@
 import Link from "next/link"
+import AdminGate from "../../components/AdminGate"
 
 export default function ReportsPage() {
   return (
     <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+      <AdminGate pageName="Reports" />
       <div className="mb-6 flex items-center justify-between gap-3">
         <div>
           <p className="text-sm uppercase tracking-wide text-slate-500">Clinical Insight</p>

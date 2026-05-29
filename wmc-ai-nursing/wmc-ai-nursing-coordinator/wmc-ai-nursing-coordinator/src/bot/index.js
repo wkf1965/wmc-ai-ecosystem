@@ -67,7 +67,7 @@ export async function startTelegramBot() {
     log.warn('Backend API integration: WMC_BACKEND_API_URL not set — backend sync disabled.')
   }
 
-  log.info('Attendance + OT module: ENABLED ✓  (/punchin /punchout /ot_in /ot_out /attendance /ot_report)')
+  log.info('Attendance + OT module: ENABLED ✓  (/punchin /punchout /otin /otout /attendance /ot_report)')
   log.info(`Active punch sessions loaded: ${activeCount()}`)
 
   registerAllCommands(bot)

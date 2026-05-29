@@ -79,12 +79,63 @@ import { tryHandleNursingNlp } from '../services/nursingNlpHandler.js'
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 const D = '─────────────────────────'
+const NURSING_WEB_BASE_URL = (process.env.WMC_NURSING_WEB_URL ?? 'http://localhost:3000').replace(/\/$/, '')
 
 function nurseName(msg) {
   return msg.from?.first_name ?? msg.from?.username ?? 'Nurse'
 }
 function telegramUsername(msg) {
   return msg.from?.username ? `@${msg.from.username}` : (msg.from?.first_name ?? '')
+}
+
+function mapItemKeyToWebItemId(itemKey) {
+  if (!itemKey) return null
+  const key = String(itemKey).toUpperCase()
+  if (key.startsWith('PAMPERS_')) return 'pampers'
+  if (key === 'WET_TISSUE') return 'wet-tissu'
+  return null
+}
+
+function inferInventoryActionType(text = '') {
+  const value = String(text || '').toLowerCase()
+  if (/\b(add|added|restock|top\s*up|stock\s*in)\b/.test(value)) return 'added'
+  if (/\b(give|given|dispense|issued?)\b/.test(value)) return 'given'
+  if (/\b(take|taken|withdraw|remove|removed)\b/.test(value)) return 'taken'
+  return 'used'
+}
+
+async function syncToNursingWebInventory({ itemKey, qtyUsed, nurse, room = '', patientName = '', actionType = 'used', unit = '' }) {
+  const mappedItemId = mapItemKeyToWebItemId(itemKey)
+  const itemId = mappedItemId ?? String(itemKey || '').toLowerCase().replace(/_/g, '-')
+  if (!itemId) return
+
+  try {
+    const updateRes = await fetch(`${NURSING_WEB_BASE_URL}/api/integrations/telegram/ingest`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        command: 'inventory_update',
+        args: {
+          itemId,
+          itemName: ITEMS[itemKey]?.name ?? itemKey,
+          quantityChange: Number(qtyUsed || 0),
+          unit: unit || '',
+          actionType,
+          room: room || '',
+          patientName: patientName || '',
+          personInCharge: nurse || 'Nurse',
+        },
+      }),
+    })
+    if (!updateRes.ok) {
+      const errorText = await updateRes.text().catch(() => '')
+      log.warn(`[inv-sync] nursing web update failed (${itemId}): ${errorText.slice(0, 120)}`)
+      return
+    }
+    log.info(`[inv-sync] nursing web event appended: ${itemId} ${actionType} ${qtyUsed}`)
+  } catch (err) {
+    log.warn('[inv-sync] nursing web inventory sync failed:', err?.message ?? String(err))
+  }
 }
 
 // ── Workflow definitions ──────────────────────────────────────────────────────
@@ -286,6 +337,15 @@ async function saveInventoryRecord(bot, msg, workflowName, answers) {
   } else {
     log.warn('[inv-cmd] Google Sheet not configured — record saved locally only')
   }
+  syncToNursingWebInventory({
+    itemKey,
+    qtyUsed: qty,
+    nurse,
+    room: answers.room ?? '',
+    patientName: answers.patient_name ?? '',
+    actionType: inferInventoryActionType(`${workflowName} ${remarks}`),
+    unit: ITEMS[itemKey]?.unit ?? '',
+  }).catch(() => {})
 
   // ── Build reply fragments concurrently ──────────────────────────────────────
 
@@ -472,6 +532,15 @@ export async function tryHandleInventoryNlp(bot, msg) {
       log.error('[inv-nlp] sheet save error:', err.message)
     )
   }
+  syncToNursingWebInventory({
+    itemKey,
+    qtyUsed: parsed.qty,
+    nurse,
+    room: parsed.room ?? '',
+    patientName: parsed.patientName ?? '',
+    actionType: inferInventoryActionType(text),
+    unit: parsed.unit ?? ITEMS[itemKey]?.unit ?? '',
+  }).catch(() => {})
 
   // Low stock check (approximate, non-blocking)
   let stockWarn = ''

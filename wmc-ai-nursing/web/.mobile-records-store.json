@@ -1,0 +1,77 @@
+{
+  "vitals": [
+    {
+      "id": "vit-1780022995293-2sp26o",
+      "recordedAt": "2026-05-29T02:49:55.293Z",
+      "room": "203",
+      "patientName": "Lau Siew Kim",
+      "temperature": "36.1",
+      "bloodPressure": "95/64",
+      "pulse": "103",
+      "spo2": "98",
+      "glucose": "-",
+      "remark": "",
+      "nurseName": "Leong"
+    },
+    {
+      "id": "vit-1780022229235-3sr5or",
+      "recordedAt": "2026-05-29T02:37:09.235Z",
+      "room": "201",
+      "patientName": "Room 201 patient",
+      "temperature": "",
+      "bloodPressure": "",
+      "pulse": "",
+      "spo2": "56",
+      "glucose": "",
+      "remark": "",
+      "nurseName": "Wong"
+    },
+    {
+      "id": "vit-1780021103015-rprmsg",
+      "recordedAt": "2026-05-29T02:18:23.015Z",
+      "room": "201",
+      "patientName": "",
+      "temperature": "36.8",
+      "bloodPressure": "120/80",
+      "pulse": "78",
+      "spo2": "98",
+      "glucose": "5.6",
+      "remark": "smoke test",
+      "nurseName": "TestNurse"
+    }
+  ],
+  "medications": [
+    {
+      "id": "med-1780021208284-6znuft",
+      "recordedAt": "2026-05-29T02:20:08.284Z",
+      "room": "201",
+      "patientName": "",
+      "medicationName": "Paracetamol",
+      "dose": "500mg",
+      "timeGiven": "14:30",
+      "givenBy": "TestNurse",
+      "remark": "PRN"
+    }
+  ],
+  "handovers": [
+    {
+      "id": "ho-1780021190291-njkivi",
+      "recordedAt": "2026-05-29T02:19:50.291Z",
+      "shift": "Morning",
+      "nurseName": "TestNurse",
+      "summary": "All stable",
+      "concerns": "None",
+      "urgentFollowUp": "None"
+    }
+  ],
+  "notes": [
+    {
+      "id": "note-1780021192000-74dpsk",
+      "recordedAt": "2026-05-29T02:19:52.000Z",
+      "room": "201",
+      "patientName": "",
+      "note": "Patient resting well",
+      "nurseName": "TestNurse"
+    }
+  ]
+}

@@ -103,3 +103,7 @@ export function getBotAdapterStatus() {
     sheetMissing:     sheet.missing,
   }
 }
+
+export function getBotAdapterInstance() {
+  return _bot
+}

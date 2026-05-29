@@ -26,15 +26,15 @@ import {
   recordTurn,
   getRoomState,
   getAllRooms,
-  getOverdueRooms,
   getCachedPatientName,
   computeStatus,
 } from '../state/sideTurningState.js'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
-const OVERDUE_CHECK_INTERVAL_MS = 15 * 60 * 1000   // 15 minutes
+const OVERDUE_CHECK_INTERVAL_MS = 5 * 60 * 1000   // 5 minutes
 const D = '─────────────────────────'
+const NURSING_WEB_BASE_URL = (process.env.WMC_NURSING_WEB_URL ?? 'http://localhost:3000').replace(/\/$/, '')
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -88,6 +88,43 @@ function statusIcon(status) {
   if (status === 'DUE')     return '⚠️'
   if (status === 'OVERDUE') return '🔴'
   return '❓'
+}
+
+function normalizeTurningPositionLabel(position) {
+  const value = String(position || '').toUpperCase()
+  if (value === 'LEFT') return 'left side'
+  if (value === 'RIGHT') return 'right side'
+  if (value === 'SUPINE') return 'supine'
+  if (value === 'PRONE') return 'prone'
+  return 'left side'
+}
+
+async function syncToNursingWebTurning(state) {
+  try {
+    const response = await fetch(`${NURSING_WEB_BASE_URL}/api/turning-records`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        patientName: state.patient_name,
+        room: state.room_number,
+        turningTime: state.timestamp,
+        position: normalizeTurningPositionLabel(state.position),
+        nurseName: state.nurse_name,
+        recordedAt: state.timestamp,
+        nextTurningDueAt: state.next_due,
+        source: 'telegram',
+        sourceStatus: 'live',
+      }),
+    })
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => '')
+      log.warn(`[turn-sync] web sync failed room ${state.room_number}: ${errorText.slice(0, 120)}`)
+      return
+    }
+    log.info(`[turn-sync] web turning synced room ${state.room_number} ${state.position}`)
+  } catch (error) {
+    log.warn('[turn-sync] web turning sync error:', error?.message ?? String(error))
+  }
 }
 
 // ── Patient resolver ──────────────────────────────────────────────────────────
@@ -245,6 +282,7 @@ async function handleTurnCommand(bot, msg, position) {
     status:           state.status,
     source:           'telegram',
   }).catch((err) => log.error('[turn-cmd] sheet save error:', err.message))
+  syncToNursingWebTurning(state).catch(() => {})
 
   await bot.sendMessage(chatId, buildTurnRecordedReply(state), { parse_mode: 'Markdown' })
   log.info(`[turn-cmd] ${position} — room ${room} (${patientName}) by ${nurse}`)
@@ -314,14 +352,78 @@ async function handleTurnStatus(bot, msg) {
 
 // ── Registration ──────────────────────────────────────────────────────────────
 
+/**
+ * Trigger the web backend to scan overdue turning records and send Telegram
+ * group alerts. Shared by the manual /send_overdue_alerts command and the
+ * background checker. Returns the backend summary object (or null on error).
+ *
+ * @param {{ source: string }} [opts]
+ * @returns {Promise<object|null>}
+ */
+async function triggerOverdueAlerts({ source = 'auto' } = {}) {
+  log.info(`[overdue-checker] overdue check started (source: ${source})`)
+  console.log(`[overdue-checker] overdue check started (source: ${source})`)
+  try {
+    const response = await fetch(`${NURSING_WEB_BASE_URL}/api/turning-records/alerts`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+    })
+    const payload = await response.json().catch(() => null)
+    if (!response.ok || !payload?.ok) {
+      const reason = payload?.error ? String(payload.error) : `HTTP ${response.status}`
+      log.error(`[overdue-checker] failed alert reason: ${reason}`)
+      console.error(`[overdue-checker] failed alert reason: ${reason}`)
+      return null
+    }
+    const data = payload.data || {}
+    log.info(
+      `[overdue-checker] overdue:${Number(data.overdue || 0)} sent:${Number(data.sent || 0)} ` +
+        `normal:${Number(data.normalSent || 0)} critical:${Number(data.criticalSent || 0)} ` +
+        `supervisor:${Number(data.supervisorSent || 0)} skipped:${Number(data.skippedDuplicate || 0)} ` +
+        `failed:${Number(data.failed || 0)}`,
+    )
+    console.log(
+      `[overdue-checker] overdue:${Number(data.overdue || 0)} sent:${Number(data.sent || 0)} ` +
+        `critical:${Number(data.criticalSent || 0)} supervisor:${Number(data.supervisorSent || 0)} ` +
+        `skipped:${Number(data.skippedDuplicate || 0)} failed:${Number(data.failed || 0)}`,
+    )
+    return data
+  } catch (err) {
+    log.error('[overdue-checker] failed alert reason (fetch):', err?.message ?? String(err))
+    console.error('[overdue-checker] failed alert reason (fetch):', err?.message ?? String(err))
+    return null
+  }
+}
+
 export function registerSideTurningCommands(bot) {
-  bot.onText(/^\/turn_left\b/i,   (msg) => handleTurnCommand(bot, msg, 'LEFT'))
-  bot.onText(/^\/turn_right\b/i,  (msg) => handleTurnCommand(bot, msg, 'RIGHT'))
-  bot.onText(/^\/turn_supine\b/i, (msg) => handleTurnCommand(bot, msg, 'SUPINE'))
+  // /turn_left /turn_right /turn_supine /turn_back are routed by turningCommand.js
+  // into the shared /turning multi-step workflow to avoid command conflicts.
   bot.onText(/^\/turn_done\b/i,   (msg) => handleTurnCommand(bot, msg, 'DONE'))
   bot.onText(/^\/turn_status\b/i, (msg) => handleTurnStatus(bot, msg))
 
-  log.info('[bot] side turning commands registered (/turn_left /turn_right /turn_supine /turn_done /turn_status)')
+  // Manual trigger: scan overdue turning records and send group alerts now.
+  bot.onText(/^\/send_overdue_alerts\b/i, async (msg) => {
+    const chatId = msg.chat.id
+    await bot.sendMessage(chatId, '🔍 Checking overdue turning records...')
+    const data = await triggerOverdueAlerts({ source: 'manual command' })
+    if (!data) {
+      await bot.sendMessage(chatId, '❌ Could not run overdue alert check. Is the dashboard backend running?')
+      return
+    }
+    await bot.sendMessage(
+      chatId,
+      [
+        '✅ Overdue alert check complete',
+        D,
+        `Overdue records: ${Number(data.overdue || 0)}`,
+        `Alerts sent: ${Number(data.sent || 0)}`,
+        `Skipped (already alerted): ${Number(data.skippedDuplicate || 0)}`,
+        `Failed: ${Number(data.failed || 0)}`,
+      ].join('\n'),
+    )
+  })
+
+  log.info('[bot] side turning commands registered (/turn_done /turn_status /send_overdue_alerts) — directional commands routed to /turning workflow')
 }
 
 // ── Overdue checker ───────────────────────────────────────────────────────────
@@ -329,37 +431,38 @@ export function registerSideTurningCommands(bot) {
 let _overdueInterval = null
 
 /**
- * Start the background overdue turn checker (fires every 15 min).
- * Sends a Telegram reminder to the nurse who last recorded a turn for any
- * room that is DUE or OVERDUE.
+ * Start the background overdue turn checker (fires every 5 min).
+ * Triggers the web backend to scan turning records with status="overdue"
+ * (alertSent != true) and send a Telegram group alert for each.
  *
  * @param {import('node-telegram-bot-api').default} bot
  */
 export function startOverdueChecker(bot) {
   if (_overdueInterval) return   // already started
 
-  _overdueInterval = setInterval(async () => {
-    const overdue = getOverdueRooms()
-    if (overdue.length === 0) return
+  // ── ENV check (#9) — clear terminal error if Telegram config is missing ──
+  const token  = String(process.env.TELEGRAM_BOT_TOKEN ?? '').trim()
+  const chatId = String(process.env.TELEGRAM_CHAT_ID ?? '').trim()
+  if (!token) {
+    log.error('[Scheduler] ERROR: TELEGRAM_BOT_TOKEN is missing — overdue alerts cannot be sent. Set it in .env')
+    console.error('[Scheduler] ERROR: TELEGRAM_BOT_TOKEN is missing — overdue alerts cannot be sent. Set it in .env')
+  }
+  if (!chatId) {
+    log.error('[Scheduler] ERROR: TELEGRAM_CHAT_ID is missing — overdue alerts cannot be sent. Set it in .env')
+    console.error('[Scheduler] ERROR: TELEGRAM_CHAT_ID is missing — overdue alerts cannot be sent. Set it in .env')
+  }
 
-    log.info(`[overdue-checker] ${overdue.length} room(s) need turning`)
+  // ── Auto-start (#10) — runs on `npm run telegram`, no manual trigger ──────
+  console.log('[Scheduler] Started')
+  log.info('[Scheduler] Started — automatic overdue turning checker, interval 5 min')
 
-    for (const state of overdue) {
-      if (!state.chatId) continue
-      try {
-        await bot.sendMessage(
-          state.chatId,
-          buildOverdueReminderReply(state),
-          { parse_mode: 'Markdown' },
-        )
-        log.info(`[overdue-checker] reminder sent — room ${state.room_number} → chat ${state.chatId}`)
-      } catch (err) {
-        log.error(`[overdue-checker] send failed — room ${state.room_number}:`, err.message)
-      }
-    }
-  }, OVERDUE_CHECK_INTERVAL_MS)
+  const runCheck = () => {
+    void triggerOverdueAlerts({ source: '5-min background checker' })
+  }
 
-  log.info('[overdue-checker] started — interval 15 min')
+  // Run once shortly after startup, then every 5 minutes.
+  setTimeout(runCheck, 30 * 1000)
+  _overdueInterval = setInterval(runCheck, OVERDUE_CHECK_INTERVAL_MS)
 }
 
 export function stopOverdueChecker() {

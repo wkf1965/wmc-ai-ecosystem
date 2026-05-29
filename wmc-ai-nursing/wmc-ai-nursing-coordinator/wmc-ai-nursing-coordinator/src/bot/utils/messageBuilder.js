@@ -76,9 +76,9 @@ export function buildWelcomeMessage(firstName) {
     '  ⚠️ /set_minimum     — Set minimum stock alert level',
     '  💰 /set_price       — Set item unit price for billing',
     '',
-    '  ⬅️ /turn_left   — Record LEFT side turn (e.g. /turn_left Room 2)',
-    '  ➡️ /turn_right  — Record RIGHT side turn',
-    '  🔼 /turn_supine — Record SUPINE (back) position',
+    '  ⬅️ /turn_left   — Start side turning workflow (e.g. /turn_left Room 2)',
+    '  ➡️ /turn_right  — Start side turning workflow',
+    '  🔼 /turn_supine — Start side turning workflow',
     '  ✔️ /turn_done   — Mark turn as done',
     '  📊 /turn_status — Check turning status by room',
     '',
@@ -131,12 +131,12 @@ export function buildHelpMessage(workflows) {
   lines.push(`🔍 */ot_check* — Individual OT record check`)
   lines.push(`   Fields: staff name, date (YYYY-MM-DD)`)
   lines.push('')
-  lines.push(`⬅️ */turn_left [Room] NUMBER [Patient]* — Record LEFT side turn`)
+  lines.push(`⬅️ */turn_left [Room] NUMBER [Patient]* — Start side turning workflow with LEFT prefilled`)
   lines.push(`   Example: /turn_left Room 2   or   /turn_left 2 Ali`)
   lines.push('')
-  lines.push(`➡️ */turn_right [Room] NUMBER [Patient]* — Record RIGHT side turn`)
+  lines.push(`➡️ */turn_right [Room] NUMBER [Patient]* — Start side turning workflow with RIGHT prefilled`)
   lines.push('')
-  lines.push(`🔼 */turn_supine [Room] NUMBER [Patient]* — Record SUPINE position`)
+  lines.push(`🔼 */turn_supine [Room] NUMBER [Patient]* — Start side turning workflow with SUPINE prefilled`)
   lines.push('')
   lines.push(`✔️ */turn_done [Room] NUMBER* — Mark turning as done`)
   lines.push('')

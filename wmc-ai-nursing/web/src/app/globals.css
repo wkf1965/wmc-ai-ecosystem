@@ -20,6 +20,8 @@
       radial-gradient(28rem 28rem at 8% -12%, #dbeafe, transparent 62%),
       radial-gradient(24rem 24rem at 92% -16%, #fbcfe8, transparent 55%),
       #f8fafc;
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
   }
 
   *,
@@ -33,6 +35,28 @@
   textarea,
   select {
     font: inherit;
+  }
+
+  /* Mobile: keep page content clear of the fixed bottom navigation bar. */
+  @media (max-width: 1023px) {
+    body {
+      padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
+    }
+
+    /* 16px inputs prevent Android/iOS auto-zoom on focus. */
+    input,
+    select,
+    textarea {
+      font-size: 16px;
+    }
+
+    /* Comfortable touch targets for fast, accurate nurse taps. */
+    button,
+    a[role="button"],
+    [type="button"],
+    [type="submit"] {
+      min-height: 44px;
+    }
   }
 }
 
@@ -50,11 +74,24 @@
   }
 
   .panel-card {
-    @apply rounded-2xl border border-slate-200 bg-white p-5 shadow-panel shadow-slate-900/5;
+    @apply rounded-2xl border border-slate-200 bg-white p-4 shadow-panel shadow-slate-900/5 sm:p-5;
   }
 
   .panel-title {
     @apply text-sm font-semibold uppercase tracking-[0.08em] text-slate-500;
+  }
+
+  /* Large, thumb-friendly primary action button for nurse workflows. */
+  .btn-touch {
+    @apply inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl px-5 text-base font-semibold transition active:scale-[0.98];
+  }
+
+  .btn-touch-primary {
+    @apply btn-touch bg-slate-900 text-white;
+  }
+
+  .btn-touch-secondary {
+    @apply btn-touch border border-slate-300 bg-white text-slate-700;
   }
 }
 

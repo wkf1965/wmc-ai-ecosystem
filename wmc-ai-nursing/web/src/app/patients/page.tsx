@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import { analyzePatientRisk, PatientRiskProfile } from "../../lib/aiRiskDetection"
-import { listPatients, Patient } from "../../lib/patientManagement"
+import { listPatients, Patient, syncPatientsFromTelegramAdmissions } from "../../lib/patientManagement"
 
 const riskClass = (risk: string) => {
   const normalized = risk.toLowerCase()
@@ -17,9 +17,51 @@ export default function PatientsPage() {
   const [query, setQuery] = useState("")
   const [riskFilter, setRiskFilter] = useState("All")
   const [nurseFilter, setNurseFilter] = useState("All")
+  const [lastSyncAt, setLastSyncAt] = useState("")
+  const [nextRetryMs, setNextRetryMs] = useState<number | null>(null)
 
   useEffect(() => {
-    setPatients(listPatients())
+    let mounted = true
+    let inFlight = false
+    let retryCount = 0
+    let retryTimer: number | null = null
+
+    const scheduleNextPoll = (delayMs = 20000) => {
+      if (!mounted) return
+      if (retryTimer) window.clearTimeout(retryTimer)
+      retryTimer = window.setTimeout(() => {
+        void refreshFromSources()
+      }, delayMs)
+    }
+
+    const refreshFromSources = async () => {
+      if (!mounted || inFlight) return
+      inFlight = true
+      try {
+        await syncPatientsFromTelegramAdmissions()
+        if (!mounted) return
+        setPatients(listPatients())
+        setLastSyncAt(new Date().toLocaleTimeString())
+        setNextRetryMs(null)
+        retryCount = 0
+        scheduleNextPoll(20000)
+      } catch (error) {
+        const nextRetry = Math.min(retryCount + 1, 3)
+        retryCount = nextRetry
+        const backoffDelay = 20000 * Math.pow(2, nextRetry)
+        setNextRetryMs(backoffDelay)
+        console.error("[patients-loop] sync failed, scheduling retry", { backoffDelay, error })
+        scheduleNextPoll(backoffDelay)
+      } finally {
+        inFlight = false
+      }
+    }
+
+    void refreshFromSources()
+    return () => {
+      mounted = false
+      if (retryTimer) window.clearTimeout(retryTimer)
+    }
   }, [])
 
   const nurses = useMemo(() => Array.from(new Set(patients.map((person) => person.assignedNurse))).sort(), [patients])
@@ -66,6 +108,10 @@ export default function PatientsPage() {
           <p className="text-sm uppercase tracking-wide text-slate-500">Care portfolio</p>
           <h1 className="text-2xl font-semibold text-slate-900">Patients</h1>
           <p className="text-sm text-slate-500">Clinical profile directory and resident snapshots</p>
+          <p className="mt-1 text-xs text-slate-500">
+            Loop sync: {lastSyncAt ? `ok at ${lastSyncAt}` : "starting..."}
+            {nextRetryMs ? ` | retry in ${Math.ceil(nextRetryMs / 1000)}s` : ""}
+          </p>
         </div>
         <div className="flex gap-2">
           <Link href="/rooms" className="inline-flex rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700">

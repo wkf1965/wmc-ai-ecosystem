@@ -1,0 +1,13 @@
+{
+  "room_201": {
+    "room_number": "201",
+    "patient_name": "Room 201 Patient",
+    "position": "SUPINE",
+    "nurse_name": "Wong",
+    "timestamp": "2026-05-28T11:01:54.730Z",
+    "next_due": "2026-05-28T13:01:54.730Z",
+    "status": "OK",
+    "chatId": "-4853741756",
+    "savedAt": "2026-05-28T11:01:54.730Z"
+  }
+}

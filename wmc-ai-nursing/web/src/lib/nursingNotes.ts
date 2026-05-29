@@ -187,7 +187,7 @@ const trim = (value: string) => value.trim()
 
 function normalizeNote(candidate: Partial<NursingNote>, index = 0): NursingNote {
   return {
-    id: String(candidate.id || `n-legacy-${index}-${nowIsoDateTime()}`),
+    id: String(candidate.id || `n-legacy-${index}-${toIsoDateTime()}`),
     patientId: candidate.patientId || "",
     date: candidate.date || pastDate(0),
     recordedAt: candidate.recordedAt || candidate.date || toIsoDateTime(),

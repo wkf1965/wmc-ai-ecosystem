@@ -1,0 +1,1258 @@
+{
+  "inventory": [
+    {
+      "id": "pampers",
+      "itemName": "Pampers",
+      "quantity": 0,
+      "unit": "packs",
+      "personInCharge": "TestNurse",
+      "lastUpdatedAt": "2026-05-29T02:20:09.066Z"
+    },
+    {
+      "id": "wet-tissu",
+      "itemName": "Wet tissu",
+      "quantity": 0,
+      "unit": "packs",
+      "personInCharge": "",
+      "lastUpdatedAt": ""
+    },
+    {
+      "id": "ryles-tube",
+      "itemName": "Ryles tube",
+      "quantity": 0,
+      "unit": "pcs",
+      "personInCharge": "",
+      "lastUpdatedAt": ""
+    },
+    {
+      "id": "cbd-tube",
+      "itemName": "CBD tube",
+      "quantity": 0,
+      "unit": "pcs",
+      "personInCharge": "",
+      "lastUpdatedAt": ""
+    },
+    {
+      "id": "prime-edema",
+      "itemName": "Prime edema",
+      "quantity": 0,
+      "unit": "units",
+      "personInCharge": "",
+      "lastUpdatedAt": ""
+    },
+    {
+      "id": "milk-powder",
+      "itemName": "Milk powder",
+      "quantity": 0,
+      "unit": "scoops",
+      "personInCharge": "",
+      "lastUpdatedAt": ""
+    },
+    {
+      "id": "gloves",
+      "itemName": "Gloves",
+      "quantity": 0,
+      "unit": "pcs",
+      "personInCharge": "",
+      "lastUpdatedAt": ""
+    }
+  ],
+  "inventoryEvents": [
+    {
+      "id": "inv-1780021209066-gsa5hk",
+      "itemId": "pampers",
+      "itemName": "Pampers",
+      "quantityChange": -2,
+      "unit": "packs",
+      "room": "201",
+      "patientName": "",
+      "personInCharge": "TestNurse",
+      "actionType": "used",
+      "recordedAt": "2026-05-29T02:20:09.066Z",
+      "source": "api",
+      "sourceStatus": "live"
+    },
+    {
+      "id": "inv-1779861740420-3svimh",
+      "itemId": "pampers",
+      "itemName": "Pampers",
+      "quantityChange": -1,
+      "unit": "pcs",
+      "room": "201",
+      "patientName": "Fung Poh Chai",
+      "personInCharge": "Wong",
+      "actionType": "used",
+      "recordedAt": "2026-05-27T06:02:20.420Z",
+      "source": "telegram",
+      "sourceStatus": "live"
+    },
+    {
+      "id": "inv-1779779898680-c5r2ij",
+      "itemId": "pampers",
+      "itemName": "Pampers",
+      "quantityChange": -1,
+      "unit": "pcs",
+      "room": "A201",
+      "patientName": "Fung Poh Chai",
+      "personInCharge": "Wong",
+      "actionType": "used",
+      "recordedAt": "2026-05-26T07:18:18.680Z",
+      "source": "telegram",
+      "sourceStatus": "live"
+    },
+    {
+      "id": "inv-1779693648201-iioxgd",
+      "itemId": "pampers",
+      "itemName": "Pampers",
+      "quantityChange": -2,
+      "unit": "packs",
+      "room": "",
+      "patientName": "",
+      "personInCharge": "Wong",
+      "actionType": "used",
+      "recordedAt": "2026-05-25T07:20:48.201Z",
+      "source": "telegram",
+      "sourceStatus": "live"
+    },
+    {
+      "id": "inv-1779693557219-neiu9b",
+      "itemId": "pampers",
+      "itemName": "Pampers",
+      "quantityChange": -1,
+      "unit": "packs",
+      "room": "",
+      "patientName": "",
+      "personInCharge": "Wong",
+      "actionType": "used",
+      "recordedAt": "2026-05-25T07:19:17.219Z",
+      "source": "telegram",
+      "sourceStatus": "live"
+    }
+  ],
+  "otLogs": [
+    {
+      "id": "ot-1780020562912",
+      "nurseName": "Fatin",
+      "date": "2026-05-29",
+      "dutyPunchInAt": "2026-05-29T02:09:22.912Z",
+      "dutyPunchOutAt": null,
+      "otPunchInAt": null,
+      "otPunchOutAt": null,
+      "normalHours": 0,
+      "otHours": 0,
+      "otRate": 18,
+      "totalOtAllowance": 0,
+      "status": "on_duty",
+      "approvalStatus": "pending",
+      "approvedAt": null,
+      "approvedBy": null,
+      "approvalNote": null,
+      "rejectedAt": null,
+      "rejectionReason": null,
+      "source": "manual",
+      "syncStatus": "synced",
+      "syncError": null,
+      "lastSyncAttemptAt": null
+    },
+    {
+      "id": "ot-1780019756224",
+      "nurseName": "Leong",
+      "date": "2026-05-29",
+      "dutyPunchInAt": "2026-05-29T01:55:56.224Z",
+      "dutyPunchOutAt": "2026-05-29T02:00:48.972Z",
+      "otPunchInAt": null,
+      "otPunchOutAt": null,
+      "normalHours": 0.08,
+      "otHours": 0,
+      "otRate": 18,
+      "totalOtAllowance": 0,
+      "status": "duty_completed",
+      "approvalStatus": "pending",
+      "approvedAt": null,
+      "approvedBy": null,
+      "approvalNote": null,
+      "rejectedAt": null,
+      "rejectionReason": null,
+      "source": "manual",
+      "syncStatus": "synced",
+      "syncError": null,
+      "lastSyncAttemptAt": "2026-05-29T02:00:48.972Z"
+    },
+    {
+      "id": "ot-1779958248656",
+      "nurseName": "Wong",
+      "date": "2026-05-28",
+      "dutyPunchInAt": "2026-05-28T08:50:48.656Z",
+      "dutyPunchOutAt": null,
+      "otPunchInAt": null,
+      "otPunchOutAt": null,
+      "normalHours": 0,
+      "otHours": 0,
+      "otRate": 18,
+      "totalOtAllowance": 0,
+      "status": "on_duty",
+      "approvalStatus": "pending",
+      "approvedAt": null,
+      "approvedBy": null,
+      "approvalNote": null,
+      "rejectedAt": null,
+      "rejectionReason": null,
+      "source": "telegram",
+      "syncStatus": "pending_sync",
+      "syncError": null,
+      "lastSyncAttemptAt": null
+    },
+    {
+      "id": "ot-1779872099056",
+      "nurseName": "Wong",
+      "date": "2026-05-27",
+      "dutyPunchInAt": "2026-05-27T08:54:59.056Z",
+      "dutyPunchOutAt": "2026-05-27T08:57:50.720Z",
+      "otPunchInAt": "2026-05-27T08:57:59.387Z",
+      "otPunchOutAt": "2026-05-27T09:00:50.394Z",
+      "normalHours": 0.05,
+      "otHours": 0.05,
+      "otRate": 18,
+      "totalOtAllowance": 0.9,
+      "status": "ot_completed",
+      "approvalStatus": "approved",
+      "approvedAt": "2026-05-27T09:30:02.053Z",
+      "approvedBy": "dr wong",
+      "approvalNote": null,
+      "rejectedAt": null,
+      "rejectionReason": null,
+      "source": "telegram",
+      "syncStatus": "synced",
+      "syncError": null,
+      "lastSyncAttemptAt": "2026-05-27T09:00:52.241Z"
+    },
+    {
+      "id": "ot-1779871383949",
+      "nurseName": "Wong",
+      "date": "2026-05-27",
+      "dutyPunchInAt": "2026-05-27T08:43:03.949Z",
+      "dutyPunchOutAt": "2026-05-27T08:50:14.011Z",
+      "otPunchInAt": "2026-05-27T08:50:23.134Z",
+      "otPunchOutAt": "2026-05-27T08:52:06.247Z",
+      "normalHours": 0.12,
+      "otHours": 0.03,
+      "otRate": 18,
+      "totalOtAllowance": 0.52,
+      "status": "ot_completed",
+      "approvalStatus": "pending",
+      "approvedAt": null,
+      "approvedBy": null,
+      "approvalNote": null,
+      "rejectedAt": null,
+      "rejectionReason": null,
+      "source": "telegram",
+      "syncStatus": "synced",
+      "syncError": null,
+      "lastSyncAttemptAt": "2026-05-27T08:52:08.103Z"
+    },
+    {
+      "id": "ot-1779871007976",
+      "nurseName": "Wong",
+      "date": "2026-05-27",
+      "dutyPunchInAt": "2026-05-27T08:36:47.976Z",
+      "dutyPunchOutAt": "2026-05-27T08:39:02.142Z",
+      "otPunchInAt": "2026-05-27T08:39:11.256Z",
+      "otPunchOutAt": "2026-05-27T08:40:07.000Z",
+      "normalHours": 0.04,
+      "otHours": 0.02,
+      "otRate": 18,
+      "totalOtAllowance": 0.28,
+      "status": "ot_completed",
+      "approvalStatus": "pending",
+      "approvedAt": null,
+      "approvedBy": null,
+      "approvalNote": null,
+      "rejectedAt": null,
+      "rejectionReason": null,
+      "source": "telegram",
+      "syncStatus": "synced",
+      "syncError": null,
+      "lastSyncAttemptAt": "2026-05-27T08:40:08.894Z"
+    },
+    {
+      "id": "ot-1779870512268",
+      "nurseName": "Wong",
+      "date": "2026-05-27",
+      "dutyPunchInAt": "2026-05-27T08:28:32.269Z",
+      "dutyPunchOutAt": "2026-05-27T08:33:06.649Z",
+      "otPunchInAt": "2026-05-27T08:33:42.351Z",
+      "otPunchOutAt": "2026-05-27T08:35:29.712Z",
+      "normalHours": 0.08,
+      "otHours": 0.03,
+      "otRate": 17,
+      "totalOtAllowance": 0.51,
+      "status": "ot_completed",
+      "approvalStatus": "pending",
+      "approvedAt": null,
+      "approvedBy": null,
+      "approvalNote": null,
+      "rejectedAt": null,
+      "rejectionReason": null,
+      "source": "telegram",
+      "syncStatus": "synced",
+      "syncError": null,
+      "lastSyncAttemptAt": "2026-05-27T08:35:31.627Z"
+    },
+    {
+      "id": "ot-1779869722804",
+      "nurseName": "Wong",
+      "date": "2026-05-27",
+      "dutyPunchInAt": "2026-05-27T08:15:22.804Z",
+      "dutyPunchOutAt": "2026-05-27T08:19:44.475Z",
+      "otPunchInAt": "2026-05-27T08:19:55.862Z",
+      "otPunchOutAt": "2026-05-27T08:21:42.692Z",
+      "normalHours": 0.07,
+      "otHours": 0.03,
+      "otRate": 17,
+      "totalOtAllowance": 0.5,
+      "status": "ot_completed",
+      "approvalStatus": "pending",
+      "approvedAt": null,
+      "approvedBy": null,
+      "approvalNote": null,
+      "rejectedAt": null,
+      "rejectionReason": null,
+      "source": "telegram",
+      "syncStatus": "synced",
+      "syncError": null,
+      "lastSyncAttemptAt": "2026-05-27T08:21:44.514Z"
+    },
+    {
+      "id": "ot-1779868783590",
+      "nurseName": "Wong",
+      "date": "2026-05-27",
+      "dutyPunchInAt": "2026-05-27T07:59:43.590Z",
+      "dutyPunchOutAt": "2026-05-27T08:07:47.293Z",
+      "otPunchInAt": "2026-05-27T08:08:08.998Z",
+      "otPunchOutAt": "2026-05-27T08:08:24.934Z",
+      "normalHours": 0.13,
+      "otHours": 0,
+      "otRate": 17,
+      "totalOtAllowance": 0,
+      "status": "ot_completed",
+      "approvalStatus": "pending",
+      "approvedAt": null,
+      "approvedBy": null,
+      "approvalNote": null,
+      "rejectedAt": null,
+      "rejectionReason": null,
+      "source": "telegram",
+      "syncStatus": "synced",
+      "syncError": null,
+      "lastSyncAttemptAt": "2026-05-27T08:08:26.819Z"
+    },
+    {
+      "id": "ot-1779868025505",
+      "nurseName": "Wong",
+      "date": "2026-05-27",
+      "dutyPunchInAt": "2026-05-27T07:47:05.505Z",
+      "dutyPunchOutAt": "2026-05-27T07:51:17.079Z",
+      "otPunchInAt": "2026-05-27T07:51:32.455Z",
+      "otPunchOutAt": "2026-05-27T07:52:41.738Z",
+      "normalHours": 0.07,
+      "otHours": 0.02,
+      "otRate": 17,
+      "totalOtAllowance": 0.34,
+      "status": "ot_completed",
+      "approvalStatus": "pending",
+      "approvedAt": null,
+      "approvedBy": null,
+      "approvalNote": null,
+      "rejectedAt": null,
+      "rejectionReason": null,
+      "source": "telegram",
+      "syncStatus": "synced",
+      "syncError": null,
+      "lastSyncAttemptAt": "2026-05-27T07:52:43.682Z"
+    },
+    {
+      "id": "ot-1779867524190",
+      "nurseName": "Wong",
+      "date": "2026-05-27",
+      "dutyPunchInAt": "2026-05-27T07:38:44.190Z",
+      "dutyPunchOutAt": "2026-05-27T07:39:11.525Z",
+      "otPunchInAt": "2026-05-27T07:39:24.704Z",
+      "otPunchOutAt": "2026-05-27T07:41:57.441Z",
+      "normalHours": 0.01,
+      "otHours": 0.04,
+      "otRate": 17,
+      "totalOtAllowance": 0.68,
+      "status": "ot_completed",
+      "approvalStatus": "pending",
+      "approvedAt": null,
+      "approvedBy": null,
+      "approvalNote": null,
+      "rejectedAt": null,
+      "rejectionReason": null,
+      "source": "telegram",
+      "syncStatus": "synced",
+      "syncError": null,
+      "lastSyncAttemptAt": "2026-05-27T07:41:59.336Z"
+    },
+    {
+      "id": "ot-1779865765463",
+      "nurseName": "Wong",
+      "date": "2026-05-27",
+      "dutyPunchInAt": "2026-05-27T07:09:25.463Z",
+      "dutyPunchOutAt": "2026-05-27T07:21:06.684Z",
+      "otPunchInAt": "2026-05-27T07:21:18.191Z",
+      "otPunchOutAt": "2026-05-27T07:28:31.544Z",
+      "normalHours": 0.19,
+      "otHours": 0.12,
+      "otRate": 17,
+      "totalOtAllowance": 2.04,
+      "status": "ot_completed",
+      "approvalStatus": "pending",
+      "approvedAt": null,
+      "approvedBy": null,
+      "approvalNote": null,
+      "rejectedAt": null,
+      "rejectionReason": null,
+      "source": "telegram",
+      "syncStatus": "synced",
+      "syncError": null,
+      "lastSyncAttemptAt": "2026-05-27T07:28:33.555Z"
+    },
+    {
+      "id": "ot-1779861110066",
+      "nurseName": "Wong",
+      "date": "2026-05-27",
+      "dutyPunchInAt": "2026-05-27T05:51:50.066Z",
+      "dutyPunchOutAt": "2026-05-27T06:16:56.833Z",
+      "otPunchInAt": "2026-05-27T06:17:29.588Z",
+      "otPunchOutAt": "2026-05-27T07:07:50.852Z",
+      "normalHours": 0.42,
+      "otHours": 0.84,
+      "otRate": 17,
+      "totalOtAllowance": 14.28,
+      "status": "ot_completed",
+      "approvalStatus": "pending",
+      "approvedAt": null,
+      "approvedBy": null,
+      "approvalNote": null,
+      "rejectedAt": null,
+      "rejectionReason": null,
+      "source": "telegram",
+      "syncStatus": "synced",
+      "syncError": null,
+      "lastSyncAttemptAt": "2026-05-27T07:07:53.307Z"
+    },
+    {
+      "id": "ot-1779782065211",
+      "nurseName": "Wong",
+      "date": "2026-05-26",
+      "dutyPunchInAt": "2026-05-26T07:54:25.211Z",
+      "dutyPunchOutAt": "2026-05-26T08:09:21.720Z",
+      "otPunchInAt": "2026-05-26T08:09:26.823Z",
+      "otPunchOutAt": "2026-05-26T08:27:12.814Z",
+      "normalHours": 0.25,
+      "otHours": 0.3,
+      "otRate": 20,
+      "totalOtAllowance": 6,
+      "status": "ot_completed",
+      "approvalStatus": "approved",
+      "approvedAt": "2026-05-27T09:30:15.468Z",
+      "approvedBy": "dr wong",
+      "approvalNote": null,
+      "rejectedAt": null,
+      "rejectionReason": null,
+      "source": "manual",
+      "syncStatus": "pending_sync",
+      "syncError": null,
+      "lastSyncAttemptAt": null
+    },
+    {
+      "id": "ot-1779697529719",
+      "nurseName": "Wong",
+      "date": "2026-05-25",
+      "dutyPunchInAt": "2026-05-25T08:25:29.719Z",
+      "dutyPunchOutAt": "2026-05-25T08:25:43.944Z",
+      "otPunchInAt": "2026-05-25T08:25:43.996Z",
+      "otPunchOutAt": "2026-05-25T08:25:44.009Z",
+      "normalHours": 0,
+      "otHours": 0,
+      "otRate": 20,
+      "totalOtAllowance": 0,
+      "status": "ot_completed",
+      "approvalStatus": "approved",
+      "approvedAt": "2026-05-27T09:30:26.595Z",
+      "approvedBy": "dr wong",
+      "approvalNote": null,
+      "rejectedAt": null,
+      "rejectionReason": null,
+      "source": "manual",
+      "syncStatus": "pending_sync",
+      "syncError": null,
+      "lastSyncAttemptAt": null
+    }
+  ],
+  "otPunchEvents": [
+    {
+      "id": "ot-evt-1780020562912-tv9sh1",
+      "nurseName": "Fatin",
+      "commandType": "punchin",
+      "timestamp": "2026-05-29T02:09:22.912Z",
+      "source": "manual"
+    },
+    {
+      "id": "ot-evt-1780020048972-jm9spr",
+      "nurseName": "Leong",
+      "commandType": "punchout",
+      "timestamp": "2026-05-29T02:00:48.972Z",
+      "source": "manual"
+    },
+    {
+      "id": "ot-evt-1780019756224-8l09fa",
+      "nurseName": "Leong",
+      "commandType": "punchin",
+      "timestamp": "2026-05-29T01:55:56.224Z",
+      "source": "manual"
+    },
+    {
+      "id": "ot-evt-1779958248656-9g95xf",
+      "nurseName": "Wong",
+      "commandType": "punchin",
+      "timestamp": "2026-05-28T08:50:48.656Z",
+      "source": "telegram"
+    },
+    {
+      "id": "ot-evt-1779872450394-0ou21p",
+      "nurseName": "Wong",
+      "commandType": "otout",
+      "timestamp": "2026-05-27T09:00:50.394Z",
+      "source": "telegram"
+    },
+    {
+      "id": "ot-evt-1779872279388-pbfleu",
+      "nurseName": "Wong",
+      "commandType": "otin",
+      "timestamp": "2026-05-27T08:57:59.388Z",
+      "source": "telegram"
+    },
+    {
+      "id": "ot-evt-1779872270720-59qx86",
+      "nurseName": "Wong",
+      "commandType": "punchout",
+      "timestamp": "2026-05-27T08:57:50.720Z",
+      "source": "telegram"
+    },
+    {
+      "id": "ot-evt-1779872099056-v916e4",
+      "nurseName": "Wong",
+      "commandType": "punchin",
+      "timestamp": "2026-05-27T08:54:59.056Z",
+      "source": "telegram"
+    },
+    {
+      "id": "ot-evt-1779871926247-c16kj2",
+      "nurseName": "Wong",
+      "commandType": "otout",
+      "timestamp": "2026-05-27T08:52:06.247Z",
+      "source": "telegram"
+    },
+    {
+      "id": "ot-evt-1779871823135-7yx739",
+      "nurseName": "Wong",
+      "commandType": "otin",
+      "timestamp": "2026-05-27T08:50:23.135Z",
+      "source": "telegram"
+    },
+    {
+      "id": "ot-evt-1779871814011-vm6xg4",
+      "nurseName": "Wong",
+      "commandType": "punchout",
+      "timestamp": "2026-05-27T08:50:14.011Z",
+      "source": "telegram"
+    },
+    {
+      "id": "ot-evt-1779871383949-8niho2",
+      "nurseName": "Wong",
+      "commandType": "punchin",
+      "timestamp": "2026-05-27T08:43:03.949Z",
+      "source": "telegram"
+    },
+    {
+      "id": "ot-evt-1779871207001-q4ionk",
+      "nurseName": "Wong",
+      "commandType": "otout",
+      "timestamp": "2026-05-27T08:40:07.001Z",
+      "source": "telegram"
+    },
+    {
+      "id": "ot-evt-1779871151256-45vuk6",
+      "nurseName": "Wong",
+      "commandType": "otin",
+      "timestamp": "2026-05-27T08:39:11.256Z",
+      "source": "telegram"
+    },
+    {
+      "id": "ot-evt-1779871142142-1fpygk",
+      "nurseName": "Wong",
+      "commandType": "punchout",
+      "timestamp": "2026-05-27T08:39:02.142Z",
+      "source": "telegram"
+    },
+    {
+      "id": "ot-evt-1779871007976-3b50ls",
+      "nurseName": "Wong",
+      "commandType": "punchin",
+      "timestamp": "2026-05-27T08:36:47.976Z",
+      "source": "telegram"
+    },
+    {
+      "id": "ot-evt-1779870929713-lfzgvx",
+      "nurseName": "Wong",
+      "commandType": "otout",
+      "timestamp": "2026-05-27T08:35:29.713Z",
+      "source": "telegram"
+    },
+    {
+      "id": "ot-evt-1779870822352-xo181d",
+      "nurseName": "Wong",
+      "commandType": "otin",
+      "timestamp": "2026-05-27T08:33:42.352Z",
+      "source": "telegram"
+    },
+    {
+      "id": "ot-evt-1779870786649-7thn0l",
+      "nurseName": "Wong",
+      "commandType": "punchout",
+      "timestamp": "2026-05-27T08:33:06.649Z",
+      "source": "telegram"
+    },
+    {
+      "id": "ot-evt-1779870512269-lm7h3i",
+      "nurseName": "Wong",
+      "commandType": "punchin",
+      "timestamp": "2026-05-27T08:28:32.269Z",
+      "source": "telegram"
+    },
+    {
+      "id": "ot-evt-1779870102693-74tarl",
+      "nurseName": "Wong",
+      "commandType": "otout",
+      "timestamp": "2026-05-27T08:21:42.693Z",
+      "source": "telegram"
+    },
+    {
+      "id": "ot-evt-1779869995863-2n00r3",
+      "nurseName": "Wong",
+      "commandType": "otin",
+      "timestamp": "2026-05-27T08:19:55.863Z",
+      "source": "telegram"
+    },
+    {
+      "id": "ot-evt-1779869984475-uix8zq",
+      "nurseName": "Wong",
+      "commandType": "punchout",
+      "timestamp": "2026-05-27T08:19:44.475Z",
+      "source": "telegram"
+    },
+    {
+      "id": "ot-evt-1779869722804-unkpr1",
+      "nurseName": "Wong",
+      "commandType": "punchin",
+      "timestamp": "2026-05-27T08:15:22.804Z",
+      "source": "telegram"
+    },
+    {
+      "id": "ot-evt-1779869304935-2vvphm",
+      "nurseName": "Wong",
+      "commandType": "otout",
+      "timestamp": "2026-05-27T08:08:24.935Z",
+      "source": "telegram"
+    },
+    {
+      "id": "ot-evt-1779869288998-m3bady",
+      "nurseName": "Wong",
+      "commandType": "otin",
+      "timestamp": "2026-05-27T08:08:08.998Z",
+      "source": "telegram"
+    },
+    {
+      "id": "ot-evt-1779869267293-diwm6q",
+      "nurseName": "Wong",
+      "commandType": "punchout",
+      "timestamp": "2026-05-27T08:07:47.293Z",
+      "source": "telegram"
+    },
+    {
+      "id": "ot-evt-1779868783590-v87kue",
+      "nurseName": "Wong",
+      "commandType": "punchin",
+      "timestamp": "2026-05-27T07:59:43.590Z",
+      "source": "telegram"
+    },
+    {
+      "id": "ot-evt-1779868361740-upa9k9",
+      "nurseName": "Wong",
+      "commandType": "otout",
+      "timestamp": "2026-05-27T07:52:41.740Z",
+      "source": "telegram"
+    },
+    {
+      "id": "ot-evt-1779868292455-hu1b8y",
+      "nurseName": "Wong",
+      "commandType": "otin",
+      "timestamp": "2026-05-27T07:51:32.455Z",
+      "source": "telegram"
+    },
+    {
+      "id": "ot-evt-1779868277079-ovbda1",
+      "nurseName": "Wong",
+      "commandType": "punchout",
+      "timestamp": "2026-05-27T07:51:17.079Z",
+      "source": "telegram"
+    },
+    {
+      "id": "ot-evt-1779868025505-pcg7l1",
+      "nurseName": "Wong",
+      "commandType": "punchin",
+      "timestamp": "2026-05-27T07:47:05.505Z",
+      "source": "telegram"
+    },
+    {
+      "id": "ot-evt-1779867717442-5lyojr",
+      "nurseName": "Wong",
+      "commandType": "otout",
+      "timestamp": "2026-05-27T07:41:57.442Z",
+      "source": "telegram"
+    },
+    {
+      "id": "ot-evt-1779867564704-z3qnub",
+      "nurseName": "Wong",
+      "commandType": "otin",
+      "timestamp": "2026-05-27T07:39:24.704Z",
+      "source": "telegram"
+    },
+    {
+      "id": "ot-evt-1779867551525-aa8ho6",
+      "nurseName": "Wong",
+      "commandType": "punchout",
+      "timestamp": "2026-05-27T07:39:11.525Z",
+      "source": "telegram"
+    },
+    {
+      "id": "ot-evt-1779867524190-pbc5sa",
+      "nurseName": "Wong",
+      "commandType": "punchin",
+      "timestamp": "2026-05-27T07:38:44.190Z",
+      "source": "telegram"
+    },
+    {
+      "id": "ot-evt-1779866911544-mq6qfp",
+      "nurseName": "Wong",
+      "commandType": "otout",
+      "timestamp": "2026-05-27T07:28:31.544Z",
+      "source": "telegram"
+    },
+    {
+      "id": "ot-evt-1779866478191-fqjuup",
+      "nurseName": "Wong",
+      "commandType": "otin",
+      "timestamp": "2026-05-27T07:21:18.191Z",
+      "source": "telegram"
+    },
+    {
+      "id": "ot-evt-1779866466684-bcu5tw",
+      "nurseName": "Wong",
+      "commandType": "punchout",
+      "timestamp": "2026-05-27T07:21:06.684Z",
+      "source": "telegram"
+    },
+    {
+      "id": "ot-evt-1779865765463-4m6ffl",
+      "nurseName": "Wong",
+      "commandType": "punchin",
+      "timestamp": "2026-05-27T07:09:25.463Z",
+      "source": "telegram"
+    },
+    {
+      "id": "ot-evt-1779865670853-5pcv7j",
+      "nurseName": "Wong",
+      "commandType": "otout",
+      "timestamp": "2026-05-27T07:07:50.853Z",
+      "source": "telegram"
+    },
+    {
+      "id": "ot-evt-1779862649588-u75iyn",
+      "nurseName": "Wong",
+      "commandType": "otin",
+      "timestamp": "2026-05-27T06:17:29.588Z",
+      "source": "telegram"
+    },
+    {
+      "id": "ot-evt-1779862616833-akit67",
+      "nurseName": "Wong",
+      "commandType": "punchout",
+      "timestamp": "2026-05-27T06:16:56.833Z",
+      "source": "telegram"
+    },
+    {
+      "id": "ot-evt-1779861110066-z59qva",
+      "nurseName": "Wong",
+      "commandType": "punchin",
+      "timestamp": "2026-05-27T05:51:50.066Z",
+      "source": "telegram"
+    },
+    {
+      "id": "ot-evt-1779784032814-ad0mfe",
+      "nurseName": "Wong",
+      "commandType": "otout",
+      "timestamp": "2026-05-26T08:27:12.814Z",
+      "source": "manual"
+    },
+    {
+      "id": "ot-evt-1779782966823-xxqu7y",
+      "nurseName": "Wong",
+      "commandType": "otin",
+      "timestamp": "2026-05-26T08:09:26.823Z",
+      "source": "manual"
+    },
+    {
+      "id": "ot-evt-1779782961720-2tmc3y",
+      "nurseName": "Wong",
+      "commandType": "punchout",
+      "timestamp": "2026-05-26T08:09:21.720Z",
+      "source": "manual"
+    },
+    {
+      "id": "ot-evt-1779782065211-j8sipe",
+      "nurseName": "Wong",
+      "commandType": "punchin",
+      "timestamp": "2026-05-26T07:54:25.211Z",
+      "source": "manual"
+    }
+  ],
+  "otRecalculationAuditLogs": [
+    {
+      "id": "ot-recalc-1779869382026-culib6",
+      "recordId": "ot-1779868783590",
+      "nurseName": "Wong",
+      "date": "2026-05-27",
+      "old_rate": 17,
+      "new_rate": 17,
+      "old_allowance": 0,
+      "new_allowance": 0,
+      "updated_at": "2026-05-27T08:09:42.026Z"
+    },
+    {
+      "id": "ot-recalc-1779869382026-orhre0",
+      "recordId": "ot-1779868025505",
+      "nurseName": "Wong",
+      "date": "2026-05-27",
+      "old_rate": 17,
+      "new_rate": 17,
+      "old_allowance": 0.34,
+      "new_allowance": 0.34,
+      "updated_at": "2026-05-27T08:09:42.026Z"
+    },
+    {
+      "id": "ot-recalc-1779869382026-2vtqd5",
+      "recordId": "ot-1779867524190",
+      "nurseName": "Wong",
+      "date": "2026-05-27",
+      "old_rate": 17,
+      "new_rate": 17,
+      "old_allowance": 0.68,
+      "new_allowance": 0.68,
+      "updated_at": "2026-05-27T08:09:42.026Z"
+    },
+    {
+      "id": "ot-recalc-1779869382026-do93ak",
+      "recordId": "ot-1779865765463",
+      "nurseName": "Wong",
+      "date": "2026-05-27",
+      "old_rate": 17,
+      "new_rate": 17,
+      "old_allowance": 2.04,
+      "new_allowance": 2.04,
+      "updated_at": "2026-05-27T08:09:42.026Z"
+    },
+    {
+      "id": "ot-recalc-1779869382026-8u9tab",
+      "recordId": "ot-1779861110066",
+      "nurseName": "Wong",
+      "date": "2026-05-27",
+      "old_rate": 17,
+      "new_rate": 17,
+      "old_allowance": 14.28,
+      "new_allowance": 14.28,
+      "updated_at": "2026-05-27T08:09:42.026Z"
+    },
+    {
+      "id": "ot-recalc-1779868168620-nq6gb8",
+      "recordId": "ot-1779868025505",
+      "nurseName": "Wong",
+      "date": "2026-05-27",
+      "old_rate": 17,
+      "new_rate": 17,
+      "old_allowance": 0,
+      "new_allowance": 0,
+      "updated_at": "2026-05-27T07:49:28.619Z"
+    },
+    {
+      "id": "ot-recalc-1779868168620-p2un0k",
+      "recordId": "ot-1779867524190",
+      "nurseName": "Wong",
+      "date": "2026-05-27",
+      "old_rate": 17,
+      "new_rate": 17,
+      "old_allowance": 0.68,
+      "new_allowance": 0.68,
+      "updated_at": "2026-05-27T07:49:28.619Z"
+    },
+    {
+      "id": "ot-recalc-1779868168620-gkb1bp",
+      "recordId": "ot-1779865765463",
+      "nurseName": "Wong",
+      "date": "2026-05-27",
+      "old_rate": 17,
+      "new_rate": 17,
+      "old_allowance": 2.04,
+      "new_allowance": 2.04,
+      "updated_at": "2026-05-27T07:49:28.619Z"
+    },
+    {
+      "id": "ot-recalc-1779868168620-nhhtcx",
+      "recordId": "ot-1779861110066",
+      "nurseName": "Wong",
+      "date": "2026-05-27",
+      "old_rate": 20,
+      "new_rate": 17,
+      "old_allowance": 16.8,
+      "new_allowance": 14.28,
+      "updated_at": "2026-05-27T07:49:28.619Z"
+    }
+  ],
+  "settings": [
+    {
+      "key": "ot_rate_per_hour",
+      "value": "18",
+      "updatedAt": "2026-05-27T08:35:38.188Z"
+    }
+  ],
+  "turningRecords": [
+    {
+      "id": "turn-1780023253150-4gpnwr",
+      "patientName": "Ong Cheng Hua",
+      "room": "106",
+      "turningTime": "2026-05-29T02:54:13.150Z",
+      "position": "right side",
+      "nurseName": "Leong",
+      "recordedAt": "2026-05-29T02:54:13.150Z",
+      "nextTurningDueAt": "2026-05-29T04:54:13.150Z",
+      "status": "done",
+      "source": "frontend",
+      "sourceStatus": "live"
+    },
+    {
+      "id": "turn-1780021188521-cdd1k0",
+      "patientName": "Room 201 Patient",
+      "room": "201",
+      "turningTime": "2026-05-29T02:19:48.521Z",
+      "position": "right side",
+      "nurseName": "TestNurse",
+      "recordedAt": "2026-05-29T02:19:48.521Z",
+      "nextTurningDueAt": "2026-05-29T04:19:48.521Z",
+      "status": "done",
+      "source": "frontend",
+      "sourceStatus": "live"
+    },
+    {
+      "id": "turn-1780021123376-o0ycjq",
+      "patientName": "Room 201 Patient",
+      "room": "201",
+      "turningTime": "2026-05-29T02:18:43.376Z",
+      "position": "left side",
+      "nurseName": "TestNurse",
+      "recordedAt": "2026-05-29T02:18:43.376Z",
+      "nextTurningDueAt": "2026-05-29T04:18:43.376Z",
+      "status": "done",
+      "source": "frontend",
+      "sourceStatus": "live"
+    },
+    {
+      "id": "turn-1779966114721-5pea44",
+      "patientName": "Room 201 Patient",
+      "room": "201",
+      "turningTime": "2026-05-28T11:00:55.878Z",
+      "position": "supine",
+      "nurseName": "Wong",
+      "recordedAt": "2026-05-28T11:00:55.878Z",
+      "nextTurningDueAt": "2026-05-28T13:00:55.878Z",
+      "status": "done",
+      "source": "telegram",
+      "sourceStatus": "live"
+    },
+    {
+      "id": "turn-1779965838744-m8mkk2",
+      "patientName": "Room 201 Patient",
+      "room": "201",
+      "turningTime": "2026-05-28T10:56:45.465Z",
+      "position": "left side",
+      "nurseName": "Wong",
+      "recordedAt": "2026-05-28T10:56:45.465Z",
+      "nextTurningDueAt": "2026-05-28T12:56:45.465Z",
+      "status": "done",
+      "source": "telegram",
+      "sourceStatus": "live"
+    },
+    {
+      "id": "turn-1779958904916-lc63dr",
+      "patientName": "Fung Poh Chai",
+      "room": "201",
+      "turningTime": "2026-05-28T09:01:44.880Z",
+      "position": "left side",
+      "nurseName": "Wong",
+      "recordedAt": "2026-05-28T09:01:44.880Z",
+      "nextTurningDueAt": "2026-05-28T11:01:44.880Z",
+      "status": "done",
+      "source": "telegram",
+      "sourceStatus": "live"
+    },
+    {
+      "id": "turn-1779865639388-k043xr",
+      "patientName": "Fung Poh Chai",
+      "room": "201",
+      "turningTime": "2026-05-27T07:07:17.543Z",
+      "position": "left side",
+      "nurseName": "Wong",
+      "recordedAt": "2026-05-27T07:07:17.543Z",
+      "nextTurningDueAt": "2026-05-27T09:07:17.543Z",
+      "status": "done",
+      "source": "telegram",
+      "sourceStatus": "live"
+    },
+    {
+      "id": "turn-1779864478095-2nn0pl",
+      "patientName": "Fung Poh Chai",
+      "room": "201",
+      "turningTime": "2026-05-27T06:47:58.065Z",
+      "position": "left side",
+      "nurseName": "Wong",
+      "recordedAt": "2026-05-27T06:47:58.066Z",
+      "nextTurningDueAt": "2026-05-27T08:47:58.065Z",
+      "status": "done",
+      "source": "telegram",
+      "sourceStatus": "live"
+    },
+    {
+      "id": "turn-1779864414951-7ysts6",
+      "patientName": "Fung Poh Chai",
+      "room": "201",
+      "turningTime": "2026-05-27T06:46:54.874Z",
+      "position": "left side",
+      "nurseName": "Wong",
+      "recordedAt": "2026-05-27T06:46:54.876Z",
+      "nextTurningDueAt": "2026-05-27T08:46:54.874Z",
+      "status": "done",
+      "source": "telegram",
+      "sourceStatus": "live"
+    },
+    {
+      "id": "turn-1779864228381-051voa",
+      "patientName": "Fung Poh Chai",
+      "room": "201",
+      "turningTime": "2026-05-27T06:43:46.545Z",
+      "position": "left side",
+      "nurseName": "Wong",
+      "recordedAt": "2026-05-27T06:43:46.545Z",
+      "nextTurningDueAt": "2026-05-27T08:43:46.545Z",
+      "status": "done",
+      "source": "telegram",
+      "sourceStatus": "live"
+    },
+    {
+      "id": "turn-1779863373310-wukmvo",
+      "patientName": "Fung Poh Chai",
+      "room": "201",
+      "turningTime": "2026-05-27T06:29:32.697Z",
+      "position": "right side",
+      "nurseName": "Wong",
+      "recordedAt": "2026-05-27T06:29:32.699Z",
+      "nextTurningDueAt": "2026-05-27T08:29:32.697Z",
+      "status": "done",
+      "source": "telegram",
+      "sourceStatus": "live"
+    },
+    {
+      "id": "turn-1779861899914-3ngh5v",
+      "patientName": "Fung Poh Chai",
+      "room": "201",
+      "turningTime": "2026-05-27T06:04:55.848Z",
+      "position": "left side",
+      "nurseName": "Wong",
+      "recordedAt": "2026-05-27T06:04:55.848Z",
+      "nextTurningDueAt": "2026-05-27T08:04:55.848Z",
+      "status": "done",
+      "source": "telegram",
+      "sourceStatus": "live"
+    }
+  ],
+  "dutyRoster": {
+    "dutyRows": [
+      {
+        "id": "shift-morning-a",
+        "shift": "Morning",
+        "timeWindow": "06:30 - 15:30",
+        "ward": "ABCD",
+        "leadNurse": "MS FATIN ",
+        "nurseNames": "YURI ,PRAVIN JITRA",
+        "onDuty": 3,
+        "handoverAt": "13:45"
+      },
+      {
+        "id": "shift-evening-b",
+        "shift": "Evening",
+        "timeWindow": "14:00 - 23:00",
+        "ward": "ABCD",
+        "leadNurse": "Nurse Chan",
+        "nurseNames": "Nurse Chan, Nurse Wong, Nurse Lim",
+        "onDuty": 3,
+        "handoverAt": "21:45"
+      },
+      {
+        "id": "shift-night-c",
+        "shift": "Night",
+        "timeWindow": "23:00 - 07:00",
+        "ward": "ABCD",
+        "leadNurse": "Nurse Patel",
+        "nurseNames": "Nurse Patel, Nurse Ong, Nurse Das",
+        "onDuty": 1,
+        "handoverAt": "05:45"
+      }
+    ],
+    "nurseLeaveList": "Nurse Alicia Tan, Nurse Marcus Lim",
+    "weeklyRoster": [
+      {
+        "day": "Monday",
+        "morning": "Nurse Lee, Nurse Tan",
+        "evening": "Nurse Chan, Nurse Wong",
+        "night": "Nurse Patel, Nurse Ong"
+      },
+      {
+        "day": "Tuesday",
+        "morning": "Nurse Lee, Nurse Kumar",
+        "evening": "Nurse Chan, Nurse Lim",
+        "night": "Nurse Patel, Nurse Das"
+      },
+      {
+        "day": "Wednesday",
+        "morning": "Nurse Lee, Nurse Tan",
+        "evening": "Nurse Chan, Nurse Wong",
+        "night": "Nurse Patel, Nurse Ong"
+      },
+      {
+        "day": "Thursday",
+        "morning": "Nurse Lee, Nurse Kumar",
+        "evening": "Nurse Chan, Nurse Lim",
+        "night": "Nurse Patel, Nurse Das"
+      },
+      {
+        "day": "Friday",
+        "morning": "Nurse Lee, Nurse Tan",
+        "evening": "Nurse Chan, Nurse Wong",
+        "night": "Nurse Patel, Nurse Ong"
+      },
+      {
+        "day": "Saturday",
+        "morning": "Nurse Lee, Nurse Kumar",
+        "evening": "Nurse Chan, Nurse Lim",
+        "night": "Nurse Patel, Nurse Das"
+      },
+      {
+        "day": "Sunday",
+        "morning": "Nurse Lee, Nurse Tan",
+        "evening": "Nurse Chan, Nurse Wong",
+        "night": "Nurse Patel, Nurse Ong"
+      }
+    ],
+    "updatedAt": "2026-05-27T07:33:32.234Z"
+  },
+  "duty_roster_settings": {
+    "dutyRows": [
+      {
+        "id": "shift-morning-a",
+        "shift": "Morning",
+        "timeWindow": "06:30 - 15:30",
+        "ward": "ABCD",
+        "leadNurse": "MS FATIN ",
+        "nurseNames": "YURI ,PRAVIN JITRA",
+        "onDuty": 3,
+        "handoverAt": "13:45"
+      },
+      {
+        "id": "shift-evening-b",
+        "shift": "Evening",
+        "timeWindow": "14:00 - 23:00",
+        "ward": "ABCD",
+        "leadNurse": "Nurse Chan",
+        "nurseNames": "Nurse Chan, Nurse Wong, Nurse Lim",
+        "onDuty": 3,
+        "handoverAt": "21:45"
+      },
+      {
+        "id": "shift-night-c",
+        "shift": "Night",
+        "timeWindow": "23:00 - 07:00",
+        "ward": "ABCD",
+        "leadNurse": "Nurse Patel",
+        "nurseNames": "Nurse Patel, Nurse Ong, Nurse Das",
+        "onDuty": 1,
+        "handoverAt": "05:45"
+      }
+    ],
+    "nurseLeaveList": "Nurse Alicia Tan, Nurse Marcus Lim",
+    "weeklyRoster": [
+      {
+        "day": "Monday",
+        "morning": "Nurse Lee, Nurse Tan",
+        "evening": "Nurse Chan, Nurse Wong",
+        "night": "Nurse Patel, Nurse Ong"
+      },
+      {
+        "day": "Tuesday",
+        "morning": "Nurse Lee, Nurse Kumar",
+        "evening": "Nurse Chan, Nurse Lim",
+        "night": "Nurse Patel, Nurse Das"
+      },
+      {
+        "day": "Wednesday",
+        "morning": "Nurse Lee, Nurse Tan",
+        "evening": "Nurse Chan, Nurse Wong",
+        "night": "Nurse Patel, Nurse Ong"
+      },
+      {
+        "day": "Thursday",
+        "morning": "Nurse Lee, Nurse Kumar",
+        "evening": "Nurse Chan, Nurse Lim",
+        "night": "Nurse Patel, Nurse Das"
+      },
+      {
+        "day": "Friday",
+        "morning": "Nurse Lee, Nurse Tan",
+        "evening": "Nurse Chan, Nurse Wong",
+        "night": "Nurse Patel, Nurse Ong"
+      },
+      {
+        "day": "Saturday",
+        "morning": "Nurse Lee, Nurse Kumar",
+        "evening": "Nurse Chan, Nurse Lim",
+        "night": "Nurse Patel, Nurse Das"
+      },
+      {
+        "day": "Sunday",
+        "morning": "Nurse Lee, Nurse Tan",
+        "evening": "Nurse Chan, Nurse Wong",
+        "night": "Nurse Patel, Nurse Ong"
+      }
+    ],
+    "updatedAt": "2026-05-27T07:33:32.234Z"
+  }
+}

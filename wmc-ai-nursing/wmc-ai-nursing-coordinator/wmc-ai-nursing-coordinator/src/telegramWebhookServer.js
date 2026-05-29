@@ -23,11 +23,15 @@ import {
   initBotAdapter,
   processWebhookUpdate,
   getBotAdapterStatus,
+  getBotAdapterInstance,
 } from './src/bot/webhookAdapter.js'
 import {
   getTodayRecords,
   getMonthlyOtSummary,
+  getOtSheetSyncQueueStatus,
+  retryOtSheetSyncNow,
 } from './src/bot/services/attendanceSheetService.js'
+import { getDutyRosterRowsForDate, runAutoAbsentCheck } from './src/bot/services/dutyRosterAttendanceService.js'
 import {
   getOnDutyToday,
   getOnOtToday,
@@ -510,6 +514,48 @@ app.get('/api/attendance/ot-summary', async (req, res) => {
  */
 app.get('/api/attendance/status', (_req, res) => {
   res.json({ ok: true, ...getBotAdapterStatus() })
+})
+
+app.get('/api/attendance/sync-queue', async (_req, res) => {
+  try {
+    const queue = await getOtSheetSyncQueueStatus()
+    res.json({ ok: true, ...queue })
+  } catch (error) {
+    res.status(500).json({ ok: false, error: String(error?.message || error) })
+  }
+})
+
+app.get('/api/attendance/duty-roster', async (req, res) => {
+  try {
+    const date = String(req.query.date || todayString())
+    const rows = await getDutyRosterRowsForDate(date)
+    res.json({ ok: true, date, rows, count: rows.length })
+  } catch (error) {
+    res.status(500).json({ ok: false, error: String(error?.message || error) })
+  }
+})
+
+app.post('/api/attendance/duty-roster/run-absent-check', async (_req, res) => {
+  try {
+    const bot = getBotAdapterInstance()
+    if (!bot) {
+      res.status(503).json({ ok: false, error: 'Telegram bot is not initialized yet.' })
+      return
+    }
+    await runAutoAbsentCheck(bot)
+    res.json({ ok: true, message: 'Absent check completed.' })
+  } catch (error) {
+    res.status(500).json({ ok: false, error: String(error?.message || error) })
+  }
+})
+
+app.post('/api/attendance/sync-queue/retry', async (_req, res) => {
+  try {
+    const queue = await retryOtSheetSyncNow()
+    res.json({ ok: true, ...queue })
+  } catch (error) {
+    res.status(500).json({ ok: false, error: String(error?.message || error) })
+  }
 })
 
 // ── Command Workflow API endpoints ───────────────────────────────────────────

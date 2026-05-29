@@ -252,7 +252,7 @@ function buildAlertRows() {
   })
 }
 
-function buildSimulatedRows() {
+function buildSimulatedRows(): WhatsAppAlert[] {
   return simulatedTestPatients.map((entry, index) => ({
     id: `sim-${index + 1}`,
     patientId: `sim-${index + 1}`,

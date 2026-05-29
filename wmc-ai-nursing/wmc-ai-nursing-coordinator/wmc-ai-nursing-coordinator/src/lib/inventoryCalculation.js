@@ -181,6 +181,14 @@ export function parseNlpInventory(text) {
     ?? lower.match(/\b(?:qty|quantity)\s*[:=]?\s*(\d+)\b/i)
 
   let qty = unitQtyMatch ? Number(unitQtyMatch[1]) : null
+  let unit = null
+  if (unitQtyMatch && unitQtyMatch[0]) {
+    const token = String(unitQtyMatch[0]).toLowerCase()
+    if (/\b(scoops?|scoop)\b/.test(token)) unit = 'scoops'
+    else if (/\b(packs?|pack)\b/.test(token)) unit = 'packs'
+    else if (/\b(pcs|pieces?|piece)\b/.test(token)) unit = 'pcs'
+    else if (/\b(units?|unit)\b/.test(token)) unit = 'units'
+  }
 
   if (qty == null) {
     const numbers  = lower.match(/\b(\d+)\b/g) ?? []
@@ -210,7 +218,7 @@ export function parseNlpInventory(text) {
     ? nameWords.map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
     : null
 
-  return { room, nurseName: parsedNurse, patientName, itemKey, size, qty }
+  return { room, nurseName: parsedNurse, patientName, itemKey, size, qty, unit }
 }
 
 // ── Stock balance ─────────────────────────────────────────────────────────────

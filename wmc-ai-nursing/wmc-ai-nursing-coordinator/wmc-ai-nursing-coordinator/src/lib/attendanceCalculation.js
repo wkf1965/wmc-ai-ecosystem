@@ -82,21 +82,58 @@ export function formatMonthLabel(ym) {
 // ── Calculation ───────────────────────────────────────────────────────────────
 
 /**
+ * Canonical OT calculation.
+ *
+ * Rule (must match across all modules):
+ *   1. Compute rawMinutes from start → end.
+ *   2. Round OT hours to 2 dp.
+ *   3. allowance = roundedHours × rate, rounded to 2 dp.
+ *
+ * Accepts either:
+ *   - HH:mm strings  (Telegram bot, "16:19")
+ *   - ISO timestamps (backend, "2026-05-27T08:19:34.123Z")
+ *
+ * @param {string} startTime  HH:mm or ISO
+ * @param {string} endTime    HH:mm or ISO
+ * @param {number} rate       RM per hour
+ * @returns {{ rawMinutes: number, otHoursRounded: number, allowanceRounded: number }}
+ */
+export function calculateOT(startTime, endTime, rate) {
+  const s = String(startTime || '').trim()
+  const e = String(endTime   || '').trim()
+  let rawMinutes = 0
+
+  if (/^\d{1,2}:\d{2}$/.test(s)) {
+    // HH:mm format
+    let a = toMinutes(s)
+    let b = toMinutes(e)
+    if (a >= 0 && b >= 0) {
+      if (b < a) b += 24 * 60   // midnight crossover
+      rawMinutes = Math.max(0, b - a)
+    }
+  } else {
+    // ISO / date-string format
+    const ms = new Date(e).getTime() - new Date(s).getTime()
+    if (!Number.isNaN(ms)) rawMinutes = Math.max(0, ms / 60000)
+  }
+
+  const otHoursRounded  = Math.round((rawMinutes / 60) * 100) / 100
+  const allowanceRounded = Math.round(otHoursRounded * (Number(rate) || 0) * 100) / 100
+  return { rawMinutes, otHoursRounded, allowanceRounded }
+}
+
+/**
  * OT hours = ot_out − ot_in.  Handles midnight crossover.
  * Returns 0 if either time is missing or ot_out ≤ ot_in after crossover.
  */
 export function computeOtHours(otIn, otOut) {
-  let a = toMinutes(otIn)
-  let b = toMinutes(otOut)
-  if (a < 0 || b < 0) return 0
-  if (b < a) b += 24 * 60    // midnight crossover
-  const diff = b - a
-  return diff > 0 ? Math.round((diff / 60) * 100) / 100 : 0
+  return calculateOT(otIn, otOut, 0).otHoursRounded
 }
 
-/** OT amount = ot_hours × ot_rate */
+/** OT amount = ot_hours × ot_rate  (rounds hours first, then multiplies) */
 export function computeOtAmount(otHours, otRate = DEFAULT_OT_RATE) {
-  return Math.round(otHours * otRate * 100) / 100
+  const h = Math.round(Number(otHours) * 100) / 100
+  return Math.round(h * otRate * 100) / 100
 }
 
 /** Worked hours = normal_punch_out − normal_punch_in */

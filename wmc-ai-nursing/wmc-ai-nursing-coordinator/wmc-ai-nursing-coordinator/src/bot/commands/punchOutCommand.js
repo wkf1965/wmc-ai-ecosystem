@@ -7,12 +7,13 @@
  *
  * After punch-out:
  *   - Saves partial record (normal duty only) to Google Sheet.
- *   - Reminds nurse they can start OT with /ot_in if needed.
+ *   - Reminds nurse they can start OT with /otin if needed.
  */
 
 import { log }                    from '../utils/logger.js'
 import { getState, patchState }   from '../state/activePunchMap.js'
 import { upsertAttendanceRecord } from '../services/attendanceSheetService.js'
+import { syncDutyRosterFromPunchOut } from '../services/dutyRosterAttendanceService.js'
 import {
   buildAttendanceRecord,
   fmtPunchOut,
@@ -20,6 +21,44 @@ import {
   todayString,
   RECORD_STATUS,
 } from '../../lib/attendanceCalculation.js'
+
+const NURSING_WEB_BASE_URL = (process.env.WMC_NURSING_WEB_URL ?? 'http://localhost:3000').replace(/\/$/, '')
+
+async function syncOtRecordToNursingWeb(action, nurseName) {
+  try {
+    const response = await fetch(`${NURSING_WEB_BASE_URL}/api/ot-records`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ action, nurseName, source: 'telegram' }),
+    })
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => '')
+      log.warn(`[ot-sync] punch out sync failed: ${errorText.slice(0, 120)}`)
+      return
+    }
+    log.info(`[ot-sync] punch out synced: ${nurseName}`)
+  } catch (error) {
+    log.warn('[ot-sync] punch out sync error:', error?.message ?? String(error))
+  }
+}
+
+async function setOtSyncStatus(nurseName, date, syncStatus, syncError = null) {
+  try {
+    await fetch(`${NURSING_WEB_BASE_URL}/api/ot-records`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        action: 'set_sync_status',
+        nurseName,
+        recordDate: date,
+        syncStatus,
+        syncError,
+      }),
+    })
+  } catch (error) {
+    log.warn('[ot-sync] set sync status error:', error?.message ?? String(error))
+  }
+}
 
 export function registerPunchOutCommand(bot) {
   bot.onText(/^\/punchout\b/i, async (msg) => {
@@ -47,7 +86,7 @@ export function registerPunchOutCommand(bot) {
     // ── Prevent double punch-out ─────────────────────────────────────────
     if (existing.normal_punch_out) {
       await bot.sendMessage(chatId,
-        `⚠️ Already punched out at ${existing.normal_punch_out}.\n\nIf you want to log overtime, use /ot_in`,
+        `⚠️ Already punched out at ${existing.normal_punch_out}.\n\nIf you want to log overtime, use /otin`,
       )
       return
     }
@@ -55,6 +94,9 @@ export function registerPunchOutCommand(bot) {
     // ── Record punch-out ─────────────────────────────────────────────────
     const punch_out = nowHhmm()
     patchState(chatId, { normal_punch_out: punch_out })
+
+    // Always sync local backend first so frontend updates even if sheet fails.
+    await syncOtRecordToNursingWeb('punch_out', existing.staff_name)
 
     // Build + save partial record to Google Sheet
     const record = buildAttendanceRecord({
@@ -64,8 +106,21 @@ export function registerPunchOutCommand(bot) {
 
     try {
       await upsertAttendanceRecord(record)
+      await setOtSyncStatus(existing.staff_name, existing.date, 'synced', null)
     } catch (err) {
+      await setOtSyncStatus(existing.staff_name, existing.date, 'pending_sync', err?.message ?? String(err))
       log.warn('[punchout] sheet save failed:', err?.message)
+    }
+    try {
+      await syncDutyRosterFromPunchOut({
+        date: existing.date,
+        staffName: existing.staff_name,
+        punchIn: existing.normal_punch_in,
+        punchOut: punch_out,
+        otHours: 0,
+      })
+    } catch (error) {
+      log.warn('[punchout] duty roster sync failed:', error?.message ?? String(error))
     }
 
     log.info(`[punchout] ${existing.staff_name} at ${punch_out}`)
