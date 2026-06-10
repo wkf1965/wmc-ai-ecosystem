@@ -5,56 +5,100 @@
       "itemName": "Pampers",
       "quantity": 0,
       "unit": "packs",
+      "rate": 17,
       "personInCharge": "TestNurse",
-      "lastUpdatedAt": "2026-05-29T02:20:09.066Z"
+      "lastUpdatedAt": "2026-05-29T02:20:09.066Z",
+      "rateUpdatedAt": "2026-05-29T08:56:00.685Z"
     },
     {
       "id": "wet-tissu",
       "itemName": "Wet tissu",
       "quantity": 0,
       "unit": "packs",
+      "rate": 9,
       "personInCharge": "",
-      "lastUpdatedAt": ""
+      "lastUpdatedAt": "",
+      "rateUpdatedAt": "2026-05-29T08:56:00.718Z"
     },
     {
       "id": "ryles-tube",
       "itemName": "Ryles tube",
       "quantity": 0,
       "unit": "pcs",
+      "rate": 55,
       "personInCharge": "",
-      "lastUpdatedAt": ""
+      "lastUpdatedAt": "",
+      "rateUpdatedAt": "2026-05-29T08:56:00.744Z"
     },
     {
       "id": "cbd-tube",
       "itemName": "CBD tube",
       "quantity": 0,
       "unit": "pcs",
+      "rate": 65,
       "personInCharge": "",
-      "lastUpdatedAt": ""
+      "lastUpdatedAt": "",
+      "rateUpdatedAt": "2026-05-29T08:56:00.769Z"
     },
     {
       "id": "prime-edema",
       "itemName": "Prime edema",
       "quantity": 0,
       "unit": "units",
+      "rate": 2,
       "personInCharge": "",
-      "lastUpdatedAt": ""
+      "lastUpdatedAt": "",
+      "rateUpdatedAt": "2026-05-29T08:56:00.794Z"
     },
     {
       "id": "milk-powder",
       "itemName": "Milk powder",
       "quantity": 0,
       "unit": "scoops",
+      "rate": 30,
       "personInCharge": "",
-      "lastUpdatedAt": ""
+      "lastUpdatedAt": "",
+      "rateUpdatedAt": "2026-05-29T08:56:00.817Z"
     },
     {
       "id": "gloves",
       "itemName": "Gloves",
       "quantity": 0,
       "unit": "pcs",
+      "rate": 20,
       "personInCharge": "",
-      "lastUpdatedAt": ""
+      "lastUpdatedAt": "",
+      "rateUpdatedAt": "2026-05-29T08:56:00.839Z"
+    },
+    {
+      "id": "underpad",
+      "itemName": "Underpad",
+      "quantity": 0,
+      "unit": "packs",
+      "rate": 1.5,
+      "personInCharge": "",
+      "lastUpdatedAt": "",
+      "rateUpdatedAt": "2026-05-29T08:56:00.861Z"
+    },
+    {
+      "id": "syringe",
+      "itemName": "Syringe",
+      "quantity": 0,
+      "unit": "pcs",
+      "rate": 1,
+      "personInCharge": "",
+      "lastUpdatedAt": "",
+      "rateUpdatedAt": "2026-05-29T08:56:00.887Z"
+    },
+    {
+      "id": "feeding-set",
+      "itemName": "Feeding Set",
+      "quantity": 0,
+      "unit": "pcs",
+      "rate": 6,
+      "personInCharge": "",
+      "lastUpdatedAt": "",
+      "rateUpdatedAt": "2026-05-29T08:56:00.906Z"
     }
   ],
   "inventoryEvents": [
@@ -64,6 +108,7 @@
       "itemName": "Pampers",
       "quantityChange": -2,
       "unit": "packs",
+      "unitRate": 2.5,
       "room": "201",
       "patientName": "",
       "personInCharge": "TestNurse",
@@ -78,6 +123,7 @@
       "itemName": "Pampers",
       "quantityChange": -1,
       "unit": "pcs",
+      "unitRate": 2.5,
       "room": "201",
       "patientName": "Fung Poh Chai",
       "personInCharge": "Wong",
@@ -92,6 +138,7 @@
       "itemName": "Pampers",
       "quantityChange": -1,
       "unit": "pcs",
+      "unitRate": 2.5,
       "room": "A201",
       "patientName": "Fung Poh Chai",
       "personInCharge": "Wong",
@@ -106,6 +153,7 @@
       "itemName": "Pampers",
       "quantityChange": -2,
       "unit": "packs",
+      "unitRate": 2.5,
       "room": "",
       "patientName": "",
       "personInCharge": "Wong",
@@ -120,6 +168,7 @@
       "itemName": "Pampers",
       "quantityChange": -1,
       "unit": "packs",
+      "unitRate": 2.5,
       "room": "",
       "patientName": "",
       "personInCharge": "Wong",
@@ -183,14 +232,14 @@
       "nurseName": "Wong",
       "date": "2026-05-28",
       "dutyPunchInAt": "2026-05-28T08:50:48.656Z",
-      "dutyPunchOutAt": null,
-      "otPunchInAt": null,
+      "dutyPunchOutAt": "2026-05-29T04:38:40.689Z",
+      "otPunchInAt": "2026-05-29T04:39:11.732Z",
       "otPunchOutAt": null,
-      "normalHours": 0,
+      "normalHours": 8,
       "otHours": 0,
       "otRate": 18,
       "totalOtAllowance": 0,
-      "status": "on_duty",
+      "status": "ot_active",
       "approvalStatus": "pending",
       "approvedAt": null,
       "approvedBy": null,
@@ -200,7 +249,7 @@
       "source": "telegram",
       "syncStatus": "pending_sync",
       "syncError": null,
-      "lastSyncAttemptAt": null
+      "lastSyncAttemptAt": "2026-05-29T04:39:11.732Z"
     },
     {
       "id": "ot-1779872099056",
@@ -492,6 +541,20 @@
     }
   ],
   "otPunchEvents": [
+    {
+      "id": "ot-evt-1780029551732-rhfrqt",
+      "nurseName": "Wong",
+      "commandType": "otin",
+      "timestamp": "2026-05-29T04:39:11.732Z",
+      "source": "telegram"
+    },
+    {
+      "id": "ot-evt-1780029520690-njyiaa",
+      "nurseName": "Wong",
+      "commandType": "punchout",
+      "timestamp": "2026-05-29T04:38:40.690Z",
+      "source": "telegram"
+    },
     {
       "id": "ot-evt-1780020562912-tv9sh1",
       "nurseName": "Fatin",
@@ -939,6 +1002,19 @@
   ],
   "turningRecords": [
     {
+      "id": "turn-1780029640580-097hha",
+      "patientName": "Fung Poh Chai",
+      "room": "201",
+      "turningTime": "2026-05-29T04:40:38.985Z",
+      "position": "supine",
+      "nurseName": "Wong",
+      "recordedAt": "2026-05-29T04:40:38.985Z",
+      "nextTurningDueAt": "2026-05-29T06:40:38.985Z",
+      "status": "done",
+      "source": "telegram",
+      "sourceStatus": "live"
+    },
+    {
       "id": "turn-1780023253150-4gpnwr",
       "patientName": "Ong Cheng Hua",
       "room": "106",
@@ -1093,6 +1169,49 @@
       "status": "done",
       "source": "telegram",
       "sourceStatus": "live"
+    }
+  ],
+  "nursingServices": [
+    {
+      "id": "svc-1780043428794-lw0nz0",
+      "serviceId": "feeding-tube-change",
+      "serviceName": "Feeding tube change",
+      "patientName": "Fung Poh Chai",
+      "room": "201",
+      "nurseName": "Wong",
+      "recordedAt": "2026-05-29T08:30:28.744Z",
+      "quantity": 1,
+      "unitRate": 50,
+      "totalAmount": 50,
+      "remarks": "",
+      "status": "completed",
+      "source": "telegram"
+    }
+  ],
+  "nursingServiceRates": [
+    {
+      "id": "wound-dressing",
+      "serviceName": "Wound dressing",
+      "rate": 30,
+      "updatedAt": "2026-05-29T09:07:08.325Z"
+    },
+    {
+      "id": "catheter-change",
+      "serviceName": "Urinary catheter change",
+      "rate": 86.8,
+      "updatedAt": "2026-05-29T09:07:08.360Z"
+    },
+    {
+      "id": "feeding-tube-change",
+      "serviceName": "Feeding tube change",
+      "rate": 55,
+      "updatedAt": "2026-05-29T09:07:08.389Z"
+    },
+    {
+      "id": "other",
+      "serviceName": "Other nursing procedure",
+      "rate": 0,
+      "updatedAt": "2026-05-29T09:07:08.416Z"
     }
   ],
   "dutyRoster": {

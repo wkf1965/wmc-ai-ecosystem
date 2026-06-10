@@ -24,6 +24,7 @@ import {
 } from "lucide-react"
 import { analyzePatientRisk, riskSeverity, type PatientRiskProfile } from "../../lib/aiRiskDetection"
 import { CLINICAL_DATA_UPDATE_EVENT, listPatients, syncPatientsFromTelegramAdmissions } from "../../lib/patientManagement"
+import { listNotes } from "../../lib/nursingNotes"
 import {
   escalationSeverityTone,
   escalationStatusLabel,
@@ -31,40 +32,43 @@ import {
   listEscalations,
   type EscalationRecord,
 } from "../../lib/aiEscalations"
+import RiskBrainTester from "../../components/RiskBrainTester"
 
+// Initial placeholders only. Every value + trend is recomputed from live
+// records by buildKpiRows() on mount and on each data update — no mock numbers.
 const kpiCardBlueprints = [
   {
     title: "Residents in care",
-    value: "128",
-    trend: "+2.1% this week",
+    value: "—",
+    trend: "from patient records",
     tone: "emerald",
     icon: Users,
   },
   {
     title: "Nursing notes (24h)",
-    value: "47",
-    trend: "98% completed",
+    value: "—",
+    trend: "last 24 hours",
     tone: "sky",
     icon: ShieldCheck,
   },
   {
     title: "AI watchlist",
-    value: "9",
-    trend: "4 high severity",
+    value: "—",
+    trend: "high severity",
     tone: "amber",
     icon: AlertTriangle,
   },
   {
     title: "Immediate escalations",
-    value: "3",
+    value: "—",
     trend: "requires nurse review",
     tone: "rose",
     icon: ShieldX,
   },
   {
     title: "Critical AI escalations",
-    value: "0",
-    trend: "simulation mode active",
+    value: "—",
+    trend: "live monitoring",
     tone: "rose",
     icon: AlertTriangle,
   },
@@ -162,6 +166,42 @@ type ClinicalAlertRow = {
   resolved: boolean
 }
 
+type InventoryItemRow = {
+  id: string
+  itemName: string
+  quantity: number
+  unit: string
+  rate: number
+}
+
+type InventoryRecordRow = {
+  id: string
+  itemId: string
+  itemName: string
+  quantityChange: number
+  unitRate: number
+  patientName: string
+  room: string
+  personInCharge: string
+  actionType: string
+  recordedAt: string
+}
+
+type NursingServiceRow = {
+  id: string
+  serviceId: string
+  serviceName: string
+  patientName: string
+  room: string
+  nurseName: string
+  recordedAt: string
+  quantity: number
+  unitRate: number
+  totalAmount: number
+  remarks: string
+  status: "pending" | "completed" | "billed"
+}
+
 type DashboardPatientRow = {
   patient: string
   room: string
@@ -230,14 +270,53 @@ function buildCriticalEscalations() {
 }
 
 function buildKpiRows(patients: DashboardPatientRow[], escalations: DashboardEscalation[]) {
+  // ── Residents in care: live patient count ─────────────────────────────────
+  const residentCount = patients.length
+
+  // ── Nursing notes (24h): count notes recorded in the last 24 hours ────────
+  const allNotes = listNotes()
+  const since = Date.now() - 24 * 60 * 60 * 1000
+  const notes24h = allNotes.filter((note) => {
+    const ts = new Date(note.recordedAt || note.date).getTime()
+    return Number.isFinite(ts) && ts >= since
+  }).length
+
+  // ── AI risk metrics derived from live patient risk scoring ────────────────
   const highRiskCount = patients.filter((person) => person.severity === "orange" || person.severity === "red").length
   const redRiskCount = patients.filter((person) => person.severity === "red").length
   const criticalEscalationCount = escalations.length
+
   return kpiCardBlueprints.map((card) => {
-    if (card.title === "AI watchlist") return { ...card, value: String(highRiskCount) }
-    if (card.title === "Immediate escalations") return { ...card, value: String(redRiskCount) }
-    if (card.title === "Critical AI escalations") return { ...card, value: String(criticalEscalationCount) }
-    return card
+    switch (card.title) {
+      case "Residents in care":
+        return {
+          ...card,
+          value: String(residentCount),
+          trend: residentCount === 1 ? "1 active resident" : `${residentCount} active residents`,
+        }
+      case "Nursing notes (24h)":
+        return {
+          ...card,
+          value: String(notes24h),
+          trend: `${allNotes.length} total on record`,
+        }
+      case "AI watchlist":
+        return {
+          ...card,
+          value: String(highRiskCount),
+          trend: `${redRiskCount} high severity`,
+        }
+      case "Immediate escalations":
+        return { ...card, value: String(redRiskCount), trend: "requires nurse review" }
+      case "Critical AI escalations":
+        return {
+          ...card,
+          value: String(criticalEscalationCount),
+          trend: criticalEscalationCount > 0 ? "action required" : "none active",
+        }
+      default:
+        return card
+    }
   })
 }
 
@@ -252,6 +331,52 @@ export default function DashboardPage() {
   const [vitalsRows, setVitalsRows] = useState<VitalsRow[]>([])
   const [clinicalAlerts, setClinicalAlerts] = useState<ClinicalAlertRow[]>([])
   const [resolvingAlertId, setResolvingAlertId] = useState<string | null>(null)
+  const [inventoryItems, setInventoryItems] = useState<InventoryItemRow[]>([])
+  const [inventoryRecords, setInventoryRecords] = useState<InventoryRecordRow[]>([])
+  const [nursingServices, setNursingServices] = useState<NursingServiceRow[]>([])
+
+  useEffect(() => {
+    let mounted = true
+    const loadInventory = async () => {
+      try {
+        const res = await fetch("/api/inventory", { cache: "no-store" })
+        const json = await res.json().catch(() => null)
+        if (mounted && json?.ok && json?.data) {
+          setInventoryItems(Array.isArray(json.data.inventory) ? json.data.inventory : [])
+          setInventoryRecords(Array.isArray(json.data.records) ? json.data.records : [])
+        }
+      } catch {
+        // ignore
+      }
+    }
+    void loadInventory()
+    const timer = window.setInterval(loadInventory, 20000)
+    return () => {
+      mounted = false
+      window.clearInterval(timer)
+    }
+  }, [])
+
+  useEffect(() => {
+    let mounted = true
+    const loadNursingServices = async () => {
+      try {
+        const res = await fetch("/api/nursing-services", { cache: "no-store" })
+        const json = await res.json().catch(() => null)
+        if (mounted && json?.ok && json?.data) {
+          setNursingServices(Array.isArray(json.data.records) ? json.data.records : [])
+        }
+      } catch {
+        // ignore
+      }
+    }
+    void loadNursingServices()
+    const timer = window.setInterval(loadNursingServices, 20000)
+    return () => {
+      mounted = false
+      window.clearInterval(timer)
+    }
+  }, [])
 
   useEffect(() => {
     let mounted = true
@@ -313,6 +438,69 @@ export default function DashboardPage() {
 
   const activeClinicalAlerts = clinicalAlerts.filter((a) => !a.resolved)
   const criticalClinicalAlerts = activeClinicalAlerts.filter((a) => a.severity === "CRITICAL")
+
+  const inventoryToday = inventoryRecords.filter((r) => {
+    if (r.actionType === "added" || Number(r.quantityChange) >= 0) return false
+    const d = new Date(r.recordedAt)
+    if (Number.isNaN(d.getTime())) return false
+    const now = new Date()
+    return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate()
+  })
+  const inventoryUsedTodayUnits = inventoryToday.reduce((s, r) => s + Math.abs(r.quantityChange), 0)
+  const inventoryLowStock = inventoryItems.filter((i) => i.quantity <= 5)
+
+  const isSameDay = (value: string) => {
+    const d = new Date(value)
+    if (Number.isNaN(d.getTime())) return false
+    const now = new Date()
+    return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate()
+  }
+  const isSameMonth = (value: string) => {
+    const d = new Date(value)
+    if (Number.isNaN(d.getTime())) return false
+    const now = new Date()
+    return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth()
+  }
+  const rm = (value: number) => `RM${(Number(value) || 0).toFixed(2)}`
+
+  const servicesToday = nursingServices.filter((r) => isSameDay(r.recordedAt))
+  const servicesTodayCharges = servicesToday.reduce((s, r) => s + (Number(r.totalAmount) || 0), 0)
+  const servicesMonthCharges = nursingServices
+    .filter((r) => isSameMonth(r.recordedAt))
+    .reduce((s, r) => s + (Number(r.totalAmount) || 0), 0)
+
+  // Patient billing — monthly bill = inventory charges (units × snapshot rate) + nursing service charges.
+  const patientBilling = (() => {
+    const map = new Map<
+      string,
+      { patient: string; room: string; serviceCharges: number; serviceCount: number; inventoryCharges: number }
+    >()
+    const keyOf = (patient: string) => (patient || "").trim().toLowerCase() || "(unspecified)"
+    for (const r of nursingServices) {
+      if (!isSameMonth(r.recordedAt)) continue
+      const patient = (r.patientName || "").trim() || "(unspecified)"
+      const k = keyOf(patient)
+      const cur = map.get(k) || { patient, room: r.room || "-", serviceCharges: 0, serviceCount: 0, inventoryCharges: 0 }
+      cur.serviceCharges += Number(r.totalAmount) || 0
+      cur.serviceCount += 1
+      if (!cur.room || cur.room === "-") cur.room = r.room || "-"
+      map.set(k, cur)
+    }
+    for (const r of inventoryRecords) {
+      if (r.actionType === "added" || Number(r.quantityChange) >= 0) continue
+      if (!isSameMonth(r.recordedAt)) continue
+      const patient = (r.patientName || "").trim()
+      if (!patient) continue
+      const k = keyOf(patient)
+      const cur = map.get(k) || { patient, room: r.room || "-", serviceCharges: 0, serviceCount: 0, inventoryCharges: 0 }
+      cur.inventoryCharges += Math.abs(Number(r.quantityChange) || 0) * (Number(r.unitRate) || 0)
+      if (!cur.room || cur.room === "-") cur.room = r.room || "-"
+      map.set(k, cur)
+    }
+    return Array.from(map.values())
+      .map((row) => ({ ...row, total: Math.round((row.serviceCharges + row.inventoryCharges) * 100) / 100 }))
+      .sort((a, b) => b.total - a.total)
+  })()
 
   useEffect(() => {
     let mounted = true
@@ -630,6 +818,179 @@ export default function DashboardPage() {
             </article>
           </section>
 
+          <section className='mt-6'>
+            <article className='panel-card'>
+              <header className='mb-4 flex flex-wrap items-center justify-between gap-2'>
+                <div>
+                  <h2 className='text-lg font-semibold text-slate-900'>Inventory usage</h2>
+                  <p className='text-sm text-slate-500'>Live consumption from Nurse Mode and Telegram</p>
+                </div>
+                <div className='flex items-center gap-2'>
+                  {inventoryLowStock.length > 0 ? (
+                    <span className='rounded-full bg-rose-100 px-3 py-1 text-xs font-bold text-rose-700'>
+                      {inventoryLowStock.length} low stock
+                    </span>
+                  ) : null}
+                  <Link href='/rate-settings' className='metric-chip'>
+                    Rate setup
+                  </Link>
+                  <Link href='/inventory' className='metric-chip'>
+                    Manage
+                  </Link>
+                </div>
+              </header>
+
+              <div className='mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4'>
+                <div className='rounded-xl bg-amber-50 p-3'>
+                  <p className='text-2xl font-bold text-amber-700'>{inventoryUsedTodayUnits}</p>
+                  <p className='text-xs font-semibold text-amber-700'>Units used today</p>
+                </div>
+                <div className='rounded-xl bg-slate-50 p-3'>
+                  <p className='text-2xl font-bold text-slate-900'>{inventoryToday.length}</p>
+                  <p className='text-xs font-semibold text-slate-500'>Usage events today</p>
+                </div>
+                <div className='rounded-xl bg-slate-50 p-3'>
+                  <p className='text-2xl font-bold text-slate-900'>{inventoryItems.length}</p>
+                  <p className='text-xs font-semibold text-slate-500'>Tracked items</p>
+                </div>
+                <div className='rounded-xl bg-rose-50 p-3'>
+                  <p className='text-2xl font-bold text-rose-700'>{inventoryLowStock.length}</p>
+                  <p className='text-xs font-semibold text-rose-700'>Low stock (≤5)</p>
+                </div>
+              </div>
+
+              <div className='grid gap-2 sm:grid-cols-3 lg:grid-cols-4'>
+                {inventoryItems.map((it) => {
+                  const low = it.quantity <= 5
+                  return (
+                    <div
+                      key={it.id}
+                      className={`rounded-xl border p-3 ${low ? "border-rose-200 bg-rose-50" : "border-slate-200 bg-white"}`}
+                    >
+                      <p className='text-xs font-semibold text-slate-500'>{it.itemName}</p>
+                      <p className={`mt-0.5 text-xl font-bold ${low ? "text-rose-700" : "text-slate-900"}`}>
+                        {it.quantity}{" "}
+                        <span className='text-xs font-medium text-slate-400'>{it.unit}</span>
+                      </p>
+                    </div>
+                  )
+                })}
+                {inventoryItems.length === 0 ? (
+                  <p className='text-sm text-slate-500'>No inventory items yet.</p>
+                ) : null}
+              </div>
+            </article>
+          </section>
+
+          <section className='mt-6'>
+            <article className='panel-card'>
+              <header className='mb-4 flex flex-wrap items-center justify-between gap-2'>
+                <div>
+                  <h2 className='text-lg font-semibold text-slate-900'>Nursing services &amp; billing</h2>
+                  <p className='text-sm text-slate-500'>Chargeable procedures from Nurse Mode and Telegram</p>
+                </div>
+                <div className='flex items-center gap-2'>
+                  <Link href='/rate-settings' className='metric-chip'>
+                    Rate setup
+                  </Link>
+                </div>
+              </header>
+
+              <div className='mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4'>
+                <div className='rounded-xl bg-cyan-50 p-3'>
+                  <p className='text-2xl font-bold text-cyan-700'>{servicesToday.length}</p>
+                  <p className='text-xs font-semibold text-cyan-700'>Services today</p>
+                </div>
+                <div className='rounded-xl bg-cyan-50 p-3'>
+                  <p className='text-2xl font-bold text-cyan-700'>{rm(servicesTodayCharges)}</p>
+                  <p className='text-xs font-semibold text-cyan-700'>Charges today</p>
+                </div>
+                <div className='rounded-xl bg-sky-50 p-3'>
+                  <p className='text-2xl font-bold text-sky-700'>{rm(servicesMonthCharges)}</p>
+                  <p className='text-xs font-semibold text-sky-700'>Monthly charges</p>
+                </div>
+                <div className='rounded-xl bg-slate-50 p-3'>
+                  <p className='text-2xl font-bold text-slate-900'>{patientBilling.length}</p>
+                  <p className='text-xs font-semibold text-slate-500'>Patients billed (month)</p>
+                </div>
+              </div>
+
+              <div className='grid gap-6 lg:grid-cols-2'>
+                <div>
+                  <h3 className='mb-2 text-sm font-semibold text-slate-700'>Recent services</h3>
+                  <div className='overflow-x-auto'>
+                    <table className='w-full min-w-[420px] text-sm'>
+                      <thead>
+                        <tr className='border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-500'>
+                          <th className='px-2 py-2 font-semibold'>Service</th>
+                          <th className='px-2 py-2 font-semibold'>Patient</th>
+                          <th className='px-2 py-2 font-semibold'>Room</th>
+                          <th className='px-2 py-2 font-semibold'>Amount</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {nursingServices.slice(0, 8).map((r) => (
+                          <tr key={r.id} className='border-b border-slate-100 text-slate-700'>
+                            <td className='px-2 py-2 font-medium text-slate-900'>{r.serviceName}</td>
+                            <td className='px-2 py-2'>{r.patientName || "-"}</td>
+                            <td className='px-2 py-2'>{r.room || "-"}</td>
+                            <td className='px-2 py-2 font-semibold'>{rm(r.totalAmount)}</td>
+                          </tr>
+                        ))}
+                        {nursingServices.length === 0 ? (
+                          <tr>
+                            <td colSpan={4} className='px-2 py-6 text-center text-sm text-slate-500'>
+                              No nursing service charges yet.
+                            </td>
+                          </tr>
+                        ) : null}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className='mb-2 text-sm font-semibold text-slate-700'>Monthly patient bill (this month)</h3>
+                  <div className='overflow-x-auto'>
+                    <table className='w-full min-w-[460px] text-sm'>
+                      <thead>
+                        <tr className='border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-500'>
+                          <th className='px-2 py-2 font-semibold'>Patient</th>
+                          <th className='px-2 py-2 font-semibold'>Room</th>
+                          <th className='px-2 py-2 font-semibold'>Inventory</th>
+                          <th className='px-2 py-2 font-semibold'>Services</th>
+                          <th className='px-2 py-2 font-semibold'>Total bill</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {patientBilling.slice(0, 8).map((r) => (
+                          <tr key={r.patient} className='border-b border-slate-100 text-slate-700'>
+                            <td className='px-2 py-2 font-medium text-slate-900'>{r.patient}</td>
+                            <td className='px-2 py-2'>{r.room}</td>
+                            <td className='px-2 py-2'>{rm(r.inventoryCharges)}</td>
+                            <td className='px-2 py-2'>{rm(r.serviceCharges)}</td>
+                            <td className='px-2 py-2 font-semibold text-slate-900'>{rm(r.total)}</td>
+                          </tr>
+                        ))}
+                        {patientBilling.length === 0 ? (
+                          <tr>
+                            <td colSpan={5} className='px-2 py-6 text-center text-sm text-slate-500'>
+                              No patient charges this month.
+                            </td>
+                          </tr>
+                        ) : null}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </article>
+          </section>
+
+          <section className='mt-6'>
+            <RiskBrainTester />
+          </section>
+
           <section className='mt-6 grid gap-6 lg:grid-cols-5'>
             <article className='panel-card lg:col-span-3'>
               <header className='mb-4 flex items-center justify-between'>
@@ -637,7 +998,7 @@ export default function DashboardPage() {
                   <h2 className='text-lg font-semibold text-slate-900'>AI risk alerts</h2>
                   <p className='text-sm text-slate-500'>Color-coded cards from nursing-note risk scoring</p>
                 </div>
-                <span className='metric-chip'>Last sync 08:42</span>
+                <span className='metric-chip'>{lastSyncAt ? `Last sync ${lastSyncAt}` : "Syncing..."}</span>
               </header>
               <div className='grid gap-3 sm:grid-cols-3'>
                 {alerts.map((alert) => (
@@ -656,9 +1017,9 @@ export default function DashboardPage() {
               <header className='mb-4 flex items-center justify-between'>
                 <div>
                   <h2 className='text-lg font-semibold text-slate-900'>Critical AI escalations</h2>
-                  <p className='text-sm text-slate-500'>Simulation-only escalation queue and workflow statuses</p>
+                  <p className='text-sm text-slate-500'>Auto-created from nursing-note risk scoring (score ≥ 80 or critical keywords)</p>
                 </div>
-                <span className='metric-chip'>Simulation mode</span>
+                <span className='metric-chip'>{criticalEscalations.length} active</span>
               </header>
               <div className='space-y-3'>
                 {criticalEscalations.length === 0 ? (

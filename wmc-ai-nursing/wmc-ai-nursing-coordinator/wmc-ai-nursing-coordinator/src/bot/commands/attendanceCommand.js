@@ -19,6 +19,16 @@ import {
   RECORD_STATUS,
 } from '../../lib/attendanceCalculation.js'
 
+/**
+ * Strip characters that break Telegram legacy Markdown parsing.
+ * Legacy Markdown does not support backslash escaping, so any unbalanced
+ * `* _ ` [` in dynamic data (e.g. a staff name) throws
+ * "can't parse entities". Removing them from interpolated values is safe.
+ */
+function mdSafe(value) {
+  return String(value ?? '').replace(/[*_`[\]]/g, '')
+}
+
 export function registerAttendanceCommand(bot) {
   bot.onText(/^\/attendance\b/i, async (msg) => {
     const chatId = msg.chat.id
@@ -42,7 +52,7 @@ export function registerAttendanceCommand(bot) {
     })
 
     const lines = [
-      `📋 *Attendance — ${dateLabel}*`,
+      `📋 *Attendance — ${mdSafe(dateLabel)}*`,
       '',
     ]
 
@@ -50,7 +60,7 @@ export function registerAttendanceCommand(bot) {
     if (onDuty.length > 0) {
       lines.push('🟢 *On Duty*')
       for (const s of onDuty) {
-        lines.push(`  ${s.staff_name}  IN: ${formatTime12h(s.normal_punch_in)}`)
+        lines.push(`  ${mdSafe(s.staff_name)}  IN: ${mdSafe(formatTime12h(s.normal_punch_in))}`)
       }
       lines.push('')
     }
@@ -59,7 +69,7 @@ export function registerAttendanceCommand(bot) {
     if (onOt.length > 0) {
       lines.push('🟡 *On OT*')
       for (const s of onOt) {
-        lines.push(`  ${s.staff_name}  OT since: ${formatTime12h(s.ot_in)}`)
+        lines.push(`  ${mdSafe(s.staff_name)}  OT since: ${mdSafe(formatTime12h(s.ot_in))}`)
       }
       lines.push('')
     }
@@ -68,7 +78,7 @@ export function registerAttendanceCommand(bot) {
     if (sheetRecords.length > 0) {
       lines.push('📄 *Completed Records*')
       for (const r of sheetRecords) {
-        lines.push(`  ${fmtAttendanceRow(r)}`)
+        lines.push(`  ${mdSafe(fmtAttendanceRow(r))}`)
       }
       lines.push('')
     }
@@ -77,7 +87,7 @@ export function registerAttendanceCommand(bot) {
     if (stale.length > 0) {
       lines.push('🔴 *Missing Punch Out (previous day)*')
       for (const s of stale) {
-        lines.push(`  ${s.staff_name}  ${s.date}  IN: ${formatTime12h(s.normal_punch_in)}`)
+        lines.push(`  ${mdSafe(s.staff_name)}  ${mdSafe(s.date)}  IN: ${mdSafe(formatTime12h(s.normal_punch_in))}`)
       }
       lines.push('')
     }
@@ -93,7 +103,15 @@ export function registerAttendanceCommand(bot) {
       if (otToday > 0) lines.push(`OT hours today: ${Math.round(otToday * 100) / 100}h`)
     }
 
-    await bot.sendMessage(chatId, lines.join('\n'), { parse_mode: 'Markdown' })
+    const body = lines.join('\n')
+    try {
+      await bot.sendMessage(chatId, body, { parse_mode: 'Markdown' })
+    } catch (err) {
+      // Last-resort fallback: send as plain text (strip bold markers) so the
+      // nurse always gets the data even if Markdown parsing fails.
+      log.warn('[attendance] Markdown send failed, retrying as plain text:', err?.message)
+      await bot.sendMessage(chatId, body.replace(/\*/g, ''))
+    }
     log.info(`[attendance] shown — duty:${onDuty.length} ot:${onOt.length} sheet:${sheetRecords.length}`)
   })
 }

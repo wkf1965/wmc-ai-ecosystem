@@ -6,8 +6,10 @@ export type InventoryItemRecord = {
   itemName: string
   quantity: number
   unit: string
+  rate: number
   personInCharge: string
   lastUpdatedAt: string
+  rateUpdatedAt: string
 }
 
 export type InventoryActionType = "taken" | "given" | "used" | "added"
@@ -18,6 +20,7 @@ export type InventoryEventRecord = {
   itemName: string
   quantityChange: number
   unit: string
+  unitRate: number
   room: string
   patientName: string
   personInCharge: string
@@ -133,6 +136,31 @@ export type DutyRosterRecord = {
   updatedAt: string
 }
 
+export type NursingServiceStatus = "pending" | "completed" | "billed"
+
+export type NursingServiceRecord = {
+  id: string
+  serviceId: string
+  serviceName: string
+  patientName: string
+  room: string
+  nurseName: string
+  recordedAt: string
+  quantity: number
+  unitRate: number
+  totalAmount: number
+  remarks: string
+  status: NursingServiceStatus
+  source: "telegram" | "frontend" | "api"
+}
+
+export type NursingServiceRateRecord = {
+  id: string
+  serviceName: string
+  rate: number
+  updatedAt: string
+}
+
 type NursingModuleStore = {
   inventory: InventoryItemRecord[]
   inventoryEvents: InventoryEventRecord[]
@@ -141,21 +169,54 @@ type NursingModuleStore = {
   otRecalculationAuditLogs: OtRecalculationAuditRecord[]
   settings: SettingRecord[]
   turningRecords: TurningRecord[]
+  nursingServices: NursingServiceRecord[]
+  nursingServiceRates: NursingServiceRateRecord[]
   dutyRoster: DutyRosterRecord
   duty_roster_settings: DutyRosterRecord
+}
+
+/** Chargeable nursing procedures + their default unit rates (RM). */
+const NURSING_SERVICE_CATALOG: Array<{ id: string; serviceName: string; defaultRate: number }> = [
+  { id: "wound-dressing", serviceName: "Wound dressing", defaultRate: 30 },
+  { id: "catheter-change", serviceName: "Urinary catheter change", defaultRate: 50 },
+  { id: "feeding-tube-change", serviceName: "Feeding tube change", defaultRate: 50 },
+  { id: "other", serviceName: "Other nursing procedure", defaultRate: 0 },
+]
+
+/**
+ * Resolve a free-text service label (English / Malay / Chinese) to a canonical
+ * service id. Falls back to "other" for anything unrecognised.
+ */
+export function normalizeServiceId(input: string) {
+  const v = String(input || "").trim().toLowerCase()
+  if (!v) return "other"
+  if (v === "wound-dressing" || v === "catheter-change" || v === "feeding-tube-change" || v === "other") return v
+  if (/wound|dressing|cuci\s*luka|洗伤口|洗傷口|换药|換藥/.test(v)) return "wound-dressing"
+  if (/cath?eter|urinary|tukar\s*cath|tukar\s*tiub\s*kencing|换尿管|換尿管|尿管/.test(v)) return "catheter-change"
+  if (/feeding|ryle|食管|换食管|換食管|tiub\s*makan|tukar\s*feeding|tukar\s*tiub\s*makan/.test(v)) return "feeding-tube-change"
+  return "other"
+}
+
+function resolveServiceMeta(serviceId: string, fallbackName = "") {
+  const id = normalizeServiceId(serviceId || fallbackName)
+  const found = NURSING_SERVICE_CATALOG.find((s) => s.id === id)
+  if (found) return { id: found.id, serviceName: fallbackName || found.serviceName, defaultRate: found.defaultRate }
+  return { id: "other", serviceName: fallbackName || "Other nursing procedure", defaultRate: 0 }
 }
 
 const STORE_FILE = path.join(process.cwd(), ".nursing-module-store.json")
 const DEFAULT_SHIFT_HOURS = 8
 
-const INVENTORY_ITEM_CATALOG: Array<{ id: string; itemName: string; unit: string }> = [
-  { id: "pampers", itemName: "Pampers", unit: "packs" },
-  { id: "wet-tissu", itemName: "Wet tissu", unit: "packs" },
-  { id: "ryles-tube", itemName: "Ryles tube", unit: "pcs" },
-  { id: "cbd-tube", itemName: "CBD tube", unit: "pcs" },
-  { id: "prime-edema", itemName: "Prime edema", unit: "units" },
-  { id: "milk-powder", itemName: "Milk powder", unit: "scoops" },
-  { id: "gloves", itemName: "Gloves", unit: "pcs" },
+const INVENTORY_ITEM_CATALOG: Array<{ id: string; itemName: string; unit: string; defaultRate: number }> = [
+  { id: "pampers", itemName: "Pampers", unit: "pcs", defaultRate: 2.5 },
+  { id: "wet-tissu", itemName: "Wet Tissue", unit: "packs", defaultRate: 5 },
+  { id: "ryles-tube", itemName: "Ryles Tube", unit: "pcs", defaultRate: 8 },
+  { id: "cbd-tube", itemName: "CBD Tube", unit: "pcs", defaultRate: 10 },
+  { id: "milk-powder", itemName: "Milk Powder", unit: "tins", defaultRate: 30 },
+  { id: "gloves", itemName: "Gloves", unit: "boxes", defaultRate: 20 },
+  { id: "underpad", itemName: "Underpad", unit: "pcs", defaultRate: 1.5 },
+  { id: "syringe", itemName: "Syringe", unit: "pcs", defaultRate: 1 },
+  { id: "feeding-set", itemName: "Feeding Set", unit: "pcs", defaultRate: 6 },
 ]
 
 const defaultStore: NursingModuleStore = {
@@ -164,8 +225,10 @@ const defaultStore: NursingModuleStore = {
     itemName: item.itemName,
     quantity: 0,
     unit: item.unit,
+    rate: item.defaultRate,
     personInCharge: "",
     lastUpdatedAt: "",
+    rateUpdatedAt: "",
   })),
   inventoryEvents: [],
   otLogs: [],
@@ -179,6 +242,13 @@ const defaultStore: NursingModuleStore = {
     },
   ],
   turningRecords: [],
+  nursingServices: [],
+  nursingServiceRates: NURSING_SERVICE_CATALOG.map((s) => ({
+    id: s.id,
+    serviceName: s.serviceName,
+    rate: s.defaultRate,
+    updatedAt: new Date().toISOString(),
+  })),
   dutyRoster: {
     dutyRows: [
       {
@@ -392,12 +462,15 @@ function normalizeItemId(input: string) {
   if (!value) return ""
   if (value.startsWith("pampers")) return "pampers"
   if (value === "wet tissue" || value === "wet tissu" || value === "wet-tissue") return "wet-tissu"
-  if (value.startsWith("wet-tissu")) return "wet-tissu"
+  if (value.startsWith("wet-tissu") || value.startsWith("wet tissu") || value.startsWith("wet tissue")) return "wet-tissu"
   if (value.startsWith("ryles")) return "ryles-tube"
   if (value.startsWith("cbd")) return "cbd-tube"
   if (value.startsWith("prime")) return "prime-edema"
   if (value.startsWith("milk")) return "milk-powder"
-  if (value.startsWith("gloves")) return "gloves"
+  if (value.startsWith("glove")) return "gloves"
+  if (value.startsWith("underpad") || value === "under pad" || value.startsWith("under-pad")) return "underpad"
+  if (value.startsWith("syringe")) return "syringe"
+  if (value.startsWith("feeding")) return "feeding-set"
   return value.replace(/\s+/g, "-")
 }
 
@@ -409,29 +482,35 @@ function resolveItemMeta(itemId: string, fallbackName = "") {
     id: normalized || "unknown-item",
     itemName: fallbackName || normalized || "Unknown item",
     unit: "units",
+    defaultRate: 0,
   }
 }
 
 function normalizeStore(raw: Partial<NursingModuleStore> | null | undefined): NursingModuleStore {
-  const seededInventory = INVENTORY_ITEM_CATALOG.map((item) => ({
+  const seededInventory: InventoryItemRecord[] = INVENTORY_ITEM_CATALOG.map((item) => ({
     id: item.id,
     itemName: item.itemName,
     quantity: 0,
     unit: item.unit,
+    rate: item.defaultRate,
     personInCharge: "",
     lastUpdatedAt: "",
+    rateUpdatedAt: "",
   }))
   const inventoryRows = Array.isArray(raw?.inventory) ? raw.inventory : seededInventory
   const inventoryById = new Map<string, InventoryItemRecord>()
   for (const row of inventoryRows) {
     const meta = resolveItemMeta(row?.id || "", row?.itemName || "")
+    const rawRate = (row as Partial<InventoryItemRecord> | undefined)?.rate
     inventoryById.set(meta.id, {
       id: meta.id,
       itemName: row?.itemName || meta.itemName,
       quantity: Math.max(0, Number(row?.quantity || 0)),
       unit: row?.unit || meta.unit,
+      rate: rawRate == null ? meta.defaultRate : Math.max(0, Number(rawRate) || 0),
       personInCharge: String(row?.personInCharge || ""),
       lastUpdatedAt: String(row?.lastUpdatedAt || ""),
+      rateUpdatedAt: String((row as Partial<InventoryItemRecord> | undefined)?.rateUpdatedAt || ""),
     })
   }
   for (const seed of seededInventory) {
@@ -481,12 +560,15 @@ function normalizeStore(raw: Partial<NursingModuleStore> | null | undefined): Nu
       ? raw.inventoryEvents
           .map((row) => {
             const meta = resolveItemMeta(row?.itemId || "", row?.itemName || "")
+            const rawUnitRate = (row as Partial<InventoryEventRecord> | undefined)?.unitRate
+            const fallbackRate = inventoryById.get(meta.id)?.rate ?? meta.defaultRate
             return {
               id: String(row?.id || `inv-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`),
               itemId: meta.id,
               itemName: row?.itemName || meta.itemName,
               quantityChange: Number(row?.quantityChange || 0),
               unit: String(row?.unit || meta.unit),
+              unitRate: rawUnitRate == null ? Math.max(0, Number(fallbackRate) || 0) : Math.max(0, Number(rawUnitRate) || 0),
               room: String(row?.room || ""),
               patientName: String(row?.patientName || ""),
               personInCharge: String(row?.personInCharge || ""),
@@ -586,6 +668,56 @@ function normalizeStore(raw: Partial<NursingModuleStore> | null | undefined): Nu
           })
           .sort((a, b) => b.recordedAt.localeCompare(a.recordedAt))
       : [],
+    nursingServices: Array.isArray((raw as { nursingServices?: NursingServiceRecord[] } | null)?.nursingServices)
+      ? ((raw as { nursingServices?: Array<Partial<NursingServiceRecord> & Record<string, unknown>> }).nursingServices || [])
+          .map((row, index) => {
+            const meta = resolveServiceMeta(String(row.serviceId || ""), String(row.serviceName || ""))
+            const quantity = Math.max(1, Number(row.quantity ?? 1) || 1)
+            const unitRate = Math.max(0, Number(row.unitRate ?? 0) || 0)
+            return {
+              id: String(row.id || `svc-${index}-${Date.now()}`),
+              serviceId: meta.id,
+              serviceName: String(row.serviceName || meta.serviceName),
+              patientName: String(row.patientName || ""),
+              room: String(row.room || ""),
+              nurseName: String(row.nurseName || "Nurse"),
+              recordedAt: String(row.recordedAt || nowIso()),
+              quantity,
+              unitRate,
+              totalAmount: Math.round((Number(row.totalAmount ?? unitRate * quantity) || unitRate * quantity) * 100) / 100,
+              remarks: String(row.remarks || ""),
+              status: (["pending", "completed", "billed"].includes(String(row.status || ""))
+                ? row.status
+                : "completed") as NursingServiceStatus,
+              source: (["telegram", "frontend", "api"].includes(String(row.source || "")) ? row.source : "api") as
+                | "telegram"
+                | "frontend"
+                | "api",
+            }
+          })
+          .sort((a, b) => b.recordedAt.localeCompare(a.recordedAt))
+      : [],
+    nursingServiceRates: (() => {
+      const parsed = Array.isArray((raw as { nursingServiceRates?: NursingServiceRateRecord[] } | null)?.nursingServiceRates)
+        ? ((raw as { nursingServiceRates?: Array<Partial<NursingServiceRateRecord> & Record<string, unknown>> }).nursingServiceRates || [])
+            .map((row) => {
+              const meta = resolveServiceMeta(String(row.id || ""), String(row.serviceName || ""))
+              return {
+                id: meta.id,
+                serviceName: String(row.serviceName || meta.serviceName),
+                rate: Math.max(0, Number(row.rate ?? meta.defaultRate) || 0),
+                updatedAt: String(row.updatedAt || nowIso()),
+              }
+            })
+        : []
+      // Ensure every catalog service has a rate row (seed missing ones).
+      for (const s of NURSING_SERVICE_CATALOG) {
+        if (!parsed.some((r) => r.id === s.id)) {
+          parsed.push({ id: s.id, serviceName: s.serviceName, rate: s.defaultRate, updatedAt: nowIso() })
+        }
+      }
+      return parsed
+    })(),
     dutyRoster: normalizedDutyRosterSettings,
     duty_roster_settings: normalizedDutyRosterSettings,
   }
@@ -646,8 +778,10 @@ export async function updateInventoryItem(itemId: string, updates: { quantity?: 
       itemName: meta.itemName,
       quantity: 0,
       unit: meta.unit,
+      rate: meta.defaultRate,
       personInCharge: "",
       lastUpdatedAt: "",
+      rateUpdatedAt: "",
     })
   }
   store.inventory = store.inventory.map((row) =>
@@ -660,6 +794,31 @@ export async function updateInventoryItem(itemId: string, updates: { quantity?: 
         }
       : row,
   )
+  await writeNursingModuleStore(store)
+  return store.inventory
+}
+
+/** Upsert the unit rate (RM) for an inventory item — used for patient billing. */
+export async function setInventoryRate(itemId: string, rate: number, itemName?: string) {
+  const store = await readNursingModuleStore()
+  const meta = resolveItemMeta(itemId, itemName || "")
+  const nextRate = Math.max(0, Number(rate) || 0)
+  if (!store.inventory.some((row) => row.id === meta.id)) {
+    store.inventory.unshift({
+      id: meta.id,
+      itemName: itemName || meta.itemName,
+      quantity: 0,
+      unit: meta.unit,
+      rate: nextRate,
+      personInCharge: "",
+      lastUpdatedAt: "",
+      rateUpdatedAt: nowIso(),
+    })
+  } else {
+    store.inventory = store.inventory.map((row) =>
+      row.id === meta.id ? { ...row, rate: nextRate, rateUpdatedAt: nowIso() } : row,
+    )
+  }
   await writeNursingModuleStore(store)
   return store.inventory
 }
@@ -690,8 +849,10 @@ export async function appendInventoryEvent(payload: {
       itemName: meta.itemName,
       quantity: 0,
       unit: meta.unit,
+      rate: meta.defaultRate,
       personInCharge: "",
       lastUpdatedAt: "",
+      rateUpdatedAt: "",
     })
   }
 
@@ -707,12 +868,15 @@ export async function appendInventoryEvent(payload: {
         },
   )
 
+  // Snapshot the item's current unit rate at the time of usage for accurate billing.
+  const currentRate = store.inventory.find((row) => row.id === meta.id)?.rate ?? meta.defaultRate
   const event: InventoryEventRecord = {
     id: `inv-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     itemId: meta.id,
     itemName: meta.itemName,
     quantityChange: normalizedChange,
     unit: String(payload.unit || meta.unit),
+    unitRate: Math.max(0, Number(currentRate) || 0),
     room: String(payload.room || ""),
     patientName: String(payload.patientName || ""),
     personInCharge: String(payload.personInCharge || ""),
@@ -730,6 +894,98 @@ export async function appendInventoryEvent(payload: {
     inventory: store.inventory,
     records: store.inventoryEvents,
   }
+}
+
+// ── Nursing Services ──────────────────────────────────────────────────────────
+
+/** Return all configured nursing service rates (seeded for missing services). */
+export async function getNursingServiceRates() {
+  const store = await readNursingModuleStore()
+  return store.nursingServiceRates
+}
+
+/** Look up the current unit rate for a service id / label. */
+export async function getNursingServiceRate(serviceId: string) {
+  const store = await readNursingModuleStore()
+  const meta = resolveServiceMeta(serviceId)
+  const row = store.nursingServiceRates.find((r) => r.id === meta.id)
+  return row ? row.rate : meta.defaultRate
+}
+
+/** Upsert a nursing service rate (admin rate setup). */
+export async function setNursingServiceRate(serviceId: string, rate: number, serviceName?: string) {
+  const store = await readNursingModuleStore()
+  const meta = resolveServiceMeta(serviceId, serviceName || "")
+  const nextRate = Math.max(0, Number(rate) || 0)
+  const idx = store.nursingServiceRates.findIndex((r) => r.id === meta.id)
+  const nextRow: NursingServiceRateRecord = {
+    id: meta.id,
+    serviceName: serviceName?.trim() || (idx >= 0 ? store.nursingServiceRates[idx].serviceName : meta.serviceName),
+    rate: nextRate,
+    updatedAt: nowIso(),
+  }
+  if (idx === -1) store.nursingServiceRates.push(nextRow)
+  else store.nursingServiceRates[idx] = nextRow
+  await writeNursingModuleStore(store)
+  return store.nursingServiceRates
+}
+
+/**
+ * Record a chargeable nursing service. The unit rate is taken from the rate
+ * table unless an explicit unitRate is supplied (e.g. Telegram "RM30").
+ */
+export async function appendNursingService(payload: {
+  serviceId?: string
+  serviceName?: string
+  patientName?: string
+  room?: string
+  nurseName?: string
+  quantity?: number
+  unitRate?: number
+  remarks?: string
+  status?: NursingServiceStatus
+  source?: "telegram" | "frontend" | "api"
+  recordedAt?: string
+}) {
+  const store = await readNursingModuleStore()
+  const meta = resolveServiceMeta(String(payload.serviceId || ""), String(payload.serviceName || ""))
+  const quantity = Math.max(1, Number(payload.quantity ?? 1) || 1)
+
+  const explicitRate = Number(payload.unitRate)
+  const configuredRate = store.nursingServiceRates.find((r) => r.id === meta.id)?.rate ?? meta.defaultRate
+  const unitRate = Number.isFinite(explicitRate) && explicitRate > 0 ? explicitRate : configuredRate
+  const totalAmount = Math.round(unitRate * quantity * 100) / 100
+
+  const record: NursingServiceRecord = {
+    id: `svc-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    serviceId: meta.id,
+    serviceName: payload.serviceName?.trim() || meta.serviceName,
+    patientName: String(payload.patientName || "").trim(),
+    room: String(payload.room || "").trim(),
+    nurseName: String(payload.nurseName || "Nurse").trim(),
+    recordedAt: payload.recordedAt || nowIso(),
+    quantity,
+    unitRate,
+    totalAmount,
+    remarks: String(payload.remarks || "").trim(),
+    status: payload.status || "completed",
+    source: payload.source || "api",
+  }
+  store.nursingServices.unshift(record)
+  store.nursingServices = store.nursingServices.slice(0, 5000)
+  await writeNursingModuleStore(store)
+
+  return { record, records: store.nursingServices, rates: store.nursingServiceRates }
+}
+
+/** Update the billing status of a nursing service record. */
+export async function setNursingServiceStatus(id: string, status: NursingServiceStatus) {
+  const store = await readNursingModuleStore()
+  const idx = store.nursingServices.findIndex((r) => r.id === id)
+  if (idx === -1) return { ok: false as const, error: "Record not found." }
+  store.nursingServices[idx] = { ...store.nursingServices[idx], status }
+  await writeNursingModuleStore(store)
+  return { ok: true as const, record: store.nursingServices[idx] }
 }
 
 export async function punchInOt(nurseName: string, source: "telegram" | "manual" = "manual") {

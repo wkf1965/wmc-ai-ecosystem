@@ -16,12 +16,15 @@ import {
 
 const ITEM_OPTIONS = [
   { value: "Pampers", label: "Pampers" },
-  { value: "Wet tissue", label: "Wet tissue" },
+  { value: "Wet Tissue", label: "Wet Tissue" },
+  { value: "Ryles Tube", label: "Ryles Tube" },
+  { value: "CBD Tube", label: "CBD Tube" },
+  { value: "Milk Powder", label: "Milk Powder" },
   { value: "Gloves", label: "Gloves" },
-  { value: "Mask", label: "Mask" },
-  { value: "Gauze", label: "Gauze" },
-  { value: "Dressing set", label: "Dressing set" },
-  { value: "others", label: "Others" },
+  { value: "Underpad", label: "Underpad" },
+  { value: "Syringe", label: "Syringe" },
+  { value: "Feeding Set", label: "Feeding Set" },
+  { value: "others", label: "Other" },
 ]
 
 export default function MobileInventoryPage() {

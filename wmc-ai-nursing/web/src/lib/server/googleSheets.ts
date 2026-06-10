@@ -22,6 +22,7 @@ const TAB = {
   handover: "Handover",
   note: "PatientNotes",
   clinicalAlerts: "Clinical Alerts",
+  nursingServices: "Nursing Services",
 } as const
 
 const PATIENT_ROOM_TAB = "Patientsroom"
@@ -310,6 +311,32 @@ export function saveNoteToSheet(d: {
     d.room ?? "",
     d.note ?? "",
     d.nurseName ?? "",
+  ])
+}
+
+export function saveNursingServiceToSheet(d: {
+  patientName?: string
+  room?: string
+  serviceName?: string
+  nurseName?: string
+  quantity?: number
+  unitRate?: number
+  totalAmount?: number
+  remarks?: string
+  status?: string
+  recordedAt?: string
+}) {
+  return appendRow(TAB.nursingServices, [
+    d.recordedAt ? new Date(d.recordedAt).toLocaleString("en-MY", { timeZone: "Asia/Kuala_Lumpur" }) : nowLocal(),
+    d.patientName ?? "",
+    d.room ?? "",
+    d.serviceName ?? "",
+    d.nurseName ?? "",
+    d.quantity ?? 1,
+    d.unitRate ?? 0,
+    d.totalAmount ?? 0,
+    d.remarks ?? "",
+    d.status ?? "completed",
   ])
 }
 

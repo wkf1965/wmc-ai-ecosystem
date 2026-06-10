@@ -18,6 +18,12 @@ import {
   buildCommandHelpReply,
   buildStartMessage,
 } from './commandRegistry.js'
+import {
+  classifyTelegramIntent,
+  hasAdmissionKeywords,
+  matchedNursingKeywords,
+  matchedClinicalKeywords,
+} from '../telegramIntentClassifier.js'
 import { startForm, processStep, processConfirmation } from './formEngine.js'
 import { getActiveSession, updateSession, setSessionAwaitingConfirmation, clearSession } from './sessionStore.js'
 import { handleAdmitCommand } from './handlers/admitHandler.js'
@@ -87,6 +93,37 @@ export async function dispatchCommandOrFormStep(text, chatId, ctx = {}) {
 
   // ── 3. Awaiting confirmation (YES / NO) ──────────────────────────────────
   const activeSession = await getActiveSession(chatId)
+
+  // ── Intent guard ──────────────────────────────────────────────────────────
+  // Clinical/nursing observation text (incl. Malay/Chinese) must NEVER be
+  // captured by an active admission form. Admission may only run from explicit
+  // admission keywords. This prevents nursing notes being routed into the
+  // admission confirmation flow.
+  const intent = classifyTelegramIntent(t)
+  const nursingKw = matchedNursingKeywords(t)
+  const clinicalKw = matchedClinicalKeywords(t)
+  const isCommandText = t.startsWith('/')
+  // A standalone nursing note has ≥2 clinical signals (e.g. "demam, suhu 40,
+  // kurang selera"). A single clinical word may be a valid admit form answer
+  // (e.g. diagnosis = "fever"), so a single signal does NOT trip the guard.
+  const looksLikeNursingNote = !isCommandText && !hasAdmissionKeywords(t) && clinicalKw.length >= 2
+
+  console.log('[INTENT] Detected Intent   :', intent.category)
+  console.log('[INTENT] Detected Patient  :', intent.patient_name ?? '—')
+  console.log('[INTENT] Matched Keywords  :', nursingKw.length ? nursingKw.join(', ') : '(none)')
+
+  if (
+    looksLikeNursingNote &&
+    activeSession &&
+    (activeSession.command_name === '/admit' || activeSession.command_name === '/admission')
+  ) {
+    console.log(
+      `[INTENT] GUARD — clinical note received during ${activeSession.command_name} session; ` +
+        'cancelling admission flow and routing to nursing record.',
+    )
+    await clearSession(chatId, 'cancelled')
+    return { handled: false }
+  }
 
   if (activeSession?.status === 'awaiting_confirmation') {
     const result = await processConfirmation(chatId, t)

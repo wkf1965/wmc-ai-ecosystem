@@ -16,13 +16,14 @@ import {
   computeNlpConfidence,
   hasNursingKeywords,
   isNursingIntentCategory,
+  matchedNursingKeywords,
 } from '../../lib/telegramIntentClassifier.js'
 import { tryHandleInventoryNlp } from '../commands/inventoryCommands.js'
 import { buildNursingNlpReply } from './nursingNlpHandler.js'
 import { parseNursingMessageViaBackend } from '../../../nursingParseApiClient.mjs'
 import { cancelAllSessionStates } from './sessionReset.js'
 
-export const NLP_LOW_CONFIDENCE_REPLY = '⚠️ Please include Room + Patient Name.'
+export const NLP_LOW_CONFIDENCE_REPLY = '⚠️ Please include a patient name or room number.'
 
 function debug(tag, payload) {
   const line = `[${tag}] ${typeof payload === 'string' ? payload : JSON.stringify(payload)}`
@@ -87,6 +88,10 @@ export async function routeNlpMessage(ctx) {
 
   const intent = classifyTelegramIntent(text)
   const confidence = computeNlpConfidence(intent, text)
+  const matchedKw = matchedNursingKeywords(text)
+  debug('INTENT', `Detected Intent   : ${intent.category}`)
+  debug('INTENT', `Detected Patient  : ${intent.patient_name ?? '—'}`)
+  debug('INTENT', `Matched Keywords  : ${matchedKw.length ? matchedKw.join(', ') : '(none)'}`)
   debug('NLP PARSED', { category: intent.category, confidence, room: intent.room, patient: intent.patient_name })
 
   const chatId = ctx.chatId ?? ctx.msg?.chat?.id
@@ -110,8 +115,10 @@ export async function routeNlpMessage(ctx) {
     || (hasNursingKeywords(text) && Boolean(intent.room || intent.patient_name))
 
   if (isNursing) {
-    if (!intent.room || !intent.patient_name) {
-      debug('NLP ROUTER', { route: 'fallback', reason: 'missing-room-or-patient', confidence })
+    // Patient name OR room is enough — the backend resolves the room from the
+    // patient name when only a name is given. Only bounce when BOTH are missing.
+    if (!intent.room && !intent.patient_name) {
+      debug('NLP ROUTER', { route: 'fallback', reason: 'missing-room-and-patient', confidence })
       if (ctx.bot && chatId != null) {
         await ctx.bot.sendMessage(chatId, NLP_LOW_CONFIDENCE_REPLY)
       }

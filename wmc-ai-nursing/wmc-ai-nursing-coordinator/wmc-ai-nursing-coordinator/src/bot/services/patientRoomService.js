@@ -157,6 +157,66 @@ export async function getPatientByRoom(roomNumber) {
 }
 
 /**
+ * Normalise a patient name for comparison: lowercase, collapse whitespace.
+ * @param {string} raw
+ */
+export function normaliseName(raw) {
+  return String(raw ?? '')
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+/**
+ * Find every room assignment whose patient name matches `name`.
+ * Exact (normalised) matches are preferred; if none, falls back to a
+ * "contains" match so partial names still resolve.
+ *
+ * @param {string} name
+ * @returns {Promise<Array<{ room: string, patient: string }>>}
+ */
+export async function findPatientsByName(name) {
+  const q = normaliseName(name)
+  if (!q) return []
+
+  const map = await getRoomPatientMap()
+
+  const exact = []
+  const partial = []
+  for (const [room, patient] of map.entries()) {
+    const pn = normaliseName(patient)
+    if (!pn) continue
+    if (pn === q) {
+      exact.push({ room, patient })
+    } else if (pn.includes(q) || q.includes(pn)) {
+      partial.push({ room, patient })
+    }
+  }
+  return exact.length ? exact : partial
+}
+
+/**
+ * Resolve a patient name to a single room.
+ *   { status: 'found', room, patient }   — one unambiguous match
+ *   { status: 'ambiguous', matches }      — multiple patients / rooms
+ *   { status: 'not_found' }               — no roster match
+ *
+ * @param {string} name
+ */
+export async function resolvePatientRoomByName(name) {
+  const matches = await findPatientsByName(name)
+  if (matches.length === 0) return { status: 'not_found' }
+  if (matches.length === 1) return { status: 'found', room: matches[0].room, patient: matches[0].patient }
+
+  // Several rows matched — only ambiguous if they point to different rooms.
+  const uniqueRooms = new Set(matches.map((m) => m.room))
+  if (uniqueRooms.size === 1) {
+    return { status: 'found', room: matches[0].room, patient: matches[0].patient }
+  }
+  return { status: 'ambiguous', matches }
+}
+
+/**
  * Return all room assignments as an array sorted by room number.
  * Useful for /turn_status (show all).
  *

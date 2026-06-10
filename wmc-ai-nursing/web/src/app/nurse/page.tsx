@@ -6,6 +6,7 @@ import {
   Activity,
   AlertTriangle,
   BedDouble,
+  Boxes,
   Camera,
   ClipboardList,
   Clock3,
@@ -15,6 +16,7 @@ import {
   MicOff,
   Pencil,
   Pill,
+  Stethoscope,
   X,
 } from "lucide-react"
 import { getNurseName, setNurseName } from "../../lib/roleMode"
@@ -168,6 +170,8 @@ export default function NurseModePage() {
     { label: "Upload Photo", icon: Camera, tone: "bg-indigo-600", href: "/turning" },
     { label: "Vital Signs", icon: Activity, tone: "bg-rose-500", href: "/vital-signs" },
     { label: "Medication", icon: Pill, tone: "bg-fuchsia-600", href: "/medications" },
+    { label: "Inventory", icon: Boxes, tone: "bg-amber-600", href: "/inventory-nurse" },
+    { label: "Nursing Services", icon: Stethoscope, tone: "bg-cyan-600", href: "/nursing-services-nurse" },
     { label: "Handover", icon: ClipboardList, tone: "bg-teal-600", href: "/shift-handover" },
     { label: "Incident", icon: AlertTriangle, tone: "bg-red-600", href: "/ai-risk" },
     { label: "Voice Input", icon: Mic, tone: "bg-purple-600", onClick: openVoice },

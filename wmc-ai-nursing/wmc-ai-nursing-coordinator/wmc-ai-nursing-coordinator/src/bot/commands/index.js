@@ -21,6 +21,11 @@ import { getTurningSession, clearTurningSession } from '../services/turningSessi
 import { saveSideTurningRecord } from '../services/googleSheetService.js'
 import { recordTurn } from '../state/sideTurningState.js'
 import { handleVitalsNlp } from '../services/vitalsNlp.js'
+import { handleTurningNlp } from '../services/turningNlp.js'
+import { handleMedicationNlp } from '../services/medicationNlp.js'
+import { handleNutritionNlp } from '../services/nutritionNlp.js'
+import { handleMentalHealthNlp } from '../services/mentalHealthNlp.js'
+import { handleNursingServiceNlp } from '../services/nursingServiceNlp.js'
 
 import { registerStartCommand }     from './startCommand.js'
 import { registerHelpCommand }      from './helpCommand.js'
@@ -452,6 +457,42 @@ export function registerAllCommands(bot) {
     // ════════════════════════════════════════════════════════════════════════
     console.log('[ROUTER] mode = NLP')
     log.info('[ROUTER] mode = NLP')
+
+    // Chargeable nursing services (wound dressing, catheter / feeding tube change…)
+    // — checked first so a "wound dressing done" message is billed, not logged as a vital.
+    if (await handleNursingServiceNlp(bot, msg, nurseNameStr)) {
+      console.log('[NLP ROUTE] nursing-service')
+      log.info('[NLP ROUTE] nursing-service')
+      return
+    }
+
+    // Medication assessment — before turning/vitals (e.g. "medication missed BP tablet").
+    if (await handleMedicationNlp(bot, msg, nurseNameStr)) {
+      console.log('[NLP ROUTE] medication')
+      log.info('[NLP ROUTE] medication')
+      return
+    }
+
+    // Nutrition assessment — before turning/vitals (e.g. "poor appetite ate 20% low fluid").
+    if (await handleNutritionNlp(bot, msg, nurseNameStr)) {
+      console.log('[NLP ROUTE] nutrition')
+      log.info('[NLP ROUTE] nutrition')
+      return
+    }
+
+    // Mental health assessment — before turning/vitals (e.g. "wandering agitation insomnia").
+    if (await handleMentalHealthNlp(bot, msg, nurseNameStr)) {
+      console.log('[NLP ROUTE] mental-health')
+      log.info('[NLP ROUTE] mental-health')
+      return
+    }
+
+    // Turning / pressure sore assessment — before vitals (bedridden-only messages).
+    if (await handleTurningNlp(bot, msg, nurseNameStr)) {
+      console.log('[NLP ROUTE] turning')
+      log.info('[NLP ROUTE] turning')
+      return
+    }
 
     // Vital signs (labelled, no patient name) — handled first.
     if (await handleVitalsNlp(bot, msg, nurseNameStr)) {
